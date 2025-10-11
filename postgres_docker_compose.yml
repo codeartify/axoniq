@@ -2,13 +2,13 @@ version: '3.8'
 
 services:
   postgres:
-    image: postgres:15
+    image: postgres:18
     container_name: postgres-container
     restart: always
     environment:
-      POSTGRES_USER: your_username
-      POSTGRES_PASSWORD: your_password
-      POSTGRES_DB: your_database_name
+      POSTGRES_USER: test
+      POSTGRES_PASSWORD: test
+      POSTGRES_DB: axoniq
     ports:
       - "5432:5432"
     volumes:
