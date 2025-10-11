@@ -1,4 +1,4 @@
-package com.codeartify.axoniq
+package com.codeartify.axoniq.domain
 
 import org.axonframework.commandhandling.CommandHandler
 import org.axonframework.eventsourcing.EventSourcingHandler
@@ -15,7 +15,7 @@ class Workout() {
     private lateinit var id: WorkoutId
 
     @CommandHandler
-    constructor(startWorkoutCommand:StartWorkoutCommand):this() {
+    constructor(startWorkoutCommand: StartWorkoutCommand) : this() {
         apply(WorkoutStartedEvent(startWorkoutCommand.id))
     }
 

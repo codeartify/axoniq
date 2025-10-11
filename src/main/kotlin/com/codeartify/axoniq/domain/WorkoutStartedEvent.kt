@@ -1,4 +1,4 @@
-package com.codeartify.axoniq
+package com.codeartify.axoniq.domain
 
 data class WorkoutStartedEvent(val id: WorkoutId) {
 
