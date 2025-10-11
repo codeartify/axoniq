@@ -1,0 +1,3 @@
+POST {{baseUrl}}/workouts/start
+Accept: application/json
+Content-Type: application/json

@@ -1,0 +1,19 @@
+spring:
+  application:
+    name: axoniq
+  profiles:
+    active: dev
+  datasource:
+    url: jdbc:postgresql://localhost:5432/axoniq
+    username: test
+    password: test
+  jpa:
+    hibernate:
+      ddl-auto: update
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+axon:
+  eventhandling:
+  #  processors:
+  #      projection:
+  #       dlq:
+  #        enabled: true
