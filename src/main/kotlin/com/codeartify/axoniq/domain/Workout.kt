@@ -60,6 +60,7 @@ class Workout() {
         apply(
             SetRecordedEvent(
                 workoutId = id,
+                setId = recordSetCommand.setId,
                 repetitions = recordSetCommand.repetitions,
                 weight = recordSetCommand.weight
             )
@@ -69,7 +70,13 @@ class Workout() {
 
     @EventSourcingHandler()
     fun onSetRecorded(setRecordedEvent: SetRecordedEvent) {
-       this.sets.record(WorkoutSet(setRecordedEvent.repetitions, setRecordedEvent.weight))
+        this.sets.record(
+            WorkoutSet(
+                setRecordedEvent.setId,
+                setRecordedEvent.repetitions,
+                setRecordedEvent.weight
+            )
+        )
     }
 
 
@@ -78,5 +85,8 @@ class Workout() {
     fun isFinished(): Boolean = status == FINISHED
 
     fun getId() = id.copy()
+
+    fun getSetsSnapshot(): List<WorkoutSet> = sets.snapshot()
+
 
 }

@@ -1,6 +1,5 @@
 package com.codeartify.axoniq.application
 
-import com.codeartify.axoniq.domain.WorkoutId
 import com.yourpackage.common.UseCase
 import org.axonframework.queryhandling.QueryGateway
 
