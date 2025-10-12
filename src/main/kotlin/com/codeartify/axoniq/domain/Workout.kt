@@ -3,9 +3,13 @@ package com.codeartify.axoniq.domain
 import com.codeartify.axoniq.domain.WorkoutStatus.FINISHED
 import com.codeartify.axoniq.domain.WorkoutStatus.STARTED
 import com.codeartify.axoniq.domain.commands.FinishWorkoutCommand
+import com.codeartify.axoniq.domain.commands.RecordSetCommand
 import com.codeartify.axoniq.domain.commands.StartWorkoutCommand
+import com.codeartify.axoniq.domain.events.SetRecordedEvent
 import com.codeartify.axoniq.domain.events.WorkoutFinishedEvent
 import com.codeartify.axoniq.domain.events.WorkoutStartedEvent
+import com.codeartify.axoniq.domain.exception.FinishingWorkoutFailedException
+import com.codeartify.axoniq.domain.exception.RecordingSetFailedException
 import org.axonframework.commandhandling.CommandHandler
 import org.axonframework.eventsourcing.EventSourcingHandler
 import org.axonframework.modelling.command.AggregateIdentifier
@@ -20,7 +24,9 @@ class Workout() {
     @AggregateIdentifier
     private lateinit var id: WorkoutId
 
-    private var status: WorkoutStatus = STARTED
+    private var status = STARTED
+
+    private val sets = WorkoutSets()
 
     @CommandHandler
     constructor(startWorkoutCommand: StartWorkoutCommand) : this() {
@@ -34,17 +40,28 @@ class Workout() {
 
     @CommandHandler(payloadType = FinishWorkoutCommand::class)
     fun finish() {
-        if (status != STARTED) {
+        if (!isStarted()) {
             throw FinishingWorkoutFailedException("Workout cannot be finished if it wasn't started")
         }
         apply(WorkoutFinishedEvent(id = this.id))
     }
 
-
     @EventSourcingHandler(payloadType = WorkoutFinishedEvent::class)
     fun onFinished() {
         this.status = FINISHED
     }
+
+    @CommandHandler
+    fun recordSet(recordSetCommand: RecordSetCommand) {
+        if (isFinished()) {
+            throw RecordingSetFailedException("Cannot record sets on a finished workout")
+        }
+        apply(SetRecordedEvent(workoutId = id))
+    }
+
+    fun isStarted(): Boolean = status == STARTED
+
+    fun isFinished(): Boolean = status == FINISHED
 
     fun getId() = id.copy()
 
