@@ -10,6 +10,7 @@ import com.codeartify.axoniq.domain.events.WorkoutFinishedEvent
 import com.codeartify.axoniq.domain.events.WorkoutStartedEvent
 import com.codeartify.axoniq.domain.exception.FinishingWorkoutFailedException
 import com.codeartify.axoniq.domain.exception.RecordingSetFailedException
+import com.codeartify.axoniq.domain.values.WorkoutId
 import org.axonframework.commandhandling.CommandHandler
 import org.axonframework.eventsourcing.EventSourcingHandler
 import org.axonframework.modelling.command.AggregateIdentifier
@@ -56,8 +57,21 @@ class Workout() {
         if (isFinished()) {
             throw RecordingSetFailedException("Cannot record sets on a finished workout")
         }
-        apply(SetRecordedEvent(workoutId = id))
+        apply(
+            SetRecordedEvent(
+                workoutId = id,
+                repetitions = recordSetCommand.repetitions,
+                weight = recordSetCommand.weight
+            )
+        )
     }
+
+
+    @EventSourcingHandler()
+    fun onSetRecorded(setRecordedEvent: SetRecordedEvent) {
+       this.sets.record(WorkoutSet(setRecordedEvent.repetitions, setRecordedEvent.weight))
+    }
+
 
     fun isStarted(): Boolean = status == STARTED
 
