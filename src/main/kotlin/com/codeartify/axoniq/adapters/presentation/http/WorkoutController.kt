@@ -1,5 +1,6 @@
 package com.codeartify.axoniq.adapters.presentation.http
 
+import com.codeartify.axoniq.application.GetWorkoutByIdUseCase
 import com.codeartify.axoniq.application.StartWorkoutUseCase
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
