@@ -1,8 +1,8 @@
 package com.codeartify.axoniq.adapters.presentation.http
 
-import com.codeartify.axoniq.domain.StartWorkoutCommand
-import com.codeartify.axoniq.domain.WorkoutId
-import org.axonframework.commandhandling.gateway.CommandGateway
+import com.codeartify.axoniq.application.StartWorkoutUseCase
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
@@ -10,13 +10,21 @@ import java.util.concurrent.CompletableFuture
 
 @RestController
 @RequestMapping("/workouts")
-class WorkoutController(private val commandGateway: CommandGateway) {
+class WorkoutController(
+    private val startWorkoutUseCase: StartWorkoutUseCase,
+    private val getWorkoutByIdUseCase: GetWorkoutByIdUseCase
+
+) {
 
     @PostMapping("/start")
     fun startWorkout(): CompletableFuture<WorkoutStartedResponse> {
-        return commandGateway.send<WorkoutId>(StartWorkoutCommand(id = WorkoutId.create()))
+        return startWorkoutUseCase.execute()
             .thenApply {
-                WorkoutStartedResponse(workoutId = it.value)
+                WorkoutStartedResponse(workoutId = it?.value)
             }
     }
+
+    @GetMapping("/{id}")
+    fun getWorkoutById(@PathVariable id: String) = "Hello $id"
+
 }

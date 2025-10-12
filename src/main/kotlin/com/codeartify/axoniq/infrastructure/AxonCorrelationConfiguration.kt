@@ -1,4 +1,4 @@
-package com.codeartify.axoniq
+package com.codeartify.axoniq.infrastructure
 
 import org.axonframework.messaging.correlation.MessageOriginProvider
 import org.springframework.context.annotation.Bean

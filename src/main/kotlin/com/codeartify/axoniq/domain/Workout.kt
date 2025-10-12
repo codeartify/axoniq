@@ -1,5 +1,7 @@
 package com.codeartify.axoniq.domain
 
+import com.codeartify.axoniq.domain.commands.StartWorkoutCommand
+import com.codeartify.axoniq.domain.events.WorkoutStartedEvent
 import org.axonframework.commandhandling.CommandHandler
 import org.axonframework.eventsourcing.EventSourcingHandler
 import org.axonframework.modelling.command.AggregateIdentifier

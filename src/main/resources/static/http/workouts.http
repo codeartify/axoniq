@@ -1,3 +1,7 @@
 POST {{baseUrl}}/workouts/start
 Accept: application/json
 Content-Type: application/json
+
+> {%
+    client.global.set('workoutId', response.body.workoutId);
+%}
