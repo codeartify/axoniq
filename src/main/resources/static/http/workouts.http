@@ -19,6 +19,6 @@ Content-Type: application/json
 
 {
   "exerciseName": "Bench Press",
-  "repetitions": 10,
-  "weight": 100.0
+  "repetitions": 12,
+  "weight": 120.0
 }

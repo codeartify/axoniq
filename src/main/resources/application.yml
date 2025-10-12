@@ -17,3 +17,6 @@ axon:
   #      projection:
   #       dlq:
   #        enabled: true
+
+  serializer:
+    events: jackson

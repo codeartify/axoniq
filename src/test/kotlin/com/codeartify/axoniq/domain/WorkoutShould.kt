@@ -10,6 +10,7 @@ import com.codeartify.axoniq.domain.exception.FinishingWorkoutFailedException
 import com.codeartify.axoniq.domain.exception.RecordingSetFailedException
 import com.codeartify.axoniq.domain.values.ExerciseName
 import com.codeartify.axoniq.domain.values.Repetitions
+import com.codeartify.axoniq.domain.values.SetId
 import com.codeartify.axoniq.domain.values.Weight
 import com.codeartify.axoniq.domain.values.WorkoutId
 import org.assertj.core.api.AssertionsForClassTypes.assertThat
