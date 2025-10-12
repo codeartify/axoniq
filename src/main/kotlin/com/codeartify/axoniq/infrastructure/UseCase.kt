@@ -1,4 +1,4 @@
-package com.yourpackage.common
+package com.codeartify.axoniq.infrastructure
 
 import org.springframework.stereotype.Service
 

@@ -1,31 +1,53 @@
 package com.codeartify.axoniq.adapters.presentation.http
 
+import com.codeartify.axoniq.application.FinishWorkoutUseCase
 import com.codeartify.axoniq.application.GetWorkoutByIdUseCase
+import com.codeartify.axoniq.application.RecordSetUseCase
 import com.codeartify.axoniq.application.StartWorkoutUseCase
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import com.codeartify.axoniq.domain.values.ExerciseName
+import com.codeartify.axoniq.domain.values.Repetitions
+import com.codeartify.axoniq.domain.values.SetId
+import com.codeartify.axoniq.domain.values.Weight
+import com.codeartify.axoniq.domain.values.WorkoutId
+import org.springframework.web.bind.annotation.*
 import java.util.concurrent.CompletableFuture
 
 @RestController
 @RequestMapping("/workouts")
 class WorkoutController(
     private val startWorkoutUseCase: StartWorkoutUseCase,
-    private val getWorkoutByIdUseCase: GetWorkoutByIdUseCase
-
+    private val getWorkoutByIdUseCase: GetWorkoutByIdUseCase,
+    private val finishWorkoutUseCase: FinishWorkoutUseCase,
+    private val recordSetUseCase: RecordSetUseCase
 ) {
 
     @PostMapping("/start")
-    fun startWorkout(): CompletableFuture<WorkoutStartedResponse> {
+    fun startWorkout(): CompletableFuture<WorkoutId?> {
         return startWorkoutUseCase.execute()
-            .thenApply {
-                WorkoutStartedResponse(workoutId = it?.value)
-            }
     }
 
     @GetMapping("/{id}")
     fun getWorkoutById(@PathVariable id: String) = "Hello $id"
 
+    // Command: Finish a workout
+    @PostMapping("/{id}/finish")
+    fun finishWorkout(@PathVariable id: String): CompletableFuture<Void> {
+        return finishWorkoutUseCase.execute(WorkoutId(id))
+    }
+
+    // Command: Record a set for a workout
+    @PostMapping("/{id}/sets")
+    fun recordSet(
+        @PathVariable id: String,
+        @RequestBody request: RecordSetRequest
+    ): CompletableFuture<SetId?> {
+        return recordSetUseCase.execute(
+            workoutId = WorkoutId(id),
+            repetitions = Repetitions(request.repetitions),
+            weight = Weight(request.weight),
+            exerciseName = ExerciseName(request.exerciseName)
+        )
+    }
 }
+
+

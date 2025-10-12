@@ -3,5 +3,22 @@ Accept: application/json
 Content-Type: application/json
 
 > {%
-    client.global.set('workoutId', response.body.workoutId);
+    client.global.set('workoutId', response.body.value);
 %}
+
+### Finish workout
+POST {{baseUrl}}/workouts/{{workoutId}}/finish
+Accept: application/json
+Content-Type: application/json
+
+
+### Record a set
+POST {{baseUrl}}/workouts/{{workoutId}}/sets
+Accept: application/json
+Content-Type: application/json
+
+{
+  "exerciseName": "Bench Press",
+  "repetitions": 10,
+  "weight": 100.0
+}

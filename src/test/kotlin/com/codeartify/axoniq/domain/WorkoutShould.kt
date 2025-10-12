@@ -8,6 +8,7 @@ import com.codeartify.axoniq.domain.events.WorkoutFinishedEvent
 import com.codeartify.axoniq.domain.events.WorkoutStartedEvent
 import com.codeartify.axoniq.domain.exception.FinishingWorkoutFailedException
 import com.codeartify.axoniq.domain.exception.RecordingSetFailedException
+import com.codeartify.axoniq.domain.values.ExerciseName
 import com.codeartify.axoniq.domain.values.Repetitions
 import com.codeartify.axoniq.domain.values.Weight
 import com.codeartify.axoniq.domain.values.WorkoutId
@@ -58,12 +59,13 @@ class WorkoutShould {
     @Test
     fun `be possible to record sets after starting the workout`() {
         val id = WorkoutId.create()
-        val setId = WorkoutSetId.create()
+        val setId = SetId.create()
         fixture.given(WorkoutStartedEvent(id))
             .`when`(
                 RecordSetCommand(
                     setId = setId,
                     workoutId = id,
+                    exerciseName = ExerciseName("Bench Press"),
                     repetitions = Repetitions(10),
                     weight = Weight(100.0)
                 )
@@ -72,6 +74,7 @@ class WorkoutShould {
                 SetRecordedEvent(
                     setId = setId,
                     workoutId = id,
+                    exerciseName = ExerciseName("Bench Press"),
                     repetitions = Repetitions(10),
                     weight = Weight(100.0),
                 )
@@ -81,7 +84,7 @@ class WorkoutShould {
     @Test
     fun `not be possible to record sets after finishing the workout`() {
         val id = WorkoutId.create()
-        val setId = WorkoutSetId.create()
+        val setId = SetId.create()
 
         fixture
             .given(WorkoutStartedEvent(id))
@@ -90,6 +93,7 @@ class WorkoutShould {
                 RecordSetCommand(
                     setId = setId,
                     workoutId = id,
+                    exerciseName = ExerciseName("Bench Press"),
                     repetitions = Repetitions(10),
                     weight = Weight(100.0)
                 )

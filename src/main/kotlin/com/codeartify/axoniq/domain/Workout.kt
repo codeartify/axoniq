@@ -1,7 +1,5 @@
 package com.codeartify.axoniq.domain
 
-import com.codeartify.axoniq.domain.WorkoutStatus.FINISHED
-import com.codeartify.axoniq.domain.WorkoutStatus.STARTED
 import com.codeartify.axoniq.domain.commands.FinishWorkoutCommand
 import com.codeartify.axoniq.domain.commands.RecordSetCommand
 import com.codeartify.axoniq.domain.commands.StartWorkoutCommand
@@ -10,7 +8,9 @@ import com.codeartify.axoniq.domain.events.WorkoutFinishedEvent
 import com.codeartify.axoniq.domain.events.WorkoutStartedEvent
 import com.codeartify.axoniq.domain.exception.FinishingWorkoutFailedException
 import com.codeartify.axoniq.domain.exception.RecordingSetFailedException
+import com.codeartify.axoniq.domain.values.Exercises
 import com.codeartify.axoniq.domain.values.WorkoutId
+import com.codeartify.axoniq.domain.values.WorkoutStatus.*
 import org.axonframework.commandhandling.CommandHandler
 import org.axonframework.eventsourcing.EventSourcingHandler
 import org.axonframework.modelling.command.AggregateIdentifier
@@ -27,7 +27,7 @@ class Workout() {
 
     private var status = STARTED
 
-    private val sets = WorkoutSets()
+    private val exercises = Exercises()
 
     @CommandHandler
     constructor(startWorkoutCommand: StartWorkoutCommand) : this() {
@@ -61,6 +61,7 @@ class Workout() {
             SetRecordedEvent(
                 workoutId = id,
                 setId = recordSetCommand.setId,
+                exerciseName = recordSetCommand.exerciseName,
                 repetitions = recordSetCommand.repetitions,
                 weight = recordSetCommand.weight
             )
@@ -70,8 +71,9 @@ class Workout() {
 
     @EventSourcingHandler()
     fun onSetRecorded(setRecordedEvent: SetRecordedEvent) {
-        this.sets.record(
-            WorkoutSet(
+        this.exercises.record(
+            setRecordedEvent.exerciseName,
+            Set(
                 setRecordedEvent.setId,
                 setRecordedEvent.repetitions,
                 setRecordedEvent.weight
@@ -86,7 +88,6 @@ class Workout() {
 
     fun getId() = id.copy()
 
-    fun getSetsSnapshot(): List<WorkoutSet> = sets.snapshot()
 
 
 }

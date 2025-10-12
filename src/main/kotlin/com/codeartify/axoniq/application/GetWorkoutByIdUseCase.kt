@@ -1,6 +1,6 @@
 package com.codeartify.axoniq.application
 
-import com.yourpackage.common.UseCase
+import com.codeartify.axoniq.infrastructure.UseCase
 import org.axonframework.queryhandling.QueryGateway
 
 @UseCase

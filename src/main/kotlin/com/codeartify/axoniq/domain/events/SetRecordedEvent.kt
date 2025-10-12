@@ -1,13 +1,11 @@
 package com.codeartify.axoniq.domain.events
 
-import com.codeartify.axoniq.domain.WorkoutSetId
-import com.codeartify.axoniq.domain.values.Repetitions
-import com.codeartify.axoniq.domain.values.Weight
-import com.codeartify.axoniq.domain.values.WorkoutId
+import com.codeartify.axoniq.domain.values.*
 
 data class SetRecordedEvent(
-    val setId: WorkoutSetId,
+    val setId: SetId,
     val workoutId: WorkoutId,
+    val exerciseName: ExerciseName,
     val repetitions: Repetitions,
     val weight: Weight
 )

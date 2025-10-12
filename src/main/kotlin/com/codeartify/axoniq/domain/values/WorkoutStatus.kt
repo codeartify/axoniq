@@ -1,4 +1,4 @@
-package com.codeartify.axoniq.domain
+package com.codeartify.axoniq.domain.values
 
 enum class WorkoutStatus {
     STARTED,
