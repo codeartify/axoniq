@@ -1,4 +1,4 @@
-package com.codeartify.axoniq.adapters.data_access
+package com.codeartify.axoniq.adapter.data_access
 
 import com.codeartify.axoniq.domain.Workout
 import com.codeartify.axoniq.domain.values.WorkoutId

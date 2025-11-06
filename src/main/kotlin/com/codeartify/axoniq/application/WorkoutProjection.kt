@@ -1,6 +1,6 @@
 package com.codeartify.axoniq.application
 
-import com.codeartify.axoniq.adapters.data_access.WorkoutRepository
+import com.codeartify.axoniq.adapter.data_access.WorkoutRepository
 import com.codeartify.axoniq.domain.events.SetRecordedEvent
 import org.axonframework.eventhandling.EventHandler
 

@@ -1,3 +1,3 @@
-package com.codeartify.axoniq.adapters.presentation.http
+package com.codeartify.axoniq.adapter.presentation.http
 
 data class WorkoutStartedResponse(val workoutId: String? = null)

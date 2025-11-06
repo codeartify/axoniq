@@ -1,4 +1,4 @@
-package com.codeartify.axoniq.adapters.presentation.http
+package com.codeartify.axoniq.adapter.presentation.http
 
 import com.codeartify.axoniq.domain.exception.FinishingWorkoutFailedException
 import com.codeartify.axoniq.domain.exception.RecordingSetFailedException

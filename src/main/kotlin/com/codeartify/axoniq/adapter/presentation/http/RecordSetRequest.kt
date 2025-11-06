@@ -1,4 +1,4 @@
-package com.codeartify.axoniq.adapters.presentation.http
+package com.codeartify.axoniq.adapter.presentation.http
 
 data class RecordSetRequest(
     val exerciseName: String,

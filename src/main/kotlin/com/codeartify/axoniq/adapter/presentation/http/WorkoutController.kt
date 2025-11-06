@@ -1,4 +1,4 @@
-package com.codeartify.axoniq.adapters.presentation.http
+package com.codeartify.axoniq.adapter.presentation.http
 
 import com.codeartify.axoniq.application.FinishWorkoutUseCase
 import com.codeartify.axoniq.application.GetWorkoutByIdUseCase
