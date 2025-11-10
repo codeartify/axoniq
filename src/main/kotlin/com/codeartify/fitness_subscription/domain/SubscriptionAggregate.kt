@@ -14,9 +14,9 @@ class SubscriptionAggregate() {
     private lateinit var customerId: CustomerId
 
     @CommandHandler
-    constructor(command: CreateSubscriptionCommand) : this() {
+    constructor(command: SignUpForSubscriptionCommand) : this() {
         apply(
-            SubscriptionCreatedEvent(
+            SignedUpForSubscriptionEvent(
                 subscriptionId = command.subscriptionId,
                 customerId = command.customerId
             )
@@ -24,7 +24,7 @@ class SubscriptionAggregate() {
     }
 
     @EventSourcingHandler
-    fun on(event: SubscriptionCreatedEvent) {
+    fun on(event: SignedUpForSubscriptionEvent) {
         this.id = event.subscriptionId
         this.customerId = event.customerId
     }
