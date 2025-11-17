@@ -1,0 +1,84 @@
+package ch.fitnesslab.billing.domain
+
+import ch.fitnesslab.billing.domain.commands.CreateInvoiceCommand
+import ch.fitnesslab.billing.domain.commands.MarkInvoicePaidCommand
+import ch.fitnesslab.billing.domain.events.InvoiceCreatedEvent
+import ch.fitnesslab.billing.domain.events.InvoicePaidEvent
+import ch.fitnesslab.common.types.BookingId
+import ch.fitnesslab.common.types.CustomerId
+import ch.fitnesslab.common.types.InvoiceId
+import ch.fitnesslab.common.types.ProductVariantId
+import org.axonframework.commandhandling.CommandHandler
+import org.axonframework.eventsourcing.EventSourcingHandler
+import org.axonframework.modelling.command.AggregateIdentifier
+import org.axonframework.modelling.command.AggregateLifecycle
+import org.axonframework.spring.stereotype.Aggregate
+import java.math.BigDecimal
+import java.time.Instant
+import java.time.LocalDate
+
+@Aggregate
+class InvoiceAggregate() {
+
+    @AggregateIdentifier
+    private lateinit var invoiceId: InvoiceId
+    private lateinit var bookingId: BookingId
+    private lateinit var customerId: CustomerId
+    private var productVariantId: ProductVariantId? = null
+    private lateinit var amount: BigDecimal
+    private lateinit var dueDate: LocalDate
+    private lateinit var status: InvoiceStatus
+    private var isInstallment: Boolean = false
+    private var installmentNumber: Int? = null
+    private var paidAt: Instant? = null
+
+    @CommandHandler
+    constructor(command: CreateInvoiceCommand) : this() {
+        AggregateLifecycle.apply(
+            InvoiceCreatedEvent(
+                invoiceId = command.invoiceId,
+                bookingId = command.bookingId,
+                customerId = command.customerId,
+                productVariantId = command.productVariantId,
+                amount = command.amount,
+                dueDate = command.dueDate,
+                status = InvoiceStatus.OPEN,
+                isInstallment = command.isInstallment,
+                installmentNumber = command.installmentNumber
+            )
+        )
+    }
+
+    @CommandHandler
+    fun handle(command: MarkInvoicePaidCommand) {
+        require(status == InvoiceStatus.OPEN || status == InvoiceStatus.OVERDUE) {
+            "Invoice must be OPEN or OVERDUE to be marked as PAID"
+        }
+
+        AggregateLifecycle.apply(
+            InvoicePaidEvent(
+                invoiceId = command.invoiceId,
+                paidAt = command.paidAt
+            )
+        )
+    }
+
+    @EventSourcingHandler
+    fun on(event: InvoiceCreatedEvent) {
+        this.invoiceId = event.invoiceId
+        this.bookingId = event.bookingId
+        this.customerId = event.customerId
+        this.productVariantId = event.productVariantId
+        this.amount = event.amount
+        this.dueDate = event.dueDate
+        this.status = event.status
+        this.isInstallment = event.isInstallment
+        this.installmentNumber = event.installmentNumber
+    }
+
+    @EventSourcingHandler
+    fun on(event: InvoicePaidEvent) {
+        this.status = InvoiceStatus.PAID
+        this.paidAt = event.paidAt
+    }
+}
