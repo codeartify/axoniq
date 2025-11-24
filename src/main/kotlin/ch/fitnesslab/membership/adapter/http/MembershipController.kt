@@ -21,16 +21,18 @@ class MembershipController(
 
     @PostMapping("/sign-up")
     fun signUp(@RequestBody request: MembershipSignUpRequestDto): ResponseEntity<MembershipSignUpResultDto> {
+        val signUpRequest = MembershipSignUpRequest(
+            customerId = CustomerId.from(request.customerId),
+            customerName = request.customerName,
+            customerEmail = request.customerEmail,
+            productVariantId = ProductVariantId.from(request.productVariantId),
+            price = request.price,
+            durationMonths = request.durationMonths,
+            paymentMode = request.paymentMode
+        )
+
         val result = membershipSignUpService.signUp(
-            MembershipSignUpRequest(
-                customerId = CustomerId.from(request.customerId),
-                customerName = request.customerName,
-                customerEmail = request.customerEmail,
-                productVariantId = ProductVariantId.from(request.productVariantId),
-                price = request.price,
-                durationMonths = request.durationMonths,
-                paymentMode = request.paymentMode
-            )
+            signUpRequest
         )
 
         return ResponseEntity.ok(

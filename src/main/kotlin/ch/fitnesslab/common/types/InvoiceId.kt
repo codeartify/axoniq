@@ -1,9 +1,8 @@
 package ch.fitnesslab.common.types
 
-import java.util.UUID
+import java.util.*
 
-@JvmInline
-value class InvoiceId(val value: UUID) {
+data class InvoiceId(val value: UUID) {
     companion object {
         fun generate() = InvoiceId(UUID.randomUUID())
         fun from(value: String) = InvoiceId(UUID.fromString(value))
