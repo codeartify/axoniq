@@ -1,8 +1,12 @@
 package ch.fitnesslab.billing.domain
 
+import ch.fitnesslab.billing.domain.commands.CancelInvoiceCommand
 import ch.fitnesslab.billing.domain.commands.CreateInvoiceCommand
+import ch.fitnesslab.billing.domain.commands.MarkInvoiceOverdueCommand
 import ch.fitnesslab.billing.domain.commands.MarkInvoicePaidCommand
+import ch.fitnesslab.billing.domain.events.InvoiceCancelledEvent
 import ch.fitnesslab.billing.domain.events.InvoiceCreatedEvent
+import ch.fitnesslab.billing.domain.events.InvoiceMarkedOverdueEvent
 import ch.fitnesslab.billing.domain.events.InvoicePaidEvent
 import ch.fitnesslab.common.types.BookingId
 import ch.fitnesslab.common.types.CustomerId
@@ -76,9 +80,46 @@ class Invoice() {
         this.installmentNumber = event.installmentNumber
     }
 
+    @CommandHandler
+    fun handle(command: MarkInvoiceOverdueCommand) {
+        require(status == InvoiceStatus.OPEN) {
+            "Invoice must be OPEN to be marked as OVERDUE"
+        }
+
+        AggregateLifecycle.apply(
+            InvoiceMarkedOverdueEvent(
+                invoiceId = command.invoiceId
+            )
+        )
+    }
+
+    @CommandHandler
+    fun handle(command: CancelInvoiceCommand) {
+        require(status != InvoiceStatus.PAID) {
+            "Cannot cancel a PAID invoice"
+        }
+
+        AggregateLifecycle.apply(
+            InvoiceCancelledEvent(
+                invoiceId = command.invoiceId,
+                reason = command.reason
+            )
+        )
+    }
+
     @EventSourcingHandler
     fun on(event: InvoicePaidEvent) {
         this.status = InvoiceStatus.PAID
         this.paidAt = event.paidAt
+    }
+
+    @EventSourcingHandler
+    fun on(event: InvoiceMarkedOverdueEvent) {
+        this.status = InvoiceStatus.OVERDUE
+    }
+
+    @EventSourcingHandler
+    fun on(event: InvoiceCancelledEvent) {
+        this.status = InvoiceStatus.CANCELLED
     }
 }

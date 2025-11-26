@@ -5,6 +5,7 @@ import {Observable} from 'rxjs';
 export interface InvoiceView {
   invoiceId: string;
   customerId: string;
+  customerName: string;
   bookingId: string;
   amount: number;
   dueDate: string;
@@ -22,11 +23,27 @@ export class Invoices {
 
   constructor(private http: HttpClient) {}
 
+  getAllInvoices(): Observable<InvoiceView[]> {
+    return this.http.get<InvoiceView[]>(this.apiUrl);
+  }
+
   getInvoicesByCustomerId(customerId: string): Observable<InvoiceView[]> {
     return this.http.get<InvoiceView[]>(`${this.apiUrl}/customer/${customerId}`);
   }
 
+  getInvoiceById(invoiceId: string): Observable<InvoiceView> {
+    return this.http.get<InvoiceView>(`${this.apiUrl}/${invoiceId}`);
+  }
+
   markInvoiceAsPaid(invoiceId: string): Observable<void> {
     return this.http.post<void>(`${this.apiUrl}/${invoiceId}/pay`, {});
+  }
+
+  markInvoiceAsOverdue(invoiceId: string): Observable<void> {
+    return this.http.post<void>(`${this.apiUrl}/${invoiceId}/mark-overdue`, {});
+  }
+
+  cancelInvoice(invoiceId: string, reason: string): Observable<void> {
+    return this.http.post<void>(`${this.apiUrl}/${invoiceId}/cancel`, { reason });
   }
 }

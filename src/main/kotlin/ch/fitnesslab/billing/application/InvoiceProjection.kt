@@ -1,7 +1,9 @@
 package ch.fitnesslab.billing.application
 
 import ch.fitnesslab.billing.domain.InvoiceStatus
+import ch.fitnesslab.billing.domain.events.InvoiceCancelledEvent
 import ch.fitnesslab.billing.domain.events.InvoiceCreatedEvent
+import ch.fitnesslab.billing.domain.events.InvoiceMarkedOverdueEvent
 import ch.fitnesslab.billing.domain.events.InvoicePaidEvent
 import ch.fitnesslab.billing.infrastructure.InvoiceEmailService
 import ch.fitnesslab.billing.infrastructure.InvoiceEntity
@@ -71,6 +73,44 @@ class InvoiceProjection(
         }
     }
 
+    @EventHandler
+    fun on(event: InvoiceMarkedOverdueEvent) {
+        invoiceRepository.findById(event.invoiceId.value).ifPresent { existing ->
+            val updated = InvoiceEntity(
+                invoiceId = existing.invoiceId,
+                customerId = existing.customerId,
+                bookingId = existing.bookingId,
+                productVariantId = existing.productVariantId,
+                amount = existing.amount,
+                dueDate = existing.dueDate,
+                status = InvoiceStatus.OVERDUE,
+                isInstallment = existing.isInstallment,
+                installmentNumber = existing.installmentNumber,
+                paidAt = existing.paidAt
+            )
+            invoiceRepository.save(updated)
+        }
+    }
+
+    @EventHandler
+    fun on(event: InvoiceCancelledEvent) {
+        invoiceRepository.findById(event.invoiceId.value).ifPresent { existing ->
+            val updated = InvoiceEntity(
+                invoiceId = existing.invoiceId,
+                customerId = existing.customerId,
+                bookingId = existing.bookingId,
+                productVariantId = existing.productVariantId,
+                amount = existing.amount,
+                dueDate = existing.dueDate,
+                status = InvoiceStatus.CANCELLED,
+                isInstallment = existing.isInstallment,
+                installmentNumber = existing.installmentNumber,
+                paidAt = existing.paidAt
+            )
+            invoiceRepository.save(updated)
+        }
+    }
+
     fun findAll(): List<InvoiceView> = invoiceRepository.findAll().map { it.toInvoiceView() }
 
     fun findByStatus(status: InvoiceStatus): List<InvoiceView> =
@@ -82,22 +122,33 @@ class InvoiceProjection(
     fun findByCustomerId(customerId: String): List<InvoiceView> =
         invoiceRepository.findByCustomerId(UUID.fromString(customerId)).map { it.toInvoiceView() }
 
-    private fun InvoiceEntity.toInvoiceView() = InvoiceView(
-        invoiceId = this.invoiceId.toString(),
-        customerId = this.customerId.toString(),
-        bookingId = this.bookingId.toString(),
-        amount = this.amount,
-        dueDate = this.dueDate,
-        status = this.status,
-        isInstallment = this.isInstallment,
-        installmentNumber = this.installmentNumber,
-        paidAt = this.paidAt
-    )
+    private fun InvoiceEntity.toInvoiceView(): InvoiceView {
+        val customer = customerProjection.findById(CustomerId.from(this.customerId.toString()))
+        val customerName = if (customer != null) {
+            "${customer.firstName} ${customer.lastName}"
+        } else {
+            "Unknown"
+        }
+
+        return InvoiceView(
+            invoiceId = this.invoiceId.toString(),
+            customerId = this.customerId.toString(),
+            customerName = customerName,
+            bookingId = this.bookingId.toString(),
+            amount = this.amount,
+            dueDate = this.dueDate,
+            status = this.status,
+            isInstallment = this.isInstallment,
+            installmentNumber = this.installmentNumber,
+            paidAt = this.paidAt
+        )
+    }
 }
 
 data class InvoiceView(
     val invoiceId: String,
     val customerId: String,
+    val customerName: String,
     val bookingId: String,
     val amount: BigDecimal,
     val dueDate: LocalDate,

@@ -3,6 +3,8 @@ package ch.fitnesslab.billing.adapter.http
 import ch.fitnesslab.billing.application.InvoiceProjection
 import ch.fitnesslab.billing.application.InvoiceView
 import ch.fitnesslab.billing.domain.InvoiceStatus
+import ch.fitnesslab.billing.domain.commands.CancelInvoiceCommand
+import ch.fitnesslab.billing.domain.commands.MarkInvoiceOverdueCommand
 import ch.fitnesslab.billing.domain.commands.MarkInvoicePaidCommand
 import ch.fitnesslab.common.types.InvoiceId
 import org.axonframework.commandhandling.gateway.CommandGateway
@@ -56,11 +58,42 @@ class InvoiceController(
 
         return ResponseEntity.ok().build()
     }
+
+    @PostMapping("/{invoiceId}/mark-overdue")
+    fun markAsOverdue(@PathVariable invoiceId: String): ResponseEntity<Void> {
+        commandGateway.sendAndWait<Any>(
+            MarkInvoiceOverdueCommand(
+                invoiceId = InvoiceId.from(invoiceId)
+            )
+        )
+
+        return ResponseEntity.ok().build()
+    }
+
+    @PostMapping("/{invoiceId}/cancel")
+    fun cancelInvoice(
+        @PathVariable invoiceId: String,
+        @RequestBody request: CancelInvoiceRequest
+    ): ResponseEntity<Void> {
+        commandGateway.sendAndWait<Any>(
+            CancelInvoiceCommand(
+                invoiceId = InvoiceId.from(invoiceId),
+                reason = request.reason
+            )
+        )
+
+        return ResponseEntity.ok().build()
+    }
 }
+
+data class CancelInvoiceRequest(
+    val reason: String
+)
 
 data class InvoiceDto(
     val invoiceId: String,
     val customerId: String,
+    val customerName: String,
     val bookingId: String,
     val amount: BigDecimal,
     val dueDate: LocalDate,
@@ -73,6 +106,7 @@ data class InvoiceDto(
 private fun InvoiceView.toDto() = InvoiceDto(
     invoiceId = invoiceId,
     customerId = customerId,
+    customerName = customerName,
     bookingId = bookingId,
     amount = amount,
     dueDate = dueDate,

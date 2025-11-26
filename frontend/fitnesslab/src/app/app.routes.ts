@@ -5,6 +5,7 @@ import { CustomerList } from './customers/customer-list';
 import { ProductCreate } from './products/product-create';
 import { ProductDetail } from './products/product-detail';
 import { ProductList } from './products/product-list';
+import { InvoiceList } from './invoices/invoice-list';
 
 export const routes: Routes = [
   { path: 'customers', component: CustomerList },
@@ -13,5 +14,6 @@ export const routes: Routes = [
   { path: 'products', component: ProductList },
   { path: 'products/new', component: ProductCreate },
   { path: 'products/:id', component: ProductDetail },
+  { path: 'invoices', component: InvoiceList },
   { path: '', redirectTo: '/customers', pathMatch: 'full' }
 ];

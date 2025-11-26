@@ -1,0 +1,109 @@
+<div class="invoice-list-container">
+  <h1>Invoices</h1>
+
+  <div class="search-bar">
+    <input
+      type="text"
+      placeholder="Search invoices..."
+      [ngModel]="searchTerm()"
+      (ngModelChange)="searchTerm.set($event)"
+      class="search-input"
+    />
+  </div>
+
+  <table class="invoice-table">
+    <thead>
+      <tr>
+        <th (click)="sortBy('invoiceId')">
+          Invoice ID {{ getSortIcon('invoiceId') }}
+        </th>
+        <th (click)="sortBy('customerName')">
+          Customer Name {{ getSortIcon('customerName') }}
+        </th>
+        <th (click)="sortBy('amount')">
+          Amount {{ getSortIcon('amount') }}
+        </th>
+        <th (click)="sortBy('dueDate')">
+          Due Date {{ getSortIcon('dueDate') }}
+        </th>
+        <th (click)="sortBy('status')">
+          Status {{ getSortIcon('status') }}
+        </th>
+        <th>Installment</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let invoice of filteredAndSortedInvoices()">
+        <td>{{ invoice.invoiceId.substring(0, 8) }}...</td>
+        <td>
+          <a (click)="viewCustomer(invoice.customerId)" class="customer-link">
+            {{ invoice.customerName }}
+          </a>
+        </td>
+        <td>CHF {{ invoice.amount | number:'1.2-2' }}</td>
+        <td>{{ invoice.dueDate | date:'shortDate' }}</td>
+        <td>
+          <span [ngClass]="getStatusClass(invoice.status)" class="status-badge">
+            {{ invoice.status }}
+          </span>
+        </td>
+        <td>
+          <span *ngIf="invoice.isInstallment">
+            Yes (#{{ invoice.installmentNumber }})
+          </span>
+          <span *ngIf="!invoice.isInstallment">No</span>
+        </td>
+        <td class="actions">
+          <button
+            *ngIf="invoice.status === 'OPEN' || invoice.status === 'OVERDUE'"
+            (click)="markAsPaid(invoice.invoiceId)"
+            class="btn btn-success"
+          >
+            Mark Paid
+          </button>
+          <button
+            *ngIf="invoice.status === 'OPEN'"
+            (click)="markAsOverdue(invoice.invoiceId)"
+            class="btn btn-warning"
+          >
+            Mark Overdue
+          </button>
+          <button
+            *ngIf="invoice.status !== 'PAID' && invoice.status !== 'CANCELLED'"
+            (click)="openCancelModal(invoice.invoiceId)"
+            class="btn btn-danger"
+          >
+            Cancel
+          </button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div *ngIf="filteredAndSortedInvoices().length === 0" class="no-results">
+    No invoices found.
+  </div>
+</div>
+
+<!-- Cancel Modal -->
+<div *ngIf="showCancelModal()" class="modal-overlay" (click)="closeCancelModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <h2>Cancel Invoice</h2>
+    <p>Please provide a reason for cancellation:</p>
+    <textarea
+      [(ngModel)]="cancelReason"
+      class="cancel-reason-input"
+      placeholder="Enter cancellation reason..."
+      rows="4"
+    ></textarea>
+    <div class="modal-actions">
+      <button (click)="closeCancelModal()" class="btn btn-secondary">
+        Close
+      </button>
+      <button (click)="confirmCancel()" class="btn btn-danger">
+        Confirm Cancel
+      </button>
+    </div>
+  </div>
+</div>
