@@ -1,0 +1,303 @@
+<div class="product-detail-container">
+  @if (isLoading()) {
+    <div class="loading">Loading product...</div>
+  }
+
+  @if (errorMessage()) {
+    <div class="alert alert-error">
+      {{ errorMessage() }}
+    </div>
+  }
+
+  @if (successMessage()) {
+    <div class="alert alert-success">
+      {{ successMessage() }}
+    </div>
+  }
+
+  @if (!isLoading() && product()) {
+    <div class="header">
+      <h2>{{ isEditing() ? 'Edit Product' : 'Product Details' }}</h2>
+      <div class="header-actions">
+        @if (!isEditing()) {
+          <button (click)="startEdit()" class="btn btn-primary">Edit</button>
+        }
+        <button (click)="goBack()" class="btn btn-secondary">Back to List</button>
+      </div>
+    </div>
+
+    @if (!isEditing()) {
+      <div class="product-details">
+        <div class="detail-section">
+          <h3>Basic Information</h3>
+          <div class="detail-grid">
+            <div class="detail-item">
+              <label>Product Code:</label>
+              <span>{{ product()!.code }}</span>
+            </div>
+            <div class="detail-item">
+              <label>Product Name:</label>
+              <span>{{ product()!.name }}</span>
+            </div>
+            <div class="detail-item">
+              <label>Product Type:</label>
+              <span>{{ product()!.productType }}</span>
+            </div>
+            <div class="detail-item">
+              <label>Price:</label>
+              <span>{{ product()!.price | currency }}</span>
+            </div>
+            <div class="detail-item">
+              <label>Audience:</label>
+              <span>{{ product()!.audience }}</span>
+            </div>
+            <div class="detail-item">
+              <label>Requires Membership:</label>
+              <span>{{ product()!.requiresMembership ? 'Yes' : 'No' }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="detail-section">
+          <h3>Behavior Configuration</h3>
+          <div class="detail-grid">
+            <div class="detail-item">
+              <label>Time Based:</label>
+              <span>{{ product()!.behavior.isTimeBased ? 'Yes' : 'No' }}</span>
+            </div>
+            <div class="detail-item">
+              <label>Session Based:</label>
+              <span>{{ product()!.behavior.isSessionBased ? 'Yes' : 'No' }}</span>
+            </div>
+            <div class="detail-item">
+              <label>Can Be Paused:</label>
+              <span>{{ product()!.behavior.canBePaused ? 'Yes' : 'No' }}</span>
+            </div>
+            <div class="detail-item">
+              <label>Auto Renew:</label>
+              <span>{{ product()!.behavior.autoRenew ? 'Yes' : 'No' }}</span>
+            </div>
+            @if (product()!.behavior.renewalLeadTimeDays) {
+              <div class="detail-item">
+                <label>Renewal Lead Time:</label>
+                <span>{{ product()!.behavior.renewalLeadTimeDays }} days</span>
+              </div>
+            }
+            <div class="detail-item">
+              <label>Contributes to Membership:</label>
+              <span>{{ product()!.behavior.contributesToMembershipStatus ? 'Yes' : 'No' }}</span>
+            </div>
+            @if (product()!.behavior.maxActivePerCustomer) {
+              <div class="detail-item">
+                <label>Max Active Per Customer:</label>
+                <span>{{ product()!.behavior.maxActivePerCustomer }}</span>
+              </div>
+            }
+            @if (product()!.behavior.exclusivityGroup) {
+              <div class="detail-item">
+                <label>Exclusivity Group:</label>
+                <span>{{ product()!.behavior.exclusivityGroup }}</span>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    } @else {
+      <form (ngSubmit)="saveProduct()" class="product-form">
+        <div class="form-section">
+          <h3>Basic Information</h3>
+
+          <div class="form-group">
+            <label for="code">Product Code *</label>
+            <input
+              type="text"
+              id="code"
+              [(ngModel)]="editedProduct!.code"
+              name="code"
+              required
+              class="form-control"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="name">Product Name *</label>
+            <input
+              type="text"
+              id="name"
+              [(ngModel)]="editedProduct!.name"
+              name="name"
+              required
+              class="form-control"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="productType">Product Type *</label>
+            <input
+              type="text"
+              id="productType"
+              [(ngModel)]="editedProduct!.productType"
+              name="productType"
+              required
+              class="form-control"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="price">Price *</label>
+            <input
+              type="number"
+              id="price"
+              [(ngModel)]="editedProduct!.price"
+              name="price"
+              required
+              min="0"
+              step="0.01"
+              class="form-control"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="audience">Audience *</label>
+            <select
+              id="audience"
+              [(ngModel)]="editedProduct!.audience"
+              name="audience"
+              required
+              class="form-control"
+            >
+              @for (aud of audiences; track aud) {
+                <option [value]="aud">{{ aud }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="form-group checkbox-group">
+            <label>
+              <input
+                type="checkbox"
+                [(ngModel)]="editedProduct!.requiresMembership"
+                name="requiresMembership"
+              />
+              Requires Membership
+            </label>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <h3>Behavior Configuration</h3>
+
+          <div class="form-group checkbox-group">
+            <label>
+              <input
+                type="checkbox"
+                [(ngModel)]="editedProduct!.behavior.isTimeBased"
+                name="isTimeBased"
+              />
+              Time Based
+            </label>
+          </div>
+
+          <div class="form-group checkbox-group">
+            <label>
+              <input
+                type="checkbox"
+                [(ngModel)]="editedProduct!.behavior.isSessionBased"
+                name="isSessionBased"
+              />
+              Session Based
+            </label>
+          </div>
+
+          <div class="form-group checkbox-group">
+            <label>
+              <input
+                type="checkbox"
+                [(ngModel)]="editedProduct!.behavior.canBePaused"
+                name="canBePaused"
+              />
+              Can Be Paused
+            </label>
+          </div>
+
+          <div class="form-group checkbox-group">
+            <label>
+              <input
+                type="checkbox"
+                [(ngModel)]="editedProduct!.behavior.autoRenew"
+                name="autoRenew"
+              />
+              Auto Renew
+            </label>
+          </div>
+
+          @if (editedProduct!.behavior.autoRenew) {
+            <div class="form-group">
+              <label for="renewalLeadTimeDays">Renewal Lead Time (Days)</label>
+              <input
+                type="number"
+                id="renewalLeadTimeDays"
+                [(ngModel)]="editedProduct!.behavior.renewalLeadTimeDays"
+                name="renewalLeadTimeDays"
+                min="0"
+                class="form-control"
+              />
+            </div>
+          }
+
+          <div class="form-group checkbox-group">
+            <label>
+              <input
+                type="checkbox"
+                [(ngModel)]="editedProduct!.behavior.contributesToMembershipStatus"
+                name="contributesToMembershipStatus"
+              />
+              Contributes to Membership Status
+            </label>
+          </div>
+
+          <div class="form-group">
+            <label for="maxActivePerCustomer">Max Active Per Customer</label>
+            <input
+              type="number"
+              id="maxActivePerCustomer"
+              [(ngModel)]="editedProduct!.behavior.maxActivePerCustomer"
+              name="maxActivePerCustomer"
+              min="0"
+              class="form-control"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="exclusivityGroup">Exclusivity Group</label>
+            <input
+              type="text"
+              id="exclusivityGroup"
+              [(ngModel)]="editedProduct!.behavior.exclusivityGroup"
+              name="exclusivityGroup"
+              class="form-control"
+            />
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button
+            type="button"
+            (click)="cancelEdit()"
+            class="btn btn-secondary"
+            [disabled]="isSaving()"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            class="btn btn-primary"
+            [disabled]="isSaving()"
+          >
+            {{ isSaving() ? 'Saving...' : 'Save Changes' }}
+          </button>
+        </div>
+      </form>
+    }
+  }
+</div>

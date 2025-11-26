@@ -3,6 +3,8 @@ import {CommonModule} from '@angular/common';
 import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {ActivatedRoute, Router} from '@angular/router';
 import {Customers, CustomerView} from './customers';
+import {Products, ProductView} from '../products/products';
+import {Memberships, PaymentMode} from '../memberships/memberships';
 
 @Component({
   selector: 'app-customer-detail',
@@ -17,6 +19,11 @@ export class CustomerDetail implements OnInit {
   isLoading = signal<boolean>(true);
   isEditMode = signal<boolean>(false);
   isSubmitting = signal<boolean>(false);
+  showProductSelection = signal<boolean>(false);
+  availableProducts = signal<ProductView[]>([]);
+  isLoadingProducts = signal<boolean>(false);
+  isAssigningProduct = signal<boolean>(false);
+  successMessage = signal<string | null>(null);
 
   customerForm: FormGroup;
   salutations = ['MR', 'MS', 'MRS', 'MX', 'DR'];
@@ -25,6 +32,8 @@ export class CustomerDetail implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private customerService: Customers,
+    private productService: Products,
+    private membershipService: Memberships,
     private fb: FormBuilder
   ) {
     this.customerForm = this.fb.group({
@@ -138,5 +147,70 @@ export class CustomerDetail implements OnInit {
 
   createNew(): void {
     this.router.navigate(['/customers/new']);
+  }
+
+  openProductSelection(): void {
+    this.showProductSelection.set(true);
+    this.isLoadingProducts.set(true);
+    this.errorMessage.set(null);
+    this.successMessage.set(null);
+
+    this.productService.getAllProducts().subscribe({
+      next: (products) => {
+        this.availableProducts.set(products);
+        this.isLoadingProducts.set(false);
+      },
+      error: (error) => {
+        this.errorMessage.set('Failed to load products');
+        this.isLoadingProducts.set(false);
+      }
+    });
+  }
+
+  closeProductSelection(): void {
+    this.showProductSelection.set(false);
+    this.availableProducts.set([]);
+  }
+
+  selectProduct(product: ProductView): void {
+    const customer = this.customer();
+    if (!customer) return;
+
+    this.isAssigningProduct.set(true);
+    this.errorMessage.set(null);
+    this.successMessage.set(null);
+
+    // Check if product is a membership type
+    if (product.productType.toUpperCase() === 'MEMBERSHIP') {
+      // Calculate duration months (simplified - you may need to adjust based on product)
+      const durationMonths = 12; // Default to 12 months, adjust as needed
+
+      const signUpRequest = {
+        customerId: customer.customerId,
+        customerName: `${customer.salutation} ${customer.firstName} ${customer.lastName}`,
+        customerEmail: customer.email,
+        productVariantId: product.productId,
+        price: product.price,
+        durationMonths: durationMonths,
+        paymentMode: PaymentMode.INVOICE_EMAIL
+      };
+
+      this.membershipService.signUp(signUpRequest).subscribe({
+        next: (result) => {
+          this.isAssigningProduct.set(false);
+          this.successMessage.set(`Membership assigned successfully! Contract ID: ${result.contractId}`);
+          this.closeProductSelection();
+        },
+        error: (error) => {
+          this.isAssigningProduct.set(false);
+          this.errorMessage.set('Failed to assign membership product');
+          console.error('Error assigning membership:', error);
+        }
+      });
+    } else {
+      // For non-membership products, show a message
+      this.isAssigningProduct.set(false);
+      this.errorMessage.set('Only membership products can be assigned at this time');
+    }
   }
 }

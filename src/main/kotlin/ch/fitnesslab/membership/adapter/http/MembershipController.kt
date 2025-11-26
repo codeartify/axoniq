@@ -7,6 +7,7 @@ import ch.fitnesslab.membership.application.MembershipSignUpResult
 import ch.fitnesslab.membership.application.MembershipSignUpService
 import ch.fitnesslab.membership.application.PaymentMode
 import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController
 import java.math.BigDecimal
 
 @RestController
+@CrossOrigin
 @RequestMapping("/api/memberships")
 class MembershipController(
     private val membershipSignUpService: MembershipSignUpService

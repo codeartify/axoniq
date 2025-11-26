@@ -1,0 +1,207 @@
+<div class="product-create-container">
+  <div class="header">
+    <h2>Create New Product</h2>
+  </div>
+
+  @if (errorMessage) {
+    <div class="alert alert-error">
+      {{ errorMessage }}
+    </div>
+  }
+
+  <form (ngSubmit)="onSubmit()" class="product-form">
+    <div class="form-section">
+      <h3>Basic Information</h3>
+
+      <div class="form-group">
+        <label for="code">Product Code *</label>
+        <input
+          type="text"
+          id="code"
+          [(ngModel)]="product.code"
+          name="code"
+          required
+          class="form-control"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="name">Product Name *</label>
+        <input
+          type="text"
+          id="name"
+          [(ngModel)]="product.name"
+          name="name"
+          required
+          class="form-control"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="productType">Product Type *</label>
+        <input
+          type="text"
+          id="productType"
+          [(ngModel)]="product.productType"
+          name="productType"
+          required
+          class="form-control"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="price">Price *</label>
+        <input
+          type="number"
+          id="price"
+          [(ngModel)]="product.price"
+          name="price"
+          required
+          min="0"
+          step="0.01"
+          class="form-control"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="audience">Audience *</label>
+        <select
+          id="audience"
+          [(ngModel)]="product.audience"
+          name="audience"
+          required
+          class="form-control"
+        >
+          @for (aud of audiences; track aud) {
+            <option [value]="aud">{{ aud }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="form-group checkbox-group">
+        <label>
+          <input
+            type="checkbox"
+            [(ngModel)]="product.requiresMembership"
+            name="requiresMembership"
+          />
+          Requires Membership
+        </label>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <h3>Behavior Configuration</h3>
+
+      <div class="form-group checkbox-group">
+        <label>
+          <input
+            type="checkbox"
+            [(ngModel)]="product.behavior.isTimeBased"
+            name="isTimeBased"
+          />
+          Time Based
+        </label>
+      </div>
+
+      <div class="form-group checkbox-group">
+        <label>
+          <input
+            type="checkbox"
+            [(ngModel)]="product.behavior.isSessionBased"
+            name="isSessionBased"
+          />
+          Session Based
+        </label>
+      </div>
+
+      <div class="form-group checkbox-group">
+        <label>
+          <input
+            type="checkbox"
+            [(ngModel)]="product.behavior.canBePaused"
+            name="canBePaused"
+          />
+          Can Be Paused
+        </label>
+      </div>
+
+      <div class="form-group checkbox-group">
+        <label>
+          <input
+            type="checkbox"
+            [(ngModel)]="product.behavior.autoRenew"
+            name="autoRenew"
+          />
+          Auto Renew
+        </label>
+      </div>
+
+      @if (product.behavior.autoRenew) {
+        <div class="form-group">
+          <label for="renewalLeadTimeDays">Renewal Lead Time (Days)</label>
+          <input
+            type="number"
+            id="renewalLeadTimeDays"
+            [(ngModel)]="product.behavior.renewalLeadTimeDays"
+            name="renewalLeadTimeDays"
+            min="0"
+            class="form-control"
+          />
+        </div>
+      }
+
+      <div class="form-group checkbox-group">
+        <label>
+          <input
+            type="checkbox"
+            [(ngModel)]="product.behavior.contributesToMembershipStatus"
+            name="contributesToMembershipStatus"
+          />
+          Contributes to Membership Status
+        </label>
+      </div>
+
+      <div class="form-group">
+        <label for="maxActivePerCustomer">Max Active Per Customer</label>
+        <input
+          type="number"
+          id="maxActivePerCustomer"
+          [(ngModel)]="product.behavior.maxActivePerCustomer"
+          name="maxActivePerCustomer"
+          min="0"
+          class="form-control"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="exclusivityGroup">Exclusivity Group</label>
+        <input
+          type="text"
+          id="exclusivityGroup"
+          [(ngModel)]="product.behavior.exclusivityGroup"
+          name="exclusivityGroup"
+          class="form-control"
+        />
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button
+        type="button"
+        (click)="cancel()"
+        class="btn btn-secondary"
+        [disabled]="isSubmitting"
+      >
+        Cancel
+      </button>
+      <button
+        type="submit"
+        class="btn btn-primary"
+        [disabled]="isSubmitting || !isFormValid()"
+      >
+        {{ isSubmitting ? 'Creating...' : 'Create Product' }}
+      </button>
+    </div>
+  </form>
+</div>

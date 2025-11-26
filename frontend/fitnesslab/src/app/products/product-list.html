@@ -1,0 +1,84 @@
+<div class="product-list-container">
+  <div class="header">
+    <h2>Product List</h2>
+    <button (click)="createProduct()" class="btn btn-primary">Add Product</button>
+  </div>
+
+  @if (!isLoading() && !errorMessage()) {
+    <div class="search-container">
+      <input
+        type="text"
+        [ngModel]="searchTerm()"
+        (ngModelChange)="onSearchChange($event)"
+        placeholder="Search by product name or code..."
+        class="search-input"
+      />
+    </div>
+  }
+
+  @if (isLoading()) {
+    <div class="loading">
+      Loading products...
+    </div>
+  }
+
+  @if (errorMessage() && !isLoading()) {
+    <div class="alert alert-error">
+      {{ errorMessage() }}
+    </div>
+  }
+
+  @if (!isLoading() && !errorMessage()) {
+    @if (products().length === 0) {
+      <div class="empty-state">
+        <p>No products found.</p>
+        <button (click)="createProduct()" class="btn btn-primary">Create First Product</button>
+      </div>
+    } @else {
+      <div class="product-table">
+        <table>
+          <thead>
+            <tr>
+              <th (click)="sortBy('code')" class="sortable">
+                Code {{ getSortIcon('code') }}
+              </th>
+              <th (click)="sortBy('name')" class="sortable">
+                Name {{ getSortIcon('name') }}
+              </th>
+              <th (click)="sortBy('productType')" class="sortable">
+                Type {{ getSortIcon('productType') }}
+              </th>
+              <th (click)="sortBy('price')" class="sortable">
+                Price {{ getSortIcon('price') }}
+              </th>
+              <th (click)="sortBy('audience')" class="sortable">
+                Audience {{ getSortIcon('audience') }}
+              </th>
+              <th>Requires Membership</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (product of products(); track product.productId) {
+              <tr class="product-row" (click)="viewProduct(product.productId)">
+                <td>{{ product.code }}</td>
+                <td>{{ product.name }}</td>
+                <td>{{ product.productType }}</td>
+                <td>{{ product.price | currency }}</td>
+                <td>{{ product.audience }}</td>
+                <td>{{ product.requiresMembership ? 'Yes' : 'No' }}</td>
+                <td>
+                  <button
+                    (click)="viewProduct(product.productId); $event.stopPropagation()"
+                    class="btn btn-small btn-view">
+                    View Details
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  }
+</div>

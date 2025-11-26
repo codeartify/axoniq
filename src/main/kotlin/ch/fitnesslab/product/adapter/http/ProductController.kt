@@ -1,14 +1,81 @@
 package ch.fitnesslab.product.adapter.http
 
+import ch.fitnesslab.common.types.ProductVariantId
+import ch.fitnesslab.product.application.ProductProjection
+import ch.fitnesslab.product.application.ProductView
+import ch.fitnesslab.product.domain.ProductAudience
+import ch.fitnesslab.product.domain.ProductBehaviorConfig
+import ch.fitnesslab.product.domain.commands.CreateProductCommand
+import ch.fitnesslab.product.domain.commands.UpdateProductCommand
+import org.axonframework.commandhandling.gateway.CommandGateway
+import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 import java.math.BigDecimal
 
 @RestController
+@CrossOrigin
 @RequestMapping("/api/products")
-class ProductController {
+class ProductController(
+    private val commandGateway: CommandGateway,
+    private val productProjection: ProductProjection
+) {
+
+    @PostMapping
+    fun createProduct(@RequestBody request: CreateProductRequest): ResponseEntity<ProductCreationResponse> {
+        val productId = ProductVariantId.generate()
+
+        val command = CreateProductCommand(
+            productId = productId,
+            code = request.code,
+            name = request.name,
+            productType = request.productType,
+            audience = request.audience,
+            requiresMembership = request.requiresMembership,
+            price = request.price,
+            behavior = request.behavior
+        )
+        commandGateway.sendAndWait<Any>(command)
+
+        return ResponseEntity
+            .status(HttpStatus.CREATED)
+            .body(ProductCreationResponse(productId.toString()))
+    }
+
+    @GetMapping("/{productId}")
+    fun getProduct(@PathVariable productId: String): ResponseEntity<ProductView> {
+        val product = productProjection.findById(ProductVariantId.from(productId))
+        return if (product != null) {
+            ResponseEntity.ok(product)
+        } else {
+            ResponseEntity.notFound().build()
+        }
+    }
+
+    @GetMapping
+    fun getAllProducts(): ResponseEntity<List<ProductView>> {
+        return ResponseEntity.ok(productProjection.findAll())
+    }
+
+    @PutMapping("/{productId}")
+    fun updateProduct(
+        @PathVariable productId: String,
+        @RequestBody request: UpdateProductRequest
+    ): ResponseEntity<Void> {
+        val command = UpdateProductCommand(
+            productId = ProductVariantId.from(productId),
+            code = request.code,
+            name = request.name,
+            productType = request.productType,
+            audience = request.audience,
+            requiresMembership = request.requiresMembership,
+            price = request.price,
+            behavior = request.behavior
+        )
+
+        commandGateway.sendAndWait<Any>(command)
+        return ResponseEntity.ok().build()
+    }
 
     @GetMapping("/memberships")
     fun getMembershipVariants(): ResponseEntity<List<ProductVariantDto>> {
@@ -34,6 +101,31 @@ class ProductController {
         return ResponseEntity.ok(variants)
     }
 }
+
+data class CreateProductRequest(
+    val code: String,
+    val name: String,
+    val productType: String,
+    val audience: ProductAudience,
+    val requiresMembership: Boolean,
+    val price: BigDecimal,
+    val behavior: ProductBehaviorConfig
+)
+
+data class UpdateProductRequest(
+    val code: String,
+    val name: String,
+    val productType: String,
+    val audience: ProductAudience,
+    val requiresMembership: Boolean,
+    val price: BigDecimal,
+    val behavior: ProductBehaviorConfig
+)
+
+data class ProductCreationResponse(
+    val productId: String? = null,
+    val error: String? = null
+)
 
 data class ProductVariantDto(
     val id: String,

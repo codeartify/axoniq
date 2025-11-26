@@ -11,12 +11,19 @@
     </div>
   }
 
+  @if (successMessage()) {
+    <div class="alert alert-success">
+      {{ successMessage() }}
+    </div>
+  }
+
   @if (customer() && !isLoading()) {
     <div class="customer-detail">
       <div class="header">
         <h2>Customer Details</h2>
         <div class="actions">
           @if (!isEditMode()) {
+            <button (click)="openProductSelection()" class="btn btn-product">Add Product</button>
             <button (click)="enableEditMode()" class="btn btn-edit">Edit Customer</button>
             <button (click)="createNew()" class="btn btn-primary">Create New Customer</button>
             <button (click)="goBack()" class="btn btn-secondary">Back to List</button>
@@ -205,6 +212,51 @@
           </div>
         </form>
       }
+    </div>
+  }
+
+  <!-- Product Selection Modal -->
+  @if (showProductSelection()) {
+    <div class="modal-overlay" (click)="closeProductSelection()">
+      <div class="modal-content" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>Select Product</h3>
+          <button (click)="closeProductSelection()" class="modal-close">&times;</button>
+        </div>
+
+        <div class="modal-body">
+          @if (isLoadingProducts()) {
+            <div class="loading">Loading products...</div>
+          }
+
+          @if (!isLoadingProducts() && availableProducts().length === 0) {
+            <div class="empty-state">No products available</div>
+          }
+
+          @if (!isLoadingProducts() && availableProducts().length > 0) {
+            <div class="product-grid">
+              @for (product of availableProducts(); track product.productId) {
+                <div class="product-card" [class.disabled]="isAssigningProduct()">
+                  <h4>{{ product.name }}</h4>
+                  <div class="product-info">
+                    <div><strong>Code:</strong> {{ product.code }}</div>
+                    <div><strong>Type:</strong> {{ product.productType }}</div>
+                    <div><strong>Price:</strong> {{ product.price | currency }}</div>
+                    <div><strong>Audience:</strong> {{ product.audience }}</div>
+                  </div>
+                  <button
+                    (click)="selectProduct(product)"
+                    class="btn btn-primary btn-block"
+                    [disabled]="isAssigningProduct()"
+                  >
+                    {{ isAssigningProduct() ? 'Assigning...' : 'Select' }}
+                  </button>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      </div>
     </div>
   }
 </div>
