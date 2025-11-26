@@ -7,7 +7,7 @@ import ch.fitnesslab.common.types.ProductContractId
 import ch.fitnesslab.common.types.ProductVariantId
 import ch.fitnesslab.product.domain.ProductContractStatus
 
-data class ProductContractCreatedEvent(
+data class ProductContractSignedEvent(
     val contractId: ProductContractId,
     val customerId: CustomerId,
     val productVariantId: ProductVariantId,

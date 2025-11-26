@@ -13,20 +13,3 @@ data class ProductVariant(
     val price: BigDecimal,
     val behavior: ProductBehaviorConfig
 )
-
-enum class ProductAudience {
-    INTERNAL,
-    EXTERNAL,
-    BOTH
-}
-
-data class ProductBehaviorConfig(
-    val isTimeBased: Boolean,
-    val isSessionBased: Boolean,
-    val canBePaused: Boolean,
-    val autoRenew: Boolean,
-    val renewalLeadTimeDays: Int?,
-    val contributesToMembershipStatus: Boolean,
-    val maxActivePerCustomer: Int?,
-    val exclusivityGroup: String?
-)

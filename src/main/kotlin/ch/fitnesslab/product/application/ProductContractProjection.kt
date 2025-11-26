@@ -4,7 +4,7 @@ import ch.fitnesslab.common.types.DateRange
 import ch.fitnesslab.common.types.ProductContractId
 import ch.fitnesslab.product.domain.ProductContractStatus
 import ch.fitnesslab.product.domain.commands.PauseReason
-import ch.fitnesslab.product.domain.events.ProductContractCreatedEvent
+import ch.fitnesslab.product.domain.events.ProductContractSignedEvent
 import ch.fitnesslab.product.domain.events.ProductContractPausedEvent
 import ch.fitnesslab.product.domain.events.ProductContractResumedEvent
 import org.axonframework.eventhandling.EventHandler
@@ -17,7 +17,7 @@ class ProductContractProjection {
     private val contracts = ConcurrentHashMap<ProductContractId, ProductContractView>()
 
     @EventHandler
-    fun on(event: ProductContractCreatedEvent) {
+    fun on(event: ProductContractSignedEvent) {
         contracts[event.contractId] = ProductContractView(
             contractId = event.contractId.toString(),
             customerId = event.customerId.toString(),

@@ -9,7 +9,7 @@ import ch.fitnesslab.product.domain.commands.CreateProductContractCommand
 import ch.fitnesslab.product.domain.commands.PauseProductContractCommand
 import ch.fitnesslab.product.domain.commands.PauseReason
 import ch.fitnesslab.product.domain.commands.ResumeProductContractCommand
-import ch.fitnesslab.product.domain.events.ProductContractCreatedEvent
+import ch.fitnesslab.product.domain.events.ProductContractSignedEvent
 import ch.fitnesslab.product.domain.events.ProductContractPausedEvent
 import ch.fitnesslab.product.domain.events.ProductContractResumedEvent
 import org.axonframework.commandhandling.CommandHandler
@@ -44,7 +44,7 @@ class ProductContract() {
         }
 
         AggregateLifecycle.apply(
-            ProductContractCreatedEvent(
+            ProductContractSignedEvent(
                 contractId = command.contractId,
                 customerId = command.customerId,
                 productVariantId = command.productVariantId,
@@ -95,7 +95,7 @@ class ProductContract() {
     }
 
     @EventSourcingHandler
-    fun on(event: ProductContractCreatedEvent) {
+    fun on(event: ProductContractSignedEvent) {
         this.contractId = event.contractId
         this.customerId = event.customerId
         this.productVariantId = event.productVariantId

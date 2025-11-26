@@ -11,9 +11,3 @@ data class PauseProductContractCommand(
     val reason: PauseReason
 )
 
-enum class PauseReason {
-    MEDICAL,
-    TRAVEL,
-    MILITARY,
-    OTHER
-}
