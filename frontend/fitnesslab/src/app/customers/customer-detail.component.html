@@ -1,0 +1,84 @@
+<div class="customer-detail-container">
+
+  @if (isLoading()) {
+    <div class="loading">
+      Loading customer details...
+    </div>
+  }
+  @if (errorMessage && !isLoading()) {
+    <div class="alert alert-error">
+      {{ errorMessage }}
+    </div>
+  }
+  @if (customer && !isLoading()) {
+    <div class="customer-detail">
+      <div class="header">
+        <h2>Customer Details</h2>
+        <div class="actions">
+          <button (click)="createNew()" class="btn btn-primary">Create New Customer</button>
+          <button (click)="goBack()" class="btn btn-secondary">Back to List</button>
+        </div>
+      </div>
+
+      <div class="detail-section">
+        <h3>Personal Information</h3>
+        <div class="detail-grid">
+          <div class="detail-item">
+            <label>Customer ID:</label>
+            <span>{{ customer.customerId }}</span>
+          </div>
+          <div class="detail-item">
+            <label>Salutation:</label>
+            <span>{{ customer.salutation }}</span>
+          </div>
+          <div class="detail-item">
+            <label>First Name:</label>
+            <span>{{ customer.firstName }}</span>
+          </div>
+          <div class="detail-item">
+            <label>Last Name:</label>
+            <span>{{ customer.lastName }}</span>
+          </div>
+          <div class="detail-item">
+            <label>Date of Birth:</label>
+            <span>{{ customer.dateOfBirth }}</span>
+          </div>
+          <div class="detail-item">
+            <label>Email:</label>
+            <span>{{ customer.email }}</span>
+          </div>
+          <div class="detail-item" *ngIf="customer.phoneNumber">
+            <label>Phone Number:</label>
+            <span>{{ customer.phoneNumber }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="detail-section">
+        <h3>Address</h3>
+        <div class="detail-grid">
+          <div class="detail-item">
+            <label>Street:</label>
+            <span>{{ customer.address.street }}</span>
+          </div>
+          <div class="detail-item">
+            <label>House Number:</label>
+            <span>{{ customer.address.houseNumber }}</span>
+          </div>
+          <div class="detail-item">
+            <label>Postal Code:</label>
+            <span>{{ customer.address.postalCode }}</span>
+          </div>
+          <div class="detail-item">
+            <label>City:</label>
+            <span>{{ customer.address.city }}</span>
+          </div>
+          <div class="detail-item">
+            <label>Country:</label>
+            <span>{{ customer.address.country }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+</div>

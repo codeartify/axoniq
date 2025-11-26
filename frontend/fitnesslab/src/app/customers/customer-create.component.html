@@ -1,0 +1,122 @@
+<div class="customer-create-container">
+  <h2>Register New Customer</h2>
+
+  <form [formGroup]="customerForm" (ngSubmit)="onSubmit()" class="customer-form">
+    <div class="form-section">
+      <h3>Personal Information</h3>
+
+      <div class="form-group">
+        <label for="salutation">Salutation *</label>
+        <select id="salutation" formControlName="salutation" class="form-control">
+          <option value="">Select salutation</option>
+          <option *ngFor="let sal of salutations" [value]="sal">{{ sal }}</option>
+        </select>
+        <div *ngIf="customerForm.get('salutation')?.invalid && customerForm.get('salutation')?.touched" class="error">
+          Salutation is required
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="firstName">First Name *</label>
+          <input id="firstName" type="text" formControlName="firstName" class="form-control">
+          <div *ngIf="customerForm.get('firstName')?.invalid && customerForm.get('firstName')?.touched" class="error">
+            First name is required
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="lastName">Last Name *</label>
+          <input id="lastName" type="text" formControlName="lastName" class="form-control">
+          <div *ngIf="customerForm.get('lastName')?.invalid && customerForm.get('lastName')?.touched" class="error">
+            Last name is required
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="dateOfBirth">Date of Birth *</label>
+        <input id="dateOfBirth" type="date" formControlName="dateOfBirth" class="form-control">
+        <div *ngIf="customerForm.get('dateOfBirth')?.invalid && customerForm.get('dateOfBirth')?.touched" class="error">
+          Date of birth is required
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="email">Email *</label>
+          <input id="email" type="email" formControlName="email" class="form-control">
+          <div *ngIf="customerForm.get('email')?.invalid && customerForm.get('email')?.touched" class="error">
+            Valid email is required
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="phoneNumber">Phone Number</label>
+          <input id="phoneNumber" type="tel" formControlName="phoneNumber" class="form-control">
+        </div>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <h3>Address</h3>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="street">Street *</label>
+          <input id="street" type="text" formControlName="street" class="form-control">
+          <div *ngIf="customerForm.get('street')?.invalid && customerForm.get('street')?.touched" class="error">
+            Street is required
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="houseNumber">House Number *</label>
+          <input id="houseNumber" type="text" formControlName="houseNumber" class="form-control">
+          <div *ngIf="customerForm.get('houseNumber')?.invalid && customerForm.get('houseNumber')?.touched" class="error">
+            House number is required
+          </div>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="postalCode">Postal Code *</label>
+          <input id="postalCode" type="text" formControlName="postalCode" class="form-control">
+          <div *ngIf="customerForm.get('postalCode')?.invalid && customerForm.get('postalCode')?.touched" class="error">
+            Postal code is required
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="city">City *</label>
+          <input id="city" type="text" formControlName="city" class="form-control">
+          <div *ngIf="customerForm.get('city')?.invalid && customerForm.get('city')?.touched" class="error">
+            City is required
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="country">Country *</label>
+        <input id="country" type="text" formControlName="country" class="form-control">
+        <div *ngIf="customerForm.get('country')?.invalid && customerForm.get('country')?.touched" class="error">
+          Country is required
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="errorMessage" class="alert alert-error">
+      {{ errorMessage }}
+    </div>
+
+    <div class="form-actions">
+      <button type="button" (click)="onCancel()" class="btn btn-secondary" [disabled]="isSubmitting">
+        Cancel
+      </button>
+      <button type="submit" class="btn btn-primary" [disabled]="!customerForm.valid || isSubmitting">
+        {{ isSubmitting ? 'Registering...' : 'Register Customer' }}
+      </button>
+    </div>
+  </form>
+</div>
