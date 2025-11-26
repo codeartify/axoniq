@@ -1,0 +1,60 @@
+<div class="customer-list-container">
+  <div class="header">
+    <h2>Customer List</h2>
+    <button (click)="createCustomer()" class="btn btn-primary">Add Customer</button>
+  </div>
+
+  @if (isLoading()) {
+    <div class="loading">
+      Loading customers...
+    </div>
+  }
+
+  @if (errorMessage() && !isLoading()) {
+    <div class="alert alert-error">
+      {{ errorMessage() }}
+    </div>
+  }
+
+  @if (!isLoading() && !errorMessage()) {
+    @if (customers().length === 0) {
+      <div class="empty-state">
+        <p>No customers found.</p>
+        <button (click)="createCustomer()" class="btn btn-primary">Create First Customer</button>
+      </div>
+    } @else {
+      <div class="customer-table">
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Phone</th>
+              <th>City</th>
+              <th>Date of Birth</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (customer of customers(); track customer.customerId) {
+              <tr class="customer-row" (click)="viewCustomer(customer.customerId)">
+                <td>{{ getFullName(customer) }}</td>
+                <td>{{ customer.email }}</td>
+                <td>{{ customer.phoneNumber || 'N/A' }}</td>
+                <td>{{ customer.address.city }}</td>
+                <td>{{ customer.dateOfBirth }}</td>
+                <td>
+                  <button
+                    (click)="viewCustomer(customer.customerId); $event.stopPropagation()"
+                    class="btn btn-small btn-view">
+                    View Details
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  }
+</div>
