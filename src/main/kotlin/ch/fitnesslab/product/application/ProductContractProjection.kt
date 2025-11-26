@@ -7,59 +7,91 @@ import ch.fitnesslab.product.domain.commands.PauseReason
 import ch.fitnesslab.product.domain.events.ProductContractSignedEvent
 import ch.fitnesslab.product.domain.events.ProductContractPausedEvent
 import ch.fitnesslab.product.domain.events.ProductContractResumedEvent
+import ch.fitnesslab.product.infrastructure.ProductContractEntity
+import ch.fitnesslab.product.infrastructure.ProductContractRepository
 import org.axonframework.eventhandling.EventHandler
 import org.springframework.stereotype.Component
-import java.util.concurrent.ConcurrentHashMap
+import java.util.*
 
 @Component
-class ProductContractProjection {
-
-    private val contracts = ConcurrentHashMap<ProductContractId, ProductContractView>()
+class ProductContractProjection(
+    private val productContractRepository: ProductContractRepository
+) {
 
     @EventHandler
     fun on(event: ProductContractSignedEvent) {
-        contracts[event.contractId] = ProductContractView(
-            contractId = event.contractId.toString(),
-            customerId = event.customerId.toString(),
-            productVariantId = event.productVariantId.toString(),
-            bookingId = event.bookingId.toString(),
+        val entity = ProductContractEntity(
+            contractId = event.contractId.value,
+            customerId = event.customerId.value,
+            productVariantId = event.productVariantId.value,
+            bookingId = event.bookingId.value,
             status = event.status,
-            validity = event.validity,
+            validityStart = event.validity?.start,
+            validityEnd = event.validity?.end,
             sessionsTotal = event.sessionsTotal,
-            sessionsUsed = 0,
-            pauseHistory = emptyList()
+            sessionsUsed = 0
         )
+        productContractRepository.save(entity)
     }
 
     @EventHandler
     fun on(event: ProductContractPausedEvent) {
-        contracts.computeIfPresent(event.contractId) { _, contract ->
-            contract.copy(
+        productContractRepository.findById(event.contractId.value).ifPresent { existing ->
+            val updated = ProductContractEntity(
+                contractId = existing.contractId,
+                customerId = existing.customerId,
+                productVariantId = existing.productVariantId,
+                bookingId = existing.bookingId,
                 status = ProductContractStatus.PAUSED,
-                pauseHistory = contract.pauseHistory + PauseHistoryEntry(
-                    pauseRange = event.pauseRange,
-                    reason = event.reason
-                )
+                validityStart = existing.validityStart,
+                validityEnd = existing.validityEnd,
+                sessionsTotal = existing.sessionsTotal,
+                sessionsUsed = existing.sessionsUsed
             )
+            productContractRepository.save(updated)
         }
     }
 
     @EventHandler
     fun on(event: ProductContractResumedEvent) {
-        contracts.computeIfPresent(event.contractId) { _, contract ->
-            contract.copy(
+        productContractRepository.findById(event.contractId.value).ifPresent { existing ->
+            val updated = ProductContractEntity(
+                contractId = existing.contractId,
+                customerId = existing.customerId,
+                productVariantId = existing.productVariantId,
+                bookingId = existing.bookingId,
                 status = ProductContractStatus.ACTIVE,
-                validity = event.extendedValidity
+                validityStart = event.extendedValidity?.start,
+                validityEnd = event.extendedValidity?.end,
+                sessionsTotal = existing.sessionsTotal,
+                sessionsUsed = existing.sessionsUsed
             )
+            productContractRepository.save(updated)
         }
     }
 
-    fun findById(contractId: ProductContractId): ProductContractView? = contracts[contractId]
+    fun findById(contractId: ProductContractId): ProductContractView? =
+        productContractRepository.findById(contractId.value).map { it.toProductContractView() }.orElse(null)
 
-    fun findAll(): List<ProductContractView> = contracts.values.toList()
+    fun findAll(): List<ProductContractView> =
+        productContractRepository.findAll().map { it.toProductContractView() }
 
     fun findByCustomerId(customerId: String): List<ProductContractView> =
-        contracts.values.filter { it.customerId == customerId }
+        productContractRepository.findByCustomerId(UUID.fromString(customerId)).map { it.toProductContractView() }
+
+    private fun ProductContractEntity.toProductContractView() = ProductContractView(
+        contractId = this.contractId.toString(),
+        customerId = this.customerId.toString(),
+        productVariantId = this.productVariantId.toString(),
+        bookingId = this.bookingId.toString(),
+        status = this.status,
+        validity = if (this.validityStart != null && this.validityEnd != null) {
+            DateRange(this.validityStart!!, this.validityEnd!!)
+        } else null,
+        sessionsTotal = this.sessionsTotal,
+        sessionsUsed = this.sessionsUsed,
+        pauseHistory = emptyList() // Pause history not stored in entity for simplicity
+    )
 }
 
 data class ProductContractView(

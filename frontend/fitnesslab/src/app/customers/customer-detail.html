@@ -212,6 +212,49 @@
           </div>
         </form>
       }
+
+      <!-- Invoices Section -->
+      @if (!isEditMode()) {
+        <div class="detail-section">
+          <h3>Invoices</h3>
+          @if (isLoadingInvoices()) {
+            <div class="loading-small">Loading invoices...</div>
+          }
+          @if (!isLoadingInvoices() && invoices().length === 0) {
+            <p>No invoices found for this customer.</p>
+          }
+          @if (!isLoadingInvoices() && invoices().length > 0) {
+            <div class="invoices-table">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Invoice ID</th>
+                    <th>Amount</th>
+                    <th>Due Date</th>
+                    <th>Status</th>
+                    <th>Installment</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (invoice of invoices(); track invoice.invoiceId) {
+                    <tr>
+                      <td>{{ invoice.invoiceId.substring(0, 8) }}...</td>
+                      <td>{{ invoice.amount | currency }}</td>
+                      <td>{{ invoice.dueDate }}</td>
+                      <td>
+                        <span [class]="'status-badge status-' + invoice.status.toLowerCase()">
+                          {{ invoice.status }}
+                        </span>
+                      </td>
+                      <td>{{ invoice.isInstallment ? 'Yes (' + invoice.installmentNumber + ')' : 'No' }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+        </div>
+      }
     </div>
   }
 

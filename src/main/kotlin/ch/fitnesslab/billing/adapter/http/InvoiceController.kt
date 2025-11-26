@@ -13,6 +13,7 @@ import java.time.Instant
 import java.time.LocalDate
 
 @RestController
+@CrossOrigin
 @RequestMapping("/api/invoices")
 class InvoiceController(
     private val invoiceProjection: InvoiceProjection,
@@ -27,6 +28,12 @@ class InvoiceController(
             invoiceProjection.findAll()
         }
 
+        return ResponseEntity.ok(invoices.map { it.toDto() })
+    }
+
+    @GetMapping("/customer/{customerId}")
+    fun getInvoicesByCustomerId(@PathVariable customerId: String): ResponseEntity<List<InvoiceDto>> {
+        val invoices = invoiceProjection.findByCustomerId(customerId)
         return ResponseEntity.ok(invoices.map { it.toDto() })
     }
 

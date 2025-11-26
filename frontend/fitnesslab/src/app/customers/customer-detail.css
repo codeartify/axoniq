@@ -248,6 +248,62 @@
   color: #999;
 }
 
+/* Invoice Styles */
+.loading-small {
+  padding: 1rem;
+  color: #666;
+  font-style: italic;
+}
+
+.invoices-table {
+  overflow-x: auto;
+}
+
+.invoices-table table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.invoices-table thead {
+  background-color: #f8f9fa;
+}
+
+.invoices-table th {
+  padding: 12px;
+  text-align: left;
+  font-weight: 600;
+  border-bottom: 2px solid #dee2e6;
+}
+
+.invoices-table td {
+  padding: 12px;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.status-badge {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.status-open {
+  background-color: #fff3cd;
+  color: #856404;
+}
+
+.status-paid {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.status-overdue {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
 @media (max-width: 768px) {
   .header {
     flex-direction: column;

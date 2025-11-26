@@ -3,25 +3,33 @@ package ch.fitnesslab.billing.application
 import ch.fitnesslab.billing.domain.InvoiceStatus
 import ch.fitnesslab.billing.domain.events.InvoiceCreatedEvent
 import ch.fitnesslab.billing.domain.events.InvoicePaidEvent
+import ch.fitnesslab.billing.infrastructure.InvoiceEmailService
+import ch.fitnesslab.billing.infrastructure.InvoiceEntity
+import ch.fitnesslab.billing.infrastructure.InvoiceRepository
+import ch.fitnesslab.common.types.CustomerId
 import ch.fitnesslab.common.types.InvoiceId
+import ch.fitnesslab.customers.application.CustomerProjection
 import org.axonframework.eventhandling.EventHandler
 import org.springframework.stereotype.Component
 import java.math.BigDecimal
 import java.time.Instant
 import java.time.LocalDate
-import java.util.concurrent.ConcurrentHashMap
+import java.util.*
 
 @Component
-class InvoiceProjection {
-
-    private val invoices = ConcurrentHashMap<InvoiceId, InvoiceView>()
+class InvoiceProjection(
+    private val invoiceRepository: InvoiceRepository,
+    private val invoiceEmailService: InvoiceEmailService,
+    private val customerProjection: CustomerProjection
+) {
 
     @EventHandler
     fun on(event: InvoiceCreatedEvent) {
-        invoices[event.invoiceId] = InvoiceView(
-            invoiceId = event.invoiceId.toString(),
-            customerId = event.customerId.toString(),
-            bookingId = event.bookingId.toString(),
+        val entity = InvoiceEntity(
+            invoiceId = event.invoiceId.value,
+            customerId = event.customerId.value,
+            bookingId = event.bookingId.value,
+            productVariantId = event.productVariantId?.value,
             amount = event.amount,
             dueDate = event.dueDate,
             status = event.status,
@@ -29,24 +37,62 @@ class InvoiceProjection {
             installmentNumber = event.installmentNumber,
             paidAt = null
         )
+
+        invoiceRepository.save(entity)
+
+        // Generate PDF and send email to customer
+        try {
+            val customer = customerProjection.findById(event.customerId)
+            if (customer != null) {
+                val customerName = "${customer.salutation} ${customer.firstName} ${customer.lastName}"
+                invoiceEmailService.sendInvoiceEmail(entity.toInvoiceView(), customerName, customer.email)
+            }
+        } catch (e: Exception) {
+            println("Failed to send invoice email for invoice ${event.invoiceId}: ${e.message}")
+        }
     }
 
     @EventHandler
     fun on(event: InvoicePaidEvent) {
-        invoices.computeIfPresent(event.invoiceId) { _, invoice ->
-            invoice.copy(
+        invoiceRepository.findById(event.invoiceId.value).ifPresent { existing ->
+            val updated = InvoiceEntity(
+                invoiceId = existing.invoiceId,
+                customerId = existing.customerId,
+                bookingId = existing.bookingId,
+                productVariantId = existing.productVariantId,
+                amount = existing.amount,
+                dueDate = existing.dueDate,
                 status = InvoiceStatus.PAID,
+                isInstallment = existing.isInstallment,
+                installmentNumber = existing.installmentNumber,
                 paidAt = event.paidAt
             )
+            invoiceRepository.save(updated)
         }
     }
 
-    fun findAll(): List<InvoiceView> = invoices.values.toList()
+    fun findAll(): List<InvoiceView> = invoiceRepository.findAll().map { it.toInvoiceView() }
 
     fun findByStatus(status: InvoiceStatus): List<InvoiceView> =
-        invoices.values.filter { it.status == status }
+        invoiceRepository.findByStatus(status).map { it.toInvoiceView() }
 
-    fun findById(invoiceId: InvoiceId): InvoiceView? = invoices[invoiceId]
+    fun findById(invoiceId: InvoiceId): InvoiceView? =
+        invoiceRepository.findById(invoiceId.value).map { it.toInvoiceView() }.orElse(null)
+
+    fun findByCustomerId(customerId: String): List<InvoiceView> =
+        invoiceRepository.findByCustomerId(UUID.fromString(customerId)).map { it.toInvoiceView() }
+
+    private fun InvoiceEntity.toInvoiceView() = InvoiceView(
+        invoiceId = this.invoiceId.toString(),
+        customerId = this.customerId.toString(),
+        bookingId = this.bookingId.toString(),
+        amount = this.amount,
+        dueDate = this.dueDate,
+        status = this.status,
+        isInstallment = this.isInstallment,
+        installmentNumber = this.installmentNumber,
+        paidAt = this.paidAt
+    )
 }
 
 data class InvoiceView(

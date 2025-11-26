@@ -5,6 +5,7 @@ import {ActivatedRoute, Router} from '@angular/router';
 import {Customers, CustomerView} from './customers';
 import {Products, ProductView} from '../products/products';
 import {Memberships, PaymentMode} from '../memberships/memberships';
+import {Invoices, InvoiceView} from '../invoices/invoices';
 
 @Component({
   selector: 'app-customer-detail',
@@ -24,6 +25,8 @@ export class CustomerDetail implements OnInit {
   isLoadingProducts = signal<boolean>(false);
   isAssigningProduct = signal<boolean>(false);
   successMessage = signal<string | null>(null);
+  invoices = signal<InvoiceView[]>([]);
+  isLoadingInvoices = signal<boolean>(false);
 
   customerForm: FormGroup;
   salutations = ['MR', 'MS', 'MRS', 'MX', 'DR'];
@@ -34,6 +37,7 @@ export class CustomerDetail implements OnInit {
     private customerService: Customers,
     private productService: Products,
     private membershipService: Memberships,
+    private invoiceService: Invoices,
     private fb: FormBuilder
   ) {
     this.customerForm = this.fb.group({
@@ -67,12 +71,27 @@ export class CustomerDetail implements OnInit {
         this.customer.set(customer);
         this.populateForm(customer);
         this.isLoading.set(false);
+        this.loadInvoices(customerId);
       },
       error: (error) => {
         this.errorMessage.set(error.status === 404
           ? 'Customer not found'
           : 'Failed to load customer details');
         this.isLoading.set(false);
+      }
+    });
+  }
+
+  loadInvoices(customerId: string): void {
+    this.isLoadingInvoices.set(true);
+    this.invoiceService.getInvoicesByCustomerId(customerId).subscribe({
+      next: (invoices) => {
+        this.invoices.set(invoices);
+        this.isLoadingInvoices.set(false);
+      },
+      error: (error) => {
+        console.error('Failed to load invoices:', error);
+        this.isLoadingInvoices.set(false);
       }
     });
   }
