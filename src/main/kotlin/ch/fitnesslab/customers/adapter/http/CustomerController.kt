@@ -6,6 +6,7 @@ import ch.fitnesslab.common.types.Salutation
 import ch.fitnesslab.customers.application.CustomerProjection
 import ch.fitnesslab.customers.application.CustomerView
 import ch.fitnesslab.customers.domain.commands.RegisterCustomerCommand
+import ch.fitnesslab.customers.domain.commands.UpdateCustomerCommand
 import org.axonframework.commandhandling.gateway.CommandGateway
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -64,6 +65,32 @@ class CustomerController(
     fun getAllCustomers(): ResponseEntity<List<CustomerView>> {
         return ResponseEntity.ok(customerProjection.findAll())
     }
+
+    @PutMapping("/{customerId}")
+    fun updateCustomer(
+        @PathVariable customerId: String,
+        @RequestBody request: UpdateCustomerRequest
+    ): ResponseEntity<Void> {
+        val command = UpdateCustomerCommand(
+            customerId = CustomerId.from(customerId),
+            salutation = request.salutation,
+            firstName = request.firstName,
+            lastName = request.lastName,
+            dateOfBirth = request.dateOfBirth,
+            address = Address(
+                street = request.address.street,
+                houseNumber = request.address.houseNumber,
+                postalCode = request.address.postalCode,
+                city = request.address.city,
+                country = request.address.country
+            ),
+            email = request.email,
+            phoneNumber = request.phoneNumber
+        )
+
+        commandGateway.sendAndWait<Any>(command)
+        return ResponseEntity.ok().build()
+    }
 }
 
 data class RegisterCustomerRequest(
@@ -82,6 +109,16 @@ data class AddressDto(
     val postalCode: String,
     val city: String,
     val country: String
+)
+
+data class UpdateCustomerRequest(
+    val salutation: Salutation,
+    val firstName: String,
+    val lastName: String,
+    val dateOfBirth: LocalDate,
+    val address: AddressDto,
+    val email: String,
+    val phoneNumber: String?
 )
 
 data class CustomerRegistrationResponse(

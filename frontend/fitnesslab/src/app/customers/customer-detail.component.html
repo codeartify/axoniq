@@ -1,84 +1,210 @@
 <div class="customer-detail-container">
-
   @if (isLoading()) {
     <div class="loading">
       Loading customer details...
     </div>
   }
-  @if (errorMessage && !isLoading()) {
+
+  @if (errorMessage() && !isLoading()) {
     <div class="alert alert-error">
-      {{ errorMessage }}
+      {{ errorMessage() }}
     </div>
   }
-  @if (customer && !isLoading()) {
+
+  @if (customer() && !isLoading()) {
     <div class="customer-detail">
       <div class="header">
         <h2>Customer Details</h2>
         <div class="actions">
-          <button (click)="createNew()" class="btn btn-primary">Create New Customer</button>
-          <button (click)="goBack()" class="btn btn-secondary">Back to List</button>
+          @if (!isEditMode()) {
+            <button (click)="enableEditMode()" class="btn btn-edit">Edit Customer</button>
+            <button (click)="createNew()" class="btn btn-primary">Create New Customer</button>
+            <button (click)="goBack()" class="btn btn-secondary">Back to List</button>
+          }
+          @if (isEditMode()) {
+            <button (click)="cancelEdit()" class="btn btn-secondary" [disabled]="isSubmitting()">Cancel</button>
+            <button (click)="saveCustomer()" class="btn btn-primary" [disabled]="!customerForm.valid || isSubmitting()">
+              {{ isSubmitting() ? 'Saving...' : 'Save Changes' }}
+            </button>
+          }
         </div>
       </div>
 
-      <div class="detail-section">
-        <h3>Personal Information</h3>
-        <div class="detail-grid">
-          <div class="detail-item">
-            <label>Customer ID:</label>
-            <span>{{ customer.customerId }}</span>
-          </div>
-          <div class="detail-item">
-            <label>Salutation:</label>
-            <span>{{ customer.salutation }}</span>
-          </div>
-          <div class="detail-item">
-            <label>First Name:</label>
-            <span>{{ customer.firstName }}</span>
-          </div>
-          <div class="detail-item">
-            <label>Last Name:</label>
-            <span>{{ customer.lastName }}</span>
-          </div>
-          <div class="detail-item">
-            <label>Date of Birth:</label>
-            <span>{{ customer.dateOfBirth }}</span>
-          </div>
-          <div class="detail-item">
-            <label>Email:</label>
-            <span>{{ customer.email }}</span>
-          </div>
-          <div class="detail-item" *ngIf="customer.phoneNumber">
-            <label>Phone Number:</label>
-            <span>{{ customer.phoneNumber }}</span>
+      @if (!isEditMode()) {
+        <!-- View Mode -->
+        <div class="detail-section">
+          <h3>Personal Information</h3>
+          <div class="detail-grid">
+            <div class="detail-item">
+              <label>Customer ID:</label>
+              <span>{{ customer()!.customerId }}</span>
+            </div>
+            <div class="detail-item">
+              <label>Salutation:</label>
+              <span>{{ customer()!.salutation }}</span>
+            </div>
+            <div class="detail-item">
+              <label>First Name:</label>
+              <span>{{ customer()!.firstName }}</span>
+            </div>
+            <div class="detail-item">
+              <label>Last Name:</label>
+              <span>{{ customer()!.lastName }}</span>
+            </div>
+            <div class="detail-item">
+              <label>Date of Birth:</label>
+              <span>{{ customer()!.dateOfBirth }}</span>
+            </div>
+            <div class="detail-item">
+              <label>Email:</label>
+              <span>{{ customer()!.email }}</span>
+            </div>
+            @if (customer()!.phoneNumber) {
+              <div class="detail-item">
+                <label>Phone Number:</label>
+                <span>{{ customer()!.phoneNumber }}</span>
+              </div>
+            }
           </div>
         </div>
-      </div>
 
-      <div class="detail-section">
-        <h3>Address</h3>
-        <div class="detail-grid">
-          <div class="detail-item">
-            <label>Street:</label>
-            <span>{{ customer.address.street }}</span>
-          </div>
-          <div class="detail-item">
-            <label>House Number:</label>
-            <span>{{ customer.address.houseNumber }}</span>
-          </div>
-          <div class="detail-item">
-            <label>Postal Code:</label>
-            <span>{{ customer.address.postalCode }}</span>
-          </div>
-          <div class="detail-item">
-            <label>City:</label>
-            <span>{{ customer.address.city }}</span>
-          </div>
-          <div class="detail-item">
-            <label>Country:</label>
-            <span>{{ customer.address.country }}</span>
+        <div class="detail-section">
+          <h3>Address</h3>
+          <div class="detail-grid">
+            <div class="detail-item">
+              <label>Street:</label>
+              <span>{{ customer()!.address.street }}</span>
+            </div>
+            <div class="detail-item">
+              <label>House Number:</label>
+              <span>{{ customer()!.address.houseNumber }}</span>
+            </div>
+            <div class="detail-item">
+              <label>Postal Code:</label>
+              <span>{{ customer()!.address.postalCode }}</span>
+            </div>
+            <div class="detail-item">
+              <label>City:</label>
+              <span>{{ customer()!.address.city }}</span>
+            </div>
+            <div class="detail-item">
+              <label>Country:</label>
+              <span>{{ customer()!.address.country }}</span>
+            </div>
           </div>
         </div>
-      </div>
+      }
+
+      @if (isEditMode()) {
+        <!-- Edit Mode -->
+        <form [formGroup]="customerForm" class="customer-form">
+          <div class="form-section">
+            <h3>Personal Information</h3>
+
+            <div class="form-group">
+              <label for="salutation">Salutation *</label>
+              <select id="salutation" formControlName="salutation" class="form-control">
+                <option value="">Select salutation</option>
+                @for (sal of salutations; track sal) {
+                  <option [value]="sal">{{ sal }}</option>
+                }
+              </select>
+              @if (customerForm.get('salutation')?.invalid && customerForm.get('salutation')?.touched) {
+                <div class="error">Salutation is required</div>
+              }
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="firstName">First Name *</label>
+                <input id="firstName" type="text" formControlName="firstName" class="form-control">
+                @if (customerForm.get('firstName')?.invalid && customerForm.get('firstName')?.touched) {
+                  <div class="error">First name is required</div>
+                }
+              </div>
+
+              <div class="form-group">
+                <label for="lastName">Last Name *</label>
+                <input id="lastName" type="text" formControlName="lastName" class="form-control">
+                @if (customerForm.get('lastName')?.invalid && customerForm.get('lastName')?.touched) {
+                  <div class="error">Last name is required</div>
+                }
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="dateOfBirth">Date of Birth *</label>
+              <input id="dateOfBirth" type="date" formControlName="dateOfBirth" class="form-control">
+              @if (customerForm.get('dateOfBirth')?.invalid && customerForm.get('dateOfBirth')?.touched) {
+                <div class="error">Date of birth is required</div>
+              }
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="email">Email *</label>
+                <input id="email" type="email" formControlName="email" class="form-control">
+                @if (customerForm.get('email')?.invalid && customerForm.get('email')?.touched) {
+                  <div class="error">Valid email is required</div>
+                }
+              </div>
+
+              <div class="form-group">
+                <label for="phoneNumber">Phone Number</label>
+                <input id="phoneNumber" type="tel" formControlName="phoneNumber" class="form-control">
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h3>Address</h3>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="street">Street *</label>
+                <input id="street" type="text" formControlName="street" class="form-control">
+                @if (customerForm.get('street')?.invalid && customerForm.get('street')?.touched) {
+                  <div class="error">Street is required</div>
+                }
+              </div>
+
+              <div class="form-group">
+                <label for="houseNumber">House Number *</label>
+                <input id="houseNumber" type="text" formControlName="houseNumber" class="form-control">
+                @if (customerForm.get('houseNumber')?.invalid && customerForm.get('houseNumber')?.touched) {
+                  <div class="error">House number is required</div>
+                }
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="postalCode">Postal Code *</label>
+                <input id="postalCode" type="text" formControlName="postalCode" class="form-control">
+                @if (customerForm.get('postalCode')?.invalid && customerForm.get('postalCode')?.touched) {
+                  <div class="error">Postal code is required</div>
+                }
+              </div>
+
+              <div class="form-group">
+                <label for="city">City *</label>
+                <input id="city" type="text" formControlName="city" class="form-control">
+                @if (customerForm.get('city')?.invalid && customerForm.get('city')?.touched) {
+                  <div class="error">City is required</div>
+                }
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="country">Country *</label>
+              <input id="country" type="text" formControlName="country" class="form-control">
+              @if (customerForm.get('country')?.invalid && customerForm.get('country')?.touched) {
+                <div class="error">Country is required</div>
+              }
+            </div>
+          </div>
+        </form>
+      }
     </div>
   }
 </div>

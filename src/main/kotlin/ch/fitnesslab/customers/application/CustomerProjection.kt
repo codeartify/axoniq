@@ -4,6 +4,7 @@ import ch.fitnesslab.common.types.Address
 import ch.fitnesslab.common.types.CustomerId
 import ch.fitnesslab.common.types.Salutation
 import ch.fitnesslab.customers.domain.events.CustomerRegisteredEvent
+import ch.fitnesslab.customers.domain.events.CustomerUpdatedEvent
 import org.axonframework.eventhandling.EventHandler
 import org.springframework.stereotype.Component
 import java.time.LocalDate
@@ -26,6 +27,21 @@ class CustomerProjection {
             email = event.email,
             phoneNumber = event.phoneNumber
         )
+    }
+
+    @EventHandler
+    fun on(event: CustomerUpdatedEvent) {
+        customers.computeIfPresent(event.customerId) { _, customer ->
+            customer.copy(
+                salutation = event.salutation,
+                firstName = event.firstName,
+                lastName = event.lastName,
+                dateOfBirth = event.dateOfBirth,
+                address = event.address,
+                email = event.email,
+                phoneNumber = event.phoneNumber
+            )
+        }
     }
 
     fun findById(customerId: CustomerId): CustomerView? = customers[customerId]

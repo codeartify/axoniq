@@ -20,6 +20,16 @@ export interface RegisterCustomerRequest {
   phoneNumber?: string;
 }
 
+export interface UpdateCustomerRequest {
+  salutation: string;
+  firstName: string;
+  lastName: string;
+  dateOfBirth: string;
+  address: Address;
+  email: string;
+  phoneNumber?: string;
+}
+
 export interface CustomerRegistrationResponse {
   customerId?: string;
   error?: string;
@@ -54,5 +64,9 @@ export class CustomerService {
 
   getAllCustomers(): Observable<CustomerView[]> {
     return this.http.get<CustomerView[]>(this.apiUrl);
+  }
+
+  updateCustomer(customerId: string, request: UpdateCustomerRequest): Observable<void> {
+    return this.http.put<void>(`${this.apiUrl}/${customerId}`, request);
   }
 }
