@@ -1,22 +1,22 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { CustomerService, CustomerView } from './customer.service';
+import { Customers, CustomerView } from './customers';
 
 @Component({
   selector: 'app-customer-list',
   standalone: true,
   imports: [CommonModule],
-  templateUrl: './customer-list.component.html',
-  styleUrls: ['./customer-list.component.css']
+  templateUrl: './customer-list.html',
+  styleUrls: ['./customer-list.css']
 })
-export class CustomerListComponent implements OnInit {
+export class CustomerList implements OnInit {
   customers = signal<CustomerView[]>([]);
   isLoading = signal<boolean>(true);
   errorMessage = signal<string | null>(null);
 
   constructor(
-    private customerService: CustomerService,
+    private customerService: Customers,
     private router: Router
   ) {}
 

@@ -2,16 +2,16 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { CustomerService } from './customer.service';
+import { Customers } from './customers';
 
 @Component({
   selector: 'app-customer-create',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
-  templateUrl: './customer-create.component.html',
-  styleUrls: ['./customer-create.component.css']
+  templateUrl: './customer-create.html',
+  styleUrls: ['./customer-create.css']
 })
-export class CustomerCreateComponent {
+export class CustomerCreate {
   customerForm: FormGroup;
   errorMessage: string | null = null;
   isSubmitting = false;
@@ -20,7 +20,7 @@ export class CustomerCreateComponent {
 
   constructor(
     private fb: FormBuilder,
-    private customerService: CustomerService,
+    private customerService: Customers,
     private router: Router
   ) {
     this.customerForm = this.fb.group({

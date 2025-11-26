@@ -2,16 +2,16 @@ import {Component, OnInit, signal} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {ActivatedRoute, Router} from '@angular/router';
-import {CustomerService, CustomerView} from './customer.service';
+import {Customers, CustomerView} from './customers';
 
 @Component({
   selector: 'app-customer-detail',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
-  templateUrl: './customer-detail.component.html',
-  styleUrls: ['./customer-detail.component.css']
+  templateUrl: './customer-detail.html',
+  styleUrls: ['./customer-detail.css']
 })
-export class CustomerDetailComponent implements OnInit {
+export class CustomerDetail implements OnInit {
   customer = signal<CustomerView | null>(null);
   errorMessage = signal<string | null>(null);
   isLoading = signal<boolean>(true);
@@ -24,7 +24,7 @@ export class CustomerDetailComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private customerService: CustomerService,
+    private customerService: Customers,
     private fb: FormBuilder
   ) {
     this.customerForm = this.fb.group({

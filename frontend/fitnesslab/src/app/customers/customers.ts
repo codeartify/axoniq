@@ -1,6 +1,6 @@
-import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import {Injectable} from '@angular/core';
+import {HttpClient} from '@angular/common/http';
+import {Observable} from 'rxjs';
 
 export interface Address {
   street: string;
@@ -49,7 +49,7 @@ export interface CustomerView {
 @Injectable({
   providedIn: 'root'
 })
-export class CustomerService {
+export class Customers {
   private apiUrl = 'http://localhost:8080/api/customers';
 
   constructor(private http: HttpClient) {}
