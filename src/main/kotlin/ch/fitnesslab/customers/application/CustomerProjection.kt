@@ -5,48 +5,85 @@ import ch.fitnesslab.common.types.CustomerId
 import ch.fitnesslab.common.types.Salutation
 import ch.fitnesslab.customers.domain.events.CustomerRegisteredEvent
 import ch.fitnesslab.customers.domain.events.CustomerUpdatedEvent
+import ch.fitnesslab.customers.infrastructure.CustomerEntity
+import ch.fitnesslab.customers.infrastructure.CustomerRepository
+import org.axonframework.config.ProcessingGroup
 import org.axonframework.eventhandling.EventHandler
 import org.springframework.stereotype.Component
 import java.time.LocalDate
-import java.util.concurrent.ConcurrentHashMap
 
 @Component
-class CustomerProjection {
-
-    private val customers = ConcurrentHashMap<CustomerId, CustomerView>()
+@ProcessingGroup("customers")
+class CustomerProjection(
+    private val customerRepository: CustomerRepository
+) {
 
     @EventHandler
     fun on(event: CustomerRegisteredEvent) {
-        customers[event.customerId] = CustomerView(
-            customerId = event.customerId.toString(),
+        val entity = CustomerEntity(
+            customerId = event.customerId.value,
             salutation = event.salutation,
             firstName = event.firstName,
             lastName = event.lastName,
             dateOfBirth = event.dateOfBirth,
-            address = event.address,
+            street = event.address.street,
+            houseNumber = event.address.houseNumber,
+            postalCode = event.address.postalCode,
+            city = event.address.city,
+            country = event.address.country,
             email = event.email,
             phoneNumber = event.phoneNumber
         )
+        customerRepository.save(entity)
     }
 
     @EventHandler
     fun on(event: CustomerUpdatedEvent) {
-        customers.computeIfPresent(event.customerId) { _, customer ->
-            customer.copy(
+        customerRepository.findById(event.customerId.value).ifPresent { existing ->
+            val updated = CustomerEntity(
+                customerId = existing.customerId,
                 salutation = event.salutation,
                 firstName = event.firstName,
                 lastName = event.lastName,
                 dateOfBirth = event.dateOfBirth,
-                address = event.address,
+                street = event.address.street,
+                houseNumber = event.address.houseNumber,
+                postalCode = event.address.postalCode,
+                city = event.address.city,
+                country = event.address.country,
                 email = event.email,
                 phoneNumber = event.phoneNumber
             )
+            customerRepository.save(updated)
         }
     }
 
-    fun findById(customerId: CustomerId): CustomerView? = customers[customerId]
+    fun findById(customerId: CustomerId): CustomerView? {
+        return customerRepository.findById(customerId.value)
+            .map { it.toCustomerView() }
+            .orElse(null)
+    }
 
-    fun findAll(): List<CustomerView> = customers.values.toList()
+    fun findAll(): List<CustomerView> {
+        return customerRepository.findAll().map { it.toCustomerView() }
+    }
+
+    private fun CustomerEntity.toCustomerView() = CustomerView(
+        customerId = this.customerId.toString(),
+        salutation = this.salutation,
+        firstName = this.firstName,
+        lastName = this.lastName,
+        dateOfBirth = this.dateOfBirth,
+        address = Address(
+            street = this.street,
+            houseNumber = this.houseNumber,
+            postalCode = this.postalCode,
+            city = this.city,
+            country = this.country
+        ),
+        email = this.email,
+        phoneNumber = this.phoneNumber
+    )
 }
 
 data class CustomerView(
