@@ -12,7 +12,7 @@ import org.axonframework.modelling.command.AggregateLifecycle
 import org.axonframework.spring.stereotype.Aggregate
 
 @Aggregate
-class BookingAggregate() {
+class Booking() {
 
     @AggregateIdentifier
     private lateinit var bookingId: BookingId

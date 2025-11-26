@@ -9,7 +9,3 @@ data class PurchasedProduct(
     val totalPrice: BigDecimal
 )
 
-data class Participant(
-    val displayName: String,
-    val email: String?
-)

@@ -20,7 +20,7 @@ import org.axonframework.spring.stereotype.Aggregate
 import java.time.temporal.ChronoUnit
 
 @Aggregate
-class ProductContractAggregate() {
+class ProductContract() {
 
     @AggregateIdentifier
     private lateinit var contractId: ProductContractId

@@ -18,7 +18,7 @@ import java.time.Instant
 import java.time.LocalDate
 
 @Aggregate
-class InvoiceAggregate() {
+class Invoice() {
 
     @AggregateIdentifier
     private lateinit var invoiceId: InvoiceId

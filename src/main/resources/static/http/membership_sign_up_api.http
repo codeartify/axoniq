@@ -1,0 +1,39 @@
+### Membership Sign-up
+POST {{baseUrl}}/api/memberships/sign-up
+Content-Type: application/json
+Accept: application/json
+
+{
+  "customerId": "273e372d-a4f7-4fa9-8694-df01ac651f9a",
+  "customerName": "Jane Doe",
+  "customerEmail": "jane.doe@example.com",
+  "productVariantId": "fb8e7399-57e8-4524-8ef8-4a79d4a9c81f",
+  "price": 79.90,
+  "durationMonths": 12,
+  "paymentMode": "INVOICE_EMAIL"
+}
+
+### Alternative: on-site payment (immediate paid)
+POST {{baseUrl}}/api/memberships/sign-up
+Content-Type: application/json
+Accept: application/json
+
+{
+  "customerId": "273e372d-a4f7-4fa9-8694-df01ac651f9a",
+  "customerName": "John Smith",
+  "customerEmail": "john.smith@example.com",
+  "productVariantId": "fb8e7399-57e8-4524-8ef8-4a79d4a9c81f",
+  "price": 89.90,
+  "durationMonths": 6,
+  "paymentMode": "PAY_ON_SITE"
+}
+
+###
+GET {{baseUrl}}/api/product-contracts/99e2a72e-2ec5-458a-a133-b3fb03d8823c
+Content-Type: application/json
+Accept: application/json
+
+###
+GET {{baseUrl}}/api/products/memberships
+Content-Type: application/json
+Accept: application/json

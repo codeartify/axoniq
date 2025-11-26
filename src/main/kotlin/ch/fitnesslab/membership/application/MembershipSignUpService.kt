@@ -1,16 +1,11 @@
 package ch.fitnesslab.membership.application
 
+import ch.fitnesslab.billing.domain.commands.CreateInvoiceCommand
+import ch.fitnesslab.billing.domain.commands.MarkInvoicePaidCommand
 import ch.fitnesslab.booking.domain.Participant
 import ch.fitnesslab.booking.domain.PurchasedProduct
 import ch.fitnesslab.booking.domain.commands.PlaceBookingCommand
-import ch.fitnesslab.billing.domain.commands.CreateInvoiceCommand
-import ch.fitnesslab.billing.domain.commands.MarkInvoicePaidCommand
-import ch.fitnesslab.common.types.BookingId
-import ch.fitnesslab.common.types.CustomerId
-import ch.fitnesslab.common.types.DateRange
-import ch.fitnesslab.common.types.InvoiceId
-import ch.fitnesslab.common.types.ProductContractId
-import ch.fitnesslab.common.types.ProductVariantId
+import ch.fitnesslab.common.types.*
 import ch.fitnesslab.product.domain.commands.CreateProductContractCommand
 import org.axonframework.commandhandling.gateway.CommandGateway
 import org.springframework.stereotype.Service

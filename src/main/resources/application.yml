@@ -12,11 +12,5 @@ spring:
       ddl-auto: update
     database-platform: org.hibernate.dialect.PostgreSQLDialect
 axon:
-  eventhandling:
-  #  processors:
-  #      projection:
-  #       dlq:
-  #        enabled: true
-
   serializer:
     events: jackson
