@@ -4,6 +4,18 @@
     <button (click)="createCustomer()" class="btn btn-primary">Add Customer</button>
   </div>
 
+  @if (!isLoading() && !errorMessage()) {
+    <div class="search-container">
+      <input
+        type="text"
+        [ngModel]="searchTerm()"
+        (ngModelChange)="onSearchChange($event)"
+        placeholder="Search by customer name..."
+        class="search-input"
+      />
+    </div>
+  }
+
   @if (isLoading()) {
     <div class="loading">
       Loading customers...
@@ -27,11 +39,21 @@
         <table>
           <thead>
             <tr>
-              <th>Name</th>
-              <th>Email</th>
-              <th>Phone</th>
-              <th>City</th>
-              <th>Date of Birth</th>
+              <th (click)="sortBy('name')" class="sortable">
+                Name {{ getSortIcon('name') }}
+              </th>
+              <th (click)="sortBy('email')" class="sortable">
+                Email {{ getSortIcon('email') }}
+              </th>
+              <th (click)="sortBy('phone')" class="sortable">
+                Phone {{ getSortIcon('phone') }}
+              </th>
+              <th (click)="sortBy('city')" class="sortable">
+                City {{ getSortIcon('city') }}
+              </th>
+              <th (click)="sortBy('dateOfBirth')" class="sortable">
+                Date of Birth {{ getSortIcon('dateOfBirth') }}
+              </th>
               <th>Actions</th>
             </tr>
           </thead>
