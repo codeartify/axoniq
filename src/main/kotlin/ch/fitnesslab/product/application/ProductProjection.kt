@@ -9,13 +9,16 @@ import ch.fitnesslab.product.infrastructure.ProductEntity
 import ch.fitnesslab.product.infrastructure.ProductRepository
 import org.axonframework.config.ProcessingGroup
 import org.axonframework.eventhandling.EventHandler
+import org.axonframework.queryhandling.QueryHandler
+import org.axonframework.queryhandling.QueryUpdateEmitter
 import org.springframework.stereotype.Component
 import java.math.BigDecimal
 
 @ProcessingGroup("products")
 @Component
 class ProductProjection(
-    private val productRepository: ProductRepository
+    private val productRepository: ProductRepository,
+    private val queryUpdateEmitter: QueryUpdateEmitter
 ) {
 
     @EventHandler
@@ -38,6 +41,12 @@ class ProductProjection(
             exclusivityGroup = event.behavior.exclusivityGroup
         )
         productRepository.save(entity)
+
+        queryUpdateEmitter.emit(
+            FindAllProductsQuery::class.java,
+            { true },
+            ProductUpdatedUpdate(event.productId.value.toString())
+        )
     }
 
     @EventHandler
@@ -61,7 +70,30 @@ class ProductProjection(
                 exclusivityGroup = event.behavior.exclusivityGroup
             )
             productRepository.save(updated)
+
+            queryUpdateEmitter.emit(
+                FindAllProductsQuery::class.java,
+                { true },
+                ProductUpdatedUpdate(event.productId.value.toString())
+            )
+            queryUpdateEmitter.emit(
+                FindProductByIdQuery::class.java,
+                { query -> query.productId == event.productId },
+                ProductUpdatedUpdate(event.productId.value.toString())
+            )
         }
+    }
+
+    @QueryHandler
+    fun handle(query: FindProductByIdQuery): ProductView? {
+        return productRepository.findById(query.productId.value)
+            .map { it.toProductView() }
+            .orElse(null)
+    }
+
+    @QueryHandler
+    fun handle(query: FindAllProductsQuery): List<ProductView> {
+        return productRepository.findAll().map { it.toProductView() }
     }
 
     fun findById(productId: ProductVariantId): ProductView? {

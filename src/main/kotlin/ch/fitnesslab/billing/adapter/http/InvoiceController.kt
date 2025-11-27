@@ -1,6 +1,8 @@
 package ch.fitnesslab.billing.adapter.http
 
+import ch.fitnesslab.billing.application.FindAllInvoicesQuery
 import ch.fitnesslab.billing.application.InvoiceProjection
+import ch.fitnesslab.billing.application.InvoiceUpdatedUpdate
 import ch.fitnesslab.billing.application.InvoiceView
 import ch.fitnesslab.billing.domain.InvoiceStatus
 import ch.fitnesslab.billing.domain.commands.CancelInvoiceCommand
@@ -8,9 +10,12 @@ import ch.fitnesslab.billing.domain.commands.MarkInvoiceOverdueCommand
 import ch.fitnesslab.billing.domain.commands.MarkInvoicePaidCommand
 import ch.fitnesslab.common.types.InvoiceId
 import org.axonframework.commandhandling.gateway.CommandGateway
+import org.axonframework.messaging.responsetypes.ResponseTypes
+import org.axonframework.queryhandling.QueryGateway
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import java.math.BigDecimal
+import java.time.Duration
 import java.time.Instant
 import java.time.LocalDate
 
@@ -19,7 +24,8 @@ import java.time.LocalDate
 @RequestMapping("/api/invoices")
 class InvoiceController(
     private val invoiceProjection: InvoiceProjection,
-    private val commandGateway: CommandGateway
+    private val commandGateway: CommandGateway,
+    private val queryGateway: QueryGateway
 ) {
 
     @GetMapping
@@ -49,25 +55,51 @@ class InvoiceController(
 
     @PostMapping("/{invoiceId}/pay")
     fun markAsPaid(@PathVariable invoiceId: String): ResponseEntity<Void> {
-        commandGateway.sendAndWait<Any>(
-            MarkInvoicePaidCommand(
-                invoiceId = InvoiceId.from(invoiceId),
-                paidAt = Instant.now()
-            )
+        val subscriptionQuery = queryGateway.subscriptionQuery(
+            FindAllInvoicesQuery(),
+            ResponseTypes.multipleInstancesOf(InvoiceView::class.java),
+            ResponseTypes.instanceOf(InvoiceUpdatedUpdate::class.java)
         )
 
-        return ResponseEntity.ok().build()
+        try {
+            commandGateway.sendAndWait<Any>(
+                MarkInvoicePaidCommand(
+                    invoiceId = InvoiceId.from(invoiceId),
+                    paidAt = Instant.now()
+                )
+            )
+
+            // Wait for projection update
+            subscriptionQuery.updates().blockFirst(Duration.ofSeconds(5))
+
+            return ResponseEntity.ok().build()
+        } finally {
+            subscriptionQuery.close()
+        }
     }
 
     @PostMapping("/{invoiceId}/mark-overdue")
     fun markAsOverdue(@PathVariable invoiceId: String): ResponseEntity<Void> {
-        commandGateway.sendAndWait<Any>(
-            MarkInvoiceOverdueCommand(
-                invoiceId = InvoiceId.from(invoiceId)
-            )
+        val subscriptionQuery = queryGateway.subscriptionQuery(
+            FindAllInvoicesQuery(),
+            ResponseTypes.multipleInstancesOf(InvoiceView::class.java),
+            ResponseTypes.instanceOf(InvoiceUpdatedUpdate::class.java)
         )
 
-        return ResponseEntity.ok().build()
+        try {
+            commandGateway.sendAndWait<Any>(
+                MarkInvoiceOverdueCommand(
+                    invoiceId = InvoiceId.from(invoiceId)
+                )
+            )
+
+            // Wait for projection update
+            subscriptionQuery.updates().blockFirst(Duration.ofSeconds(5))
+
+            return ResponseEntity.ok().build()
+        } finally {
+            subscriptionQuery.close()
+        }
     }
 
     @PostMapping("/{invoiceId}/cancel")
@@ -75,14 +107,27 @@ class InvoiceController(
         @PathVariable invoiceId: String,
         @RequestBody request: CancelInvoiceRequest
     ): ResponseEntity<Void> {
-        commandGateway.sendAndWait<Any>(
-            CancelInvoiceCommand(
-                invoiceId = InvoiceId.from(invoiceId),
-                reason = request.reason
-            )
+        val subscriptionQuery = queryGateway.subscriptionQuery(
+            FindAllInvoicesQuery(),
+            ResponseTypes.multipleInstancesOf(InvoiceView::class.java),
+            ResponseTypes.instanceOf(InvoiceUpdatedUpdate::class.java)
         )
 
-        return ResponseEntity.ok().build()
+        try {
+            commandGateway.sendAndWait<Any>(
+                CancelInvoiceCommand(
+                    invoiceId = InvoiceId.from(invoiceId),
+                    reason = request.reason
+                )
+            )
+
+            // Wait for projection update
+            subscriptionQuery.updates().blockFirst(Duration.ofSeconds(5))
+
+            return ResponseEntity.ok().build()
+        } finally {
+            subscriptionQuery.close()
+        }
     }
 }
 

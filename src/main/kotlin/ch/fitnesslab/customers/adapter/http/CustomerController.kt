@@ -3,52 +3,65 @@ package ch.fitnesslab.customers.adapter.http
 import ch.fitnesslab.common.types.Address
 import ch.fitnesslab.common.types.CustomerId
 import ch.fitnesslab.common.types.Salutation
-import ch.fitnesslab.customers.application.CustomerProjection
-import ch.fitnesslab.customers.application.CustomerView
+import ch.fitnesslab.customers.application.*
 import ch.fitnesslab.customers.domain.commands.RegisterCustomerCommand
 import ch.fitnesslab.customers.domain.commands.UpdateCustomerCommand
 import org.axonframework.commandhandling.gateway.CommandGateway
+import org.axonframework.messaging.responsetypes.ResponseTypes
+import org.axonframework.queryhandling.QueryGateway
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import java.time.LocalDate
-import java.util.concurrent.CompletableFuture
+import java.time.Duration
 
 @RestController
 @CrossOrigin
 @RequestMapping("/api/customers")
 class CustomerController(
     private val commandGateway: CommandGateway,
-    private val customerProjection: CustomerProjection
+    private val customerProjection: CustomerProjection,
+    private val queryGateway: QueryGateway
 ) {
 
     @PostMapping
     fun registerCustomer(@RequestBody request: RegisterCustomerRequest): ResponseEntity<CustomerRegistrationResponse?> {
         val customerId = CustomerId.generate()
 
-        val command = RegisterCustomerCommand(
-            customerId = customerId,
-            salutation = request.salutation,
-            firstName = request.firstName,
-            lastName = request.lastName,
-            dateOfBirth = request.dateOfBirth,
-            address = Address(
-                street = request.address.street,
-                houseNumber = request.address.houseNumber,
-                postalCode = request.address.postalCode,
-                city = request.address.city,
-                country = request.address.country
-            ),
-            email = request.email,
-            phoneNumber = request.phoneNumber
+        val subscriptionQuery = queryGateway.subscriptionQuery(
+            FindAllCustomersQuery(),
+            ResponseTypes.multipleInstancesOf(CustomerView::class.java),
+            ResponseTypes.instanceOf(CustomerUpdatedUpdate::class.java)
         )
-      commandGateway.sendAndWait<Any>(command)
 
+        try {
+            val command = RegisterCustomerCommand(
+                customerId = customerId,
+                salutation = request.salutation,
+                firstName = request.firstName,
+                lastName = request.lastName,
+                dateOfBirth = request.dateOfBirth,
+                address = Address(
+                    street = request.address.street,
+                    houseNumber = request.address.houseNumber,
+                    postalCode = request.address.postalCode,
+                    city = request.address.city,
+                    country = request.address.country
+                ),
+                email = request.email,
+                phoneNumber = request.phoneNumber
+            )
+            commandGateway.sendAndWait<Any>(command)
 
-        return ResponseEntity
-            .status(HttpStatus.CREATED)
-            .body(CustomerRegistrationResponse(customerId.toString()))
+            // Wait for projection update
+            subscriptionQuery.updates().blockFirst(Duration.ofSeconds(5))
 
+            return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(CustomerRegistrationResponse(customerId.toString()))
+        } finally {
+            subscriptionQuery.close()
+        }
     }
 
     @GetMapping("/{customerId}")
@@ -71,25 +84,39 @@ class CustomerController(
         @PathVariable customerId: String,
         @RequestBody request: UpdateCustomerRequest
     ): ResponseEntity<Void> {
-        val command = UpdateCustomerCommand(
-            customerId = CustomerId.from(customerId),
-            salutation = request.salutation,
-            firstName = request.firstName,
-            lastName = request.lastName,
-            dateOfBirth = request.dateOfBirth,
-            address = Address(
-                street = request.address.street,
-                houseNumber = request.address.houseNumber,
-                postalCode = request.address.postalCode,
-                city = request.address.city,
-                country = request.address.country
-            ),
-            email = request.email,
-            phoneNumber = request.phoneNumber
+        val subscriptionQuery = queryGateway.subscriptionQuery(
+            FindAllCustomersQuery(),
+            ResponseTypes.multipleInstancesOf(CustomerView::class.java),
+            ResponseTypes.instanceOf(CustomerUpdatedUpdate::class.java)
         )
 
-        commandGateway.sendAndWait<Any>(command)
-        return ResponseEntity.ok().build()
+        try {
+            val command = UpdateCustomerCommand(
+                customerId = CustomerId.from(customerId),
+                salutation = request.salutation,
+                firstName = request.firstName,
+                lastName = request.lastName,
+                dateOfBirth = request.dateOfBirth,
+                address = Address(
+                    street = request.address.street,
+                    houseNumber = request.address.houseNumber,
+                    postalCode = request.address.postalCode,
+                    city = request.address.city,
+                    country = request.address.country
+                ),
+                email = request.email,
+                phoneNumber = request.phoneNumber
+            )
+
+            commandGateway.sendAndWait<Any>(command)
+
+            // Wait for projection update
+            subscriptionQuery.updates().blockFirst(Duration.ofSeconds(5))
+
+            return ResponseEntity.ok().build()
+        } finally {
+            subscriptionQuery.close()
+        }
     }
 }
 

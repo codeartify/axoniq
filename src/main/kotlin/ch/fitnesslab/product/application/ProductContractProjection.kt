@@ -11,12 +11,15 @@ import ch.fitnesslab.product.infrastructure.ProductContractEntity
 import ch.fitnesslab.product.infrastructure.ProductContractRepository
 import org.axonframework.config.ProcessingGroup
 import org.axonframework.eventhandling.EventHandler
+import org.axonframework.queryhandling.QueryHandler
+import org.axonframework.queryhandling.QueryUpdateEmitter
 import org.springframework.stereotype.Component
 import java.util.*
 @ProcessingGroup("product-contracts")
 @Component
 class ProductContractProjection(
-    private val productContractRepository: ProductContractRepository
+    private val productContractRepository: ProductContractRepository,
+    private val queryUpdateEmitter: QueryUpdateEmitter
 ) {
 
     @EventHandler
@@ -33,6 +36,12 @@ class ProductContractProjection(
             sessionsUsed = 0
         )
         productContractRepository.save(entity)
+
+        queryUpdateEmitter.emit(
+            FindAllProductContractsQuery::class.java,
+            { true },
+            ProductContractUpdatedUpdate(event.contractId.value.toString())
+        )
     }
 
     @EventHandler
@@ -50,6 +59,17 @@ class ProductContractProjection(
                 sessionsUsed = existing.sessionsUsed
             )
             productContractRepository.save(updated)
+
+            queryUpdateEmitter.emit(
+                FindAllProductContractsQuery::class.java,
+                { true },
+                ProductContractUpdatedUpdate(event.contractId.value.toString())
+            )
+            queryUpdateEmitter.emit(
+                FindProductContractByIdQuery::class.java,
+                { query -> query.contractId == event.contractId },
+                ProductContractUpdatedUpdate(event.contractId.value.toString())
+            )
         }
     }
 
@@ -68,8 +88,27 @@ class ProductContractProjection(
                 sessionsUsed = existing.sessionsUsed
             )
             productContractRepository.save(updated)
+
+            queryUpdateEmitter.emit(
+                FindAllProductContractsQuery::class.java,
+                { true },
+                ProductContractUpdatedUpdate(event.contractId.value.toString())
+            )
+            queryUpdateEmitter.emit(
+                FindProductContractByIdQuery::class.java,
+                { query -> query.contractId == event.contractId },
+                ProductContractUpdatedUpdate(event.contractId.value.toString())
+            )
         }
     }
+
+    @QueryHandler
+    fun handle(query: FindProductContractByIdQuery): ProductContractView? =
+        productContractRepository.findById(query.contractId.value).map { it.toProductContractView() }.orElse(null)
+
+    @QueryHandler
+    fun handle(query: FindAllProductContractsQuery): List<ProductContractView> =
+        productContractRepository.findAll().map { it.toProductContractView() }
 
     fun findById(contractId: ProductContractId): ProductContractView? =
         productContractRepository.findById(contractId.value).map { it.toProductContractView() }.orElse(null)

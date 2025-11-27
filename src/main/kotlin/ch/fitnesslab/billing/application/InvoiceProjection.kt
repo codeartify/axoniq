@@ -13,6 +13,8 @@ import ch.fitnesslab.common.types.InvoiceId
 import ch.fitnesslab.customers.application.CustomerProjection
 import org.axonframework.config.ProcessingGroup
 import org.axonframework.eventhandling.EventHandler
+import org.axonframework.queryhandling.QueryHandler
+import org.axonframework.queryhandling.QueryUpdateEmitter
 import org.springframework.stereotype.Component
 import java.math.BigDecimal
 import java.time.Instant
@@ -24,7 +26,8 @@ import java.util.*
 class InvoiceProjection(
     private val invoiceRepository: InvoiceRepository,
     private val invoiceEmailService: InvoiceEmailService,
-    private val customerProjection: CustomerProjection
+    private val customerProjection: CustomerProjection,
+    private val queryUpdateEmitter: QueryUpdateEmitter
 ) {
 
     @EventHandler
@@ -54,6 +57,12 @@ class InvoiceProjection(
         } catch (e: Exception) {
             println("Failed to send invoice email for invoice ${event.invoiceId}: ${e.message}")
         }
+
+        queryUpdateEmitter.emit(
+            FindAllInvoicesQuery::class.java,
+            { true },
+            InvoiceUpdatedUpdate(event.invoiceId.value.toString())
+        )
     }
 
     @EventHandler
@@ -72,6 +81,12 @@ class InvoiceProjection(
                 paidAt = event.paidAt
             )
             invoiceRepository.save(updated)
+
+            queryUpdateEmitter.emit(
+                FindAllInvoicesQuery::class.java,
+                { true },
+                InvoiceUpdatedUpdate(event.invoiceId.value.toString())
+            )
         }
     }
 
@@ -91,6 +106,12 @@ class InvoiceProjection(
                 paidAt = existing.paidAt
             )
             invoiceRepository.save(updated)
+
+            queryUpdateEmitter.emit(
+                FindAllInvoicesQuery::class.java,
+                { true },
+                InvoiceUpdatedUpdate(event.invoiceId.value.toString())
+            )
         }
     }
 
@@ -110,7 +131,23 @@ class InvoiceProjection(
                 paidAt = existing.paidAt
             )
             invoiceRepository.save(updated)
+
+            queryUpdateEmitter.emit(
+                FindAllInvoicesQuery::class.java,
+                { true },
+                InvoiceUpdatedUpdate(event.invoiceId.value.toString())
+            )
         }
+    }
+
+    @QueryHandler
+    fun handle(query: FindAllInvoicesQuery): List<InvoiceView> {
+        return findAll()
+    }
+
+    @QueryHandler
+    fun handle(query: FindInvoiceByIdQuery): InvoiceView? {
+        return findById(query.invoiceId)
     }
 
     fun findAll(): List<InvoiceView> = invoiceRepository.findAll().map { it.toInvoiceView() }

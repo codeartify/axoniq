@@ -1,0 +1,34 @@
+import { Component, effect } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { LoadingService } from './loading.service';
+
+@Component({
+  selector: 'app-loading-bar',
+  standalone: true,
+  imports: [CommonModule],
+  template: `
+    <div *ngIf="loadingService.isLoading()" class="fixed top-0 left-0 right-0 z-50">
+      <div class="h-1 bg-blue-600 loading-bar"></div>
+    </div>
+  `,
+  styles: [`
+    .loading-bar {
+      animation: loading 1.5s ease-in-out infinite;
+    }
+
+    @keyframes loading {
+      0% {
+        transform: translateX(-100%);
+      }
+      50% {
+        transform: translateX(0%);
+      }
+      100% {
+        transform: translateX(100%);
+      }
+    }
+  `]
+})
+export class LoadingBar {
+  constructor(public loadingService: LoadingService) {}
+}

@@ -10,13 +10,16 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import org.axonframework.config.ProcessingGroup
 import org.axonframework.eventhandling.EventHandler
+import org.axonframework.queryhandling.QueryHandler
+import org.axonframework.queryhandling.QueryUpdateEmitter
 import org.springframework.stereotype.Component
 import java.util.*
 @ProcessingGroup("booking")
 @Component
 class BookingProjection(
     private val bookingRepository: BookingRepository,
-    private val objectMapper: ObjectMapper
+    private val objectMapper: ObjectMapper,
+    private val queryUpdateEmitter: QueryUpdateEmitter
 ) {
 
     @EventHandler
@@ -28,7 +31,21 @@ class BookingProjection(
             purchasedProductsJson = objectMapper.writeValueAsString(event.purchasedProducts)
         )
         bookingRepository.save(entity)
+
+        queryUpdateEmitter.emit(
+            FindAllBookingsQuery::class.java,
+            { true },
+            BookingUpdatedUpdate(bookingId = event.bookingId.value.toString())
+        )
     }
+
+    @QueryHandler
+    fun handle(query: FindBookingByIdQuery): BookingView? =
+        bookingRepository.findById(query.bookingId.value).map { it.toBookingView() }.orElse(null)
+
+    @QueryHandler
+    fun handle(query: FindAllBookingsQuery): List<BookingView> =
+        bookingRepository.findAll().map { it.toBookingView() }
 
     fun findById(bookingId: BookingId): BookingView? =
         bookingRepository.findById(bookingId.value).map { it.toBookingView() }.orElse(null)

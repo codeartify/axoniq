@@ -2,22 +2,25 @@ package ch.fitnesslab.product.adapter.http
 
 import ch.fitnesslab.common.types.DateRange
 import ch.fitnesslab.common.types.ProductContractId
-import ch.fitnesslab.product.application.ProductContractProjection
-import ch.fitnesslab.product.application.ProductContractView
+import ch.fitnesslab.product.application.*
 import ch.fitnesslab.product.domain.ProductContractStatus
 import ch.fitnesslab.product.domain.commands.PauseProductContractCommand
 import ch.fitnesslab.product.domain.commands.PauseReason
 import ch.fitnesslab.product.domain.commands.ResumeProductContractCommand
 import org.axonframework.commandhandling.gateway.CommandGateway
+import org.axonframework.messaging.responsetypes.ResponseTypes
+import org.axonframework.queryhandling.QueryGateway
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
+import java.time.Duration
 import java.time.LocalDate
 
 @RestController
 @RequestMapping("/api/product-contracts")
 class ProductContractController(
     private val productContractProjection: ProductContractProjection,
-    private val commandGateway: CommandGateway
+    private val commandGateway: CommandGateway,
+    private val queryGateway: QueryGateway
 ) {
 
     @GetMapping("/{contractId}")
@@ -33,29 +36,55 @@ class ProductContractController(
         @PathVariable contractId: String,
         @RequestBody request: PauseContractRequest
     ): ResponseEntity<Void> {
-        commandGateway.sendAndWait<Any>(
-            PauseProductContractCommand(
-                contractId = ProductContractId.from(contractId),
-                pauseRange = DateRange(
-                    start = LocalDate.parse(request.startDate),
-                    end = LocalDate.parse(request.endDate)
-                ),
-                reason = request.reason
-            )
+        val subscriptionQuery = queryGateway.subscriptionQuery(
+            FindAllProductContractsQuery(),
+            ResponseTypes.multipleInstancesOf(ProductContractView::class.java),
+            ResponseTypes.instanceOf(ProductContractUpdatedUpdate::class.java)
         )
 
-        return ResponseEntity.ok().build()
+        try {
+            commandGateway.sendAndWait<Any>(
+                PauseProductContractCommand(
+                    contractId = ProductContractId.from(contractId),
+                    pauseRange = DateRange(
+                        start = LocalDate.parse(request.startDate),
+                        end = LocalDate.parse(request.endDate)
+                    ),
+                    reason = request.reason
+                )
+            )
+
+            // Wait for projection update
+            subscriptionQuery.updates().blockFirst(Duration.ofSeconds(5))
+
+            return ResponseEntity.ok().build()
+        } finally {
+            subscriptionQuery.close()
+        }
     }
 
     @PostMapping("/{contractId}/resume")
     fun resumeContract(@PathVariable contractId: String): ResponseEntity<Void> {
-        commandGateway.sendAndWait<Any>(
-            ResumeProductContractCommand(
-                contractId = ProductContractId.from(contractId)
-            )
+        val subscriptionQuery = queryGateway.subscriptionQuery(
+            FindAllProductContractsQuery(),
+            ResponseTypes.multipleInstancesOf(ProductContractView::class.java),
+            ResponseTypes.instanceOf(ProductContractUpdatedUpdate::class.java)
         )
 
-        return ResponseEntity.ok().build()
+        try {
+            commandGateway.sendAndWait<Any>(
+                ResumeProductContractCommand(
+                    contractId = ProductContractId.from(contractId)
+                )
+            )
+
+            // Wait for projection update
+            subscriptionQuery.updates().blockFirst(Duration.ofSeconds(5))
+
+            return ResponseEntity.ok().build()
+        } finally {
+            subscriptionQuery.close()
+        }
     }
 }
 

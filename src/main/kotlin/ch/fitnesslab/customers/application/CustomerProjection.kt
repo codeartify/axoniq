@@ -9,13 +9,16 @@ import ch.fitnesslab.customers.infrastructure.CustomerEntity
 import ch.fitnesslab.customers.infrastructure.CustomerRepository
 import org.axonframework.config.ProcessingGroup
 import org.axonframework.eventhandling.EventHandler
+import org.axonframework.queryhandling.QueryHandler
+import org.axonframework.queryhandling.QueryUpdateEmitter
 import org.springframework.stereotype.Component
 import java.time.LocalDate
 
 @Component
 @ProcessingGroup("customers")
 class CustomerProjection(
-    private val customerRepository: CustomerRepository
+    private val customerRepository: CustomerRepository,
+    private val queryUpdateEmitter: QueryUpdateEmitter
 ) {
 
     @EventHandler
@@ -35,6 +38,12 @@ class CustomerProjection(
             phoneNumber = event.phoneNumber
         )
         customerRepository.save(entity)
+
+        queryUpdateEmitter.emit(
+            FindAllCustomersQuery::class.java,
+            { true },
+            CustomerUpdatedUpdate(event.customerId.value.toString())
+        )
     }
 
     @EventHandler
@@ -55,7 +64,23 @@ class CustomerProjection(
                 phoneNumber = event.phoneNumber
             )
             customerRepository.save(updated)
+
+            queryUpdateEmitter.emit(
+                FindAllCustomersQuery::class.java,
+                { true },
+                CustomerUpdatedUpdate(event.customerId.value.toString())
+            )
         }
+    }
+
+    @QueryHandler
+    fun handle(query: FindAllCustomersQuery): List<CustomerView> {
+        return findAll()
+    }
+
+    @QueryHandler
+    fun handle(query: FindCustomerByIdQuery): CustomerView? {
+        return findById(query.customerId)
     }
 
     fun findById(customerId: CustomerId): CustomerView? {
