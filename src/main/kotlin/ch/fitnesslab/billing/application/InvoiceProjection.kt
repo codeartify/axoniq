@@ -11,6 +11,7 @@ import ch.fitnesslab.billing.infrastructure.InvoiceRepository
 import ch.fitnesslab.common.types.CustomerId
 import ch.fitnesslab.common.types.InvoiceId
 import ch.fitnesslab.customers.application.CustomerProjection
+import org.axonframework.config.ProcessingGroup
 import org.axonframework.eventhandling.EventHandler
 import org.springframework.stereotype.Component
 import java.math.BigDecimal
@@ -19,6 +20,7 @@ import java.time.LocalDate
 import java.util.*
 
 @Component
+@ProcessingGroup("invoices")
 class InvoiceProjection(
     private val invoiceRepository: InvoiceRepository,
     private val invoiceEmailService: InvoiceEmailService,

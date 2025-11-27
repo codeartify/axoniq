@@ -8,10 +8,11 @@ import ch.fitnesslab.booking.infrastructure.BookingRepository
 import ch.fitnesslab.common.types.BookingId
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import org.axonframework.config.ProcessingGroup
 import org.axonframework.eventhandling.EventHandler
 import org.springframework.stereotype.Component
 import java.util.*
-
+@ProcessingGroup("booking")
 @Component
 class BookingProjection(
     private val bookingRepository: BookingRepository,

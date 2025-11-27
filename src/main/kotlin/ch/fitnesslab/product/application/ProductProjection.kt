@@ -7,10 +7,12 @@ import ch.fitnesslab.product.domain.events.ProductCreatedEvent
 import ch.fitnesslab.product.domain.events.ProductUpdatedEvent
 import ch.fitnesslab.product.infrastructure.ProductEntity
 import ch.fitnesslab.product.infrastructure.ProductRepository
+import org.axonframework.config.ProcessingGroup
 import org.axonframework.eventhandling.EventHandler
 import org.springframework.stereotype.Component
 import java.math.BigDecimal
 
+@ProcessingGroup("products")
 @Component
 class ProductProjection(
     private val productRepository: ProductRepository

@@ -9,10 +9,11 @@ import ch.fitnesslab.product.domain.events.ProductContractPausedEvent
 import ch.fitnesslab.product.domain.events.ProductContractResumedEvent
 import ch.fitnesslab.product.infrastructure.ProductContractEntity
 import ch.fitnesslab.product.infrastructure.ProductContractRepository
+import org.axonframework.config.ProcessingGroup
 import org.axonframework.eventhandling.EventHandler
 import org.springframework.stereotype.Component
 import java.util.*
-
+@ProcessingGroup("product-contracts")
 @Component
 class ProductContractProjection(
     private val productContractRepository: ProductContractRepository
