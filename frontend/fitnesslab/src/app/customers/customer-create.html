@@ -1,120 +1,120 @@
-<div class="customer-create-container">
-  <h2>Register New Customer</h2>
+<div class="p-5 max-w-4xl mx-auto">
+  <h2 class="text-3xl font-bold text-gray-800 mb-5">Register New Customer</h2>
 
-  <form [formGroup]="customerForm" (ngSubmit)="onSubmit()" class="customer-form">
-    <div class="form-section">
-      <h3>Personal Information</h3>
+  <form [formGroup]="customerForm" (ngSubmit)="onSubmit()" class="bg-white shadow-md rounded-lg p-6">
+    <div class="mb-6">
+      <h3 class="text-xl font-semibold text-gray-700 mb-4">Personal Information</h3>
 
-      <div class="form-group">
-        <label for="salutation">Salutation *</label>
-        <select id="salutation" formControlName="salutation" class="form-control">
+      <div class="mb-4">
+        <label for="salutation" class="block text-sm font-medium text-gray-700 mb-1">Salutation *</label>
+        <select id="salutation" formControlName="salutation" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
           <option value="">Select salutation</option>
           <option *ngFor="let sal of salutations" [value]="sal">{{ sal }}</option>
         </select>
-        <div *ngIf="customerForm.get('salutation')?.invalid && customerForm.get('salutation')?.touched" class="error">
+        <div *ngIf="customerForm.get('salutation')?.invalid && customerForm.get('salutation')?.touched" class="text-red-600 text-sm mt-1">
           Salutation is required
         </div>
       </div>
 
-      <div class="form-row">
-        <div class="form-group">
-          <label for="firstName">First Name *</label>
-          <input id="firstName" type="text" formControlName="firstName" class="form-control">
-          <div *ngIf="customerForm.get('firstName')?.invalid && customerForm.get('firstName')?.touched" class="error">
+      <div class="grid grid-cols-2 gap-4 mb-4">
+        <div>
+          <label for="firstName" class="block text-sm font-medium text-gray-700 mb-1">First Name *</label>
+          <input id="firstName" type="text" formControlName="firstName" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <div *ngIf="customerForm.get('firstName')?.invalid && customerForm.get('firstName')?.touched" class="text-red-600 text-sm mt-1">
             First name is required
           </div>
         </div>
 
-        <div class="form-group">
-          <label for="lastName">Last Name *</label>
-          <input id="lastName" type="text" formControlName="lastName" class="form-control">
-          <div *ngIf="customerForm.get('lastName')?.invalid && customerForm.get('lastName')?.touched" class="error">
+        <div>
+          <label for="lastName" class="block text-sm font-medium text-gray-700 mb-1">Last Name *</label>
+          <input id="lastName" type="text" formControlName="lastName" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <div *ngIf="customerForm.get('lastName')?.invalid && customerForm.get('lastName')?.touched" class="text-red-600 text-sm mt-1">
             Last name is required
           </div>
         </div>
       </div>
 
-      <div class="form-group">
-        <label for="dateOfBirth">Date of Birth *</label>
-        <input id="dateOfBirth" type="date" formControlName="dateOfBirth" class="form-control">
-        <div *ngIf="customerForm.get('dateOfBirth')?.invalid && customerForm.get('dateOfBirth')?.touched" class="error">
+      <div class="mb-4">
+        <label for="dateOfBirth" class="block text-sm font-medium text-gray-700 mb-1">Date of Birth *</label>
+        <input id="dateOfBirth" type="date" formControlName="dateOfBirth" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <div *ngIf="customerForm.get('dateOfBirth')?.invalid && customerForm.get('dateOfBirth')?.touched" class="text-red-600 text-sm mt-1">
           Date of birth is required
         </div>
       </div>
 
-      <div class="form-row">
-        <div class="form-group">
-          <label for="email">Email *</label>
-          <input id="email" type="email" formControlName="email" class="form-control">
-          <div *ngIf="customerForm.get('email')?.invalid && customerForm.get('email')?.touched" class="error">
+      <div class="grid grid-cols-2 gap-4 mb-4">
+        <div>
+          <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email *</label>
+          <input id="email" type="email" formControlName="email" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <div *ngIf="customerForm.get('email')?.invalid && customerForm.get('email')?.touched" class="text-red-600 text-sm mt-1">
             Valid email is required
           </div>
         </div>
 
-        <div class="form-group">
-          <label for="phoneNumber">Phone Number</label>
-          <input id="phoneNumber" type="tel" formControlName="phoneNumber" class="form-control">
+        <div>
+          <label for="phoneNumber" class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
+          <input id="phoneNumber" type="tel" formControlName="phoneNumber" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
         </div>
       </div>
     </div>
 
-    <div class="form-section">
-      <h3>Address</h3>
+    <div class="mb-6">
+      <h3 class="text-xl font-semibold text-gray-700 mb-4">Address</h3>
 
-      <div class="form-row">
-        <div class="form-group">
-          <label for="street">Street *</label>
-          <input id="street" type="text" formControlName="street" class="form-control">
-          <div *ngIf="customerForm.get('street')?.invalid && customerForm.get('street')?.touched" class="error">
+      <div class="grid grid-cols-2 gap-4 mb-4">
+        <div>
+          <label for="street" class="block text-sm font-medium text-gray-700 mb-1">Street *</label>
+          <input id="street" type="text" formControlName="street" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <div *ngIf="customerForm.get('street')?.invalid && customerForm.get('street')?.touched" class="text-red-600 text-sm mt-1">
             Street is required
           </div>
         </div>
 
-        <div class="form-group">
-          <label for="houseNumber">House Number *</label>
-          <input id="houseNumber" type="text" formControlName="houseNumber" class="form-control">
-          <div *ngIf="customerForm.get('houseNumber')?.invalid && customerForm.get('houseNumber')?.touched" class="error">
+        <div>
+          <label for="houseNumber" class="block text-sm font-medium text-gray-700 mb-1">House Number *</label>
+          <input id="houseNumber" type="text" formControlName="houseNumber" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <div *ngIf="customerForm.get('houseNumber')?.invalid && customerForm.get('houseNumber')?.touched" class="text-red-600 text-sm mt-1">
             House number is required
           </div>
         </div>
       </div>
 
-      <div class="form-row">
-        <div class="form-group">
-          <label for="postalCode">Postal Code *</label>
-          <input id="postalCode" type="text" formControlName="postalCode" class="form-control">
-          <div *ngIf="customerForm.get('postalCode')?.invalid && customerForm.get('postalCode')?.touched" class="error">
+      <div class="grid grid-cols-2 gap-4 mb-4">
+        <div>
+          <label for="postalCode" class="block text-sm font-medium text-gray-700 mb-1">Postal Code *</label>
+          <input id="postalCode" type="text" formControlName="postalCode" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <div *ngIf="customerForm.get('postalCode')?.invalid && customerForm.get('postalCode')?.touched" class="text-red-600 text-sm mt-1">
             Postal code is required
           </div>
         </div>
 
-        <div class="form-group">
-          <label for="city">City *</label>
-          <input id="city" type="text" formControlName="city" class="form-control">
-          <div *ngIf="customerForm.get('city')?.invalid && customerForm.get('city')?.touched" class="error">
+        <div>
+          <label for="city" class="block text-sm font-medium text-gray-700 mb-1">City *</label>
+          <input id="city" type="text" formControlName="city" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <div *ngIf="customerForm.get('city')?.invalid && customerForm.get('city')?.touched" class="text-red-600 text-sm mt-1">
             City is required
           </div>
         </div>
       </div>
 
-      <div class="form-group">
-        <label for="country">Country *</label>
-        <input id="country" type="text" formControlName="country" class="form-control">
-        <div *ngIf="customerForm.get('country')?.invalid && customerForm.get('country')?.touched" class="error">
+      <div class="mb-4">
+        <label for="country" class="block text-sm font-medium text-gray-700 mb-1">Country *</label>
+        <input id="country" type="text" formControlName="country" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <div *ngIf="customerForm.get('country')?.invalid && customerForm.get('country')?.touched" class="text-red-600 text-sm mt-1">
           Country is required
         </div>
       </div>
     </div>
 
-    <div *ngIf="errorMessage" class="alert alert-error">
+    <div *ngIf="errorMessage" class="p-4 mb-4 bg-red-100 border border-red-400 text-red-700 rounded">
       {{ errorMessage }}
     </div>
 
-    <div class="form-actions">
-      <button type="button" (click)="onCancel()" class="btn btn-secondary" [disabled]="isSubmitting">
+    <div class="flex justify-end gap-3">
+      <button type="button" (click)="onCancel()" class="px-4 py-2 bg-gray-500 text-white rounded border-none cursor-pointer text-sm font-medium hover:bg-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed" [disabled]="isSubmitting">
         Cancel
       </button>
-      <button type="submit" class="btn btn-primary" [disabled]="!customerForm.valid || isSubmitting">
+      <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded border-none cursor-pointer text-sm font-medium hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed" [disabled]="!customerForm.valid || isSubmitting">
         {{ isSubmitting ? 'Registering...' : 'Register Customer' }}
       </button>
     </div>

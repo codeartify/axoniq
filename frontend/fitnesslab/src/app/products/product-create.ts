@@ -2,14 +2,13 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { Products, CreateProductRequest, ProductBehaviorConfig } from './products';
+import { Products, CreateProductRequest } from './products';
 
 @Component({
   selector: 'app-product-create',
   standalone: true,
   imports: [CommonModule, FormsModule],
-  templateUrl: './product-create.html',
-  styleUrls: ['./product-create.css']
+  templateUrl: './product-create.html'
 })
 export class ProductCreate {
   product: CreateProductRequest = {

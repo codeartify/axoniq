@@ -1,36 +1,36 @@
-<div class="customer-detail-container">
+<div class="p-5 max-w-7xl mx-auto">
   @if (isLoading()) {
-    <div class="loading">
+    <div class="text-center py-10 text-gray-500 text-lg">
       Loading customer details...
     </div>
   }
 
   @if (errorMessage() && !isLoading()) {
-    <div class="alert alert-error">
+    <div class="p-4 mb-4 bg-red-100 border border-red-400 text-red-700 rounded">
       {{ errorMessage() }}
     </div>
   }
 
   @if (successMessage()) {
-    <div class="alert alert-success">
+    <div class="p-4 mb-4 bg-green-100 border border-green-400 text-green-700 rounded">
       {{ successMessage() }}
     </div>
   }
 
   @if (customer() && !isLoading()) {
-    <div class="customer-detail">
-      <div class="header">
-        <h2>Customer Details</h2>
-        <div class="actions">
+    <div class="bg-white shadow-md rounded-lg p-6">
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-3xl font-bold text-gray-800">Customer Details</h2>
+        <div class="flex gap-2">
           @if (!isEditMode()) {
-            <button (click)="openProductSelection()" class="btn btn-product">Add Product</button>
-            <button (click)="enableEditMode()" class="btn btn-edit">Edit Customer</button>
-            <button (click)="createNew()" class="btn btn-primary">Create New Customer</button>
-            <button (click)="goBack()" class="btn btn-secondary">Back to List</button>
+            <button (click)="openProductSelection()" class="px-4 py-2 bg-purple-500 text-white rounded border-none cursor-pointer text-sm font-medium hover:bg-purple-600 transition-colors">Add Product</button>
+            <button (click)="enableEditMode()" class="px-4 py-2 bg-yellow-500 text-white rounded border-none cursor-pointer text-sm font-medium hover:bg-yellow-600 transition-colors">Edit Customer</button>
+            <button (click)="createNew()" class="px-4 py-2 bg-blue-500 text-white rounded border-none cursor-pointer text-sm font-medium hover:bg-blue-600 transition-colors">Create New Customer</button>
+            <button (click)="goBack()" class="px-4 py-2 bg-gray-500 text-white rounded border-none cursor-pointer text-sm font-medium hover:bg-gray-600 transition-colors">Back to List</button>
           }
           @if (isEditMode()) {
-            <button (click)="cancelEdit()" class="btn btn-secondary" [disabled]="isSubmitting()">Cancel</button>
-            <button (click)="saveCustomer()" class="btn btn-primary" [disabled]="!customerForm.valid || isSubmitting()">
+            <button (click)="cancelEdit()" class="px-4 py-2 bg-gray-500 text-white rounded border-none cursor-pointer text-sm font-medium hover:bg-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed" [disabled]="isSubmitting()">Cancel</button>
+            <button (click)="saveCustomer()" class="px-4 py-2 bg-blue-500 text-white rounded border-none cursor-pointer text-sm font-medium hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed" [disabled]="!customerForm.valid || isSubmitting()">
               {{ isSubmitting() ? 'Saving...' : 'Save Changes' }}
             </button>
           }
@@ -39,64 +39,64 @@
 
       @if (!isEditMode()) {
         <!-- View Mode -->
-        <div class="detail-section">
-          <h3>Personal Information</h3>
-          <div class="detail-grid">
-            <div class="detail-item">
-              <label>Customer ID:</label>
-              <span>{{ customer()!.customerId }}</span>
+        <div class="mb-6">
+          <h3 class="text-xl font-semibold text-gray-700 mb-4">Personal Information</h3>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-600 mb-1">Customer ID:</label>
+              <span class="text-gray-800">{{ customer()!.customerId }}</span>
             </div>
-            <div class="detail-item">
-              <label>Salutation:</label>
-              <span>{{ customer()!.salutation }}</span>
+            <div>
+              <label class="block text-sm font-medium text-gray-600 mb-1">Salutation:</label>
+              <span class="text-gray-800">{{ customer()!.salutation }}</span>
             </div>
-            <div class="detail-item">
-              <label>First Name:</label>
-              <span>{{ customer()!.firstName }}</span>
+            <div>
+              <label class="block text-sm font-medium text-gray-600 mb-1">First Name:</label>
+              <span class="text-gray-800">{{ customer()!.firstName }}</span>
             </div>
-            <div class="detail-item">
-              <label>Last Name:</label>
-              <span>{{ customer()!.lastName }}</span>
+            <div>
+              <label class="block text-sm font-medium text-gray-600 mb-1">Last Name:</label>
+              <span class="text-gray-800">{{ customer()!.lastName }}</span>
             </div>
-            <div class="detail-item">
-              <label>Date of Birth:</label>
-              <span>{{ customer()!.dateOfBirth }}</span>
+            <div>
+              <label class="block text-sm font-medium text-gray-600 mb-1">Date of Birth:</label>
+              <span class="text-gray-800">{{ customer()!.dateOfBirth }}</span>
             </div>
-            <div class="detail-item">
-              <label>Email:</label>
-              <span>{{ customer()!.email }}</span>
+            <div>
+              <label class="block text-sm font-medium text-gray-600 mb-1">Email:</label>
+              <span class="text-gray-800">{{ customer()!.email }}</span>
             </div>
             @if (customer()!.phoneNumber) {
-              <div class="detail-item">
-                <label>Phone Number:</label>
-                <span>{{ customer()!.phoneNumber }}</span>
+              <div>
+                <label class="block text-sm font-medium text-gray-600 mb-1">Phone Number:</label>
+                <span class="text-gray-800">{{ customer()!.phoneNumber }}</span>
               </div>
             }
           </div>
         </div>
 
-        <div class="detail-section">
-          <h3>Address</h3>
-          <div class="detail-grid">
-            <div class="detail-item">
-              <label>Street:</label>
-              <span>{{ customer()!.address.street }}</span>
+        <div class="mb-6">
+          <h3 class="text-xl font-semibold text-gray-700 mb-4">Address</h3>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-600 mb-1">Street:</label>
+              <span class="text-gray-800">{{ customer()!.address.street }}</span>
             </div>
-            <div class="detail-item">
-              <label>House Number:</label>
-              <span>{{ customer()!.address.houseNumber }}</span>
+            <div>
+              <label class="block text-sm font-medium text-gray-600 mb-1">House Number:</label>
+              <span class="text-gray-800">{{ customer()!.address.houseNumber }}</span>
             </div>
-            <div class="detail-item">
-              <label>Postal Code:</label>
-              <span>{{ customer()!.address.postalCode }}</span>
+            <div>
+              <label class="block text-sm font-medium text-gray-600 mb-1">Postal Code:</label>
+              <span class="text-gray-800">{{ customer()!.address.postalCode }}</span>
             </div>
-            <div class="detail-item">
-              <label>City:</label>
-              <span>{{ customer()!.address.city }}</span>
+            <div>
+              <label class="block text-sm font-medium text-gray-600 mb-1">City:</label>
+              <span class="text-gray-800">{{ customer()!.address.city }}</span>
             </div>
-            <div class="detail-item">
-              <label>Country:</label>
-              <span>{{ customer()!.address.country }}</span>
+            <div>
+              <label class="block text-sm font-medium text-gray-600 mb-1">Country:</label>
+              <span class="text-gray-800">{{ customer()!.address.country }}</span>
             </div>
           </div>
         </div>
@@ -104,109 +104,109 @@
 
       @if (isEditMode()) {
         <!-- Edit Mode -->
-        <form [formGroup]="customerForm" class="customer-form">
-          <div class="form-section">
-            <h3>Personal Information</h3>
+        <form [formGroup]="customerForm">
+          <div class="mb-6">
+            <h3 class="text-xl font-semibold text-gray-700 mb-4">Personal Information</h3>
 
-            <div class="form-group">
-              <label for="salutation">Salutation *</label>
-              <select id="salutation" formControlName="salutation" class="form-control">
+            <div class="mb-4">
+              <label for="salutation" class="block text-sm font-medium text-gray-700 mb-1">Salutation *</label>
+              <select id="salutation" formControlName="salutation" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
                 <option value="">Select salutation</option>
                 @for (sal of salutations; track sal) {
                   <option [value]="sal">{{ sal }}</option>
                 }
               </select>
               @if (customerForm.get('salutation')?.invalid && customerForm.get('salutation')?.touched) {
-                <div class="error">Salutation is required</div>
+                <div class="text-red-600 text-sm mt-1">Salutation is required</div>
               }
             </div>
 
-            <div class="form-row">
-              <div class="form-group">
-                <label for="firstName">First Name *</label>
-                <input id="firstName" type="text" formControlName="firstName" class="form-control">
+            <div class="grid grid-cols-2 gap-4 mb-4">
+              <div>
+                <label for="firstName" class="block text-sm font-medium text-gray-700 mb-1">First Name *</label>
+                <input id="firstName" type="text" formControlName="firstName" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
                 @if (customerForm.get('firstName')?.invalid && customerForm.get('firstName')?.touched) {
-                  <div class="error">First name is required</div>
+                  <div class="text-red-600 text-sm mt-1">First name is required</div>
                 }
               </div>
 
-              <div class="form-group">
-                <label for="lastName">Last Name *</label>
-                <input id="lastName" type="text" formControlName="lastName" class="form-control">
+              <div>
+                <label for="lastName" class="block text-sm font-medium text-gray-700 mb-1">Last Name *</label>
+                <input id="lastName" type="text" formControlName="lastName" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
                 @if (customerForm.get('lastName')?.invalid && customerForm.get('lastName')?.touched) {
-                  <div class="error">Last name is required</div>
+                  <div class="text-red-600 text-sm mt-1">Last name is required</div>
                 }
               </div>
             </div>
 
-            <div class="form-group">
-              <label for="dateOfBirth">Date of Birth *</label>
-              <input id="dateOfBirth" type="date" formControlName="dateOfBirth" class="form-control">
+            <div class="mb-4">
+              <label for="dateOfBirth" class="block text-sm font-medium text-gray-700 mb-1">Date of Birth *</label>
+              <input id="dateOfBirth" type="date" formControlName="dateOfBirth" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
               @if (customerForm.get('dateOfBirth')?.invalid && customerForm.get('dateOfBirth')?.touched) {
-                <div class="error">Date of birth is required</div>
+                <div class="text-red-600 text-sm mt-1">Date of birth is required</div>
               }
             </div>
 
-            <div class="form-row">
-              <div class="form-group">
-                <label for="email">Email *</label>
-                <input id="email" type="email" formControlName="email" class="form-control">
+            <div class="grid grid-cols-2 gap-4 mb-4">
+              <div>
+                <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email *</label>
+                <input id="email" type="email" formControlName="email" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
                 @if (customerForm.get('email')?.invalid && customerForm.get('email')?.touched) {
-                  <div class="error">Valid email is required</div>
+                  <div class="text-red-600 text-sm mt-1">Valid email is required</div>
                 }
               </div>
 
-              <div class="form-group">
-                <label for="phoneNumber">Phone Number</label>
-                <input id="phoneNumber" type="tel" formControlName="phoneNumber" class="form-control">
+              <div>
+                <label for="phoneNumber" class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
+                <input id="phoneNumber" type="tel" formControlName="phoneNumber" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
               </div>
             </div>
           </div>
 
-          <div class="form-section">
-            <h3>Address</h3>
+          <div class="mb-6">
+            <h3 class="text-xl font-semibold text-gray-700 mb-4">Address</h3>
 
-            <div class="form-row">
-              <div class="form-group">
-                <label for="street">Street *</label>
-                <input id="street" type="text" formControlName="street" class="form-control">
+            <div class="grid grid-cols-2 gap-4 mb-4">
+              <div>
+                <label for="street" class="block text-sm font-medium text-gray-700 mb-1">Street *</label>
+                <input id="street" type="text" formControlName="street" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
                 @if (customerForm.get('street')?.invalid && customerForm.get('street')?.touched) {
-                  <div class="error">Street is required</div>
+                  <div class="text-red-600 text-sm mt-1">Street is required</div>
                 }
               </div>
 
-              <div class="form-group">
-                <label for="houseNumber">House Number *</label>
-                <input id="houseNumber" type="text" formControlName="houseNumber" class="form-control">
+              <div>
+                <label for="houseNumber" class="block text-sm font-medium text-gray-700 mb-1">House Number *</label>
+                <input id="houseNumber" type="text" formControlName="houseNumber" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
                 @if (customerForm.get('houseNumber')?.invalid && customerForm.get('houseNumber')?.touched) {
-                  <div class="error">House number is required</div>
+                  <div class="text-red-600 text-sm mt-1">House number is required</div>
                 }
               </div>
             </div>
 
-            <div class="form-row">
-              <div class="form-group">
-                <label for="postalCode">Postal Code *</label>
-                <input id="postalCode" type="text" formControlName="postalCode" class="form-control">
+            <div class="grid grid-cols-2 gap-4 mb-4">
+              <div>
+                <label for="postalCode" class="block text-sm font-medium text-gray-700 mb-1">Postal Code *</label>
+                <input id="postalCode" type="text" formControlName="postalCode" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
                 @if (customerForm.get('postalCode')?.invalid && customerForm.get('postalCode')?.touched) {
-                  <div class="error">Postal code is required</div>
+                  <div class="text-red-600 text-sm mt-1">Postal code is required</div>
                 }
               </div>
 
-              <div class="form-group">
-                <label for="city">City *</label>
-                <input id="city" type="text" formControlName="city" class="form-control">
+              <div>
+                <label for="city" class="block text-sm font-medium text-gray-700 mb-1">City *</label>
+                <input id="city" type="text" formControlName="city" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
                 @if (customerForm.get('city')?.invalid && customerForm.get('city')?.touched) {
-                  <div class="error">City is required</div>
+                  <div class="text-red-600 text-sm mt-1">City is required</div>
                 }
               </div>
             </div>
 
-            <div class="form-group">
-              <label for="country">Country *</label>
-              <input id="country" type="text" formControlName="country" class="form-control">
+            <div class="mb-4">
+              <label for="country" class="block text-sm font-medium text-gray-700 mb-1">Country *</label>
+              <input id="country" type="text" formControlName="country" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
               @if (customerForm.get('country')?.invalid && customerForm.get('country')?.touched) {
-                <div class="error">Country is required</div>
+                <div class="text-red-600 text-sm mt-1">Country is required</div>
               }
             </div>
           </div>
@@ -215,38 +215,47 @@
 
       <!-- Invoices Section -->
       @if (!isEditMode()) {
-        <div class="detail-section">
-          <h3>Invoices</h3>
+        <div class="mb-6">
+          <h3 class="text-xl font-semibold text-gray-700 mb-4">Invoices</h3>
           @if (isLoadingInvoices()) {
-            <div class="loading-small">Loading invoices...</div>
+            <div class="text-center py-5 text-gray-500">Loading invoices...</div>
           }
           @if (!isLoadingInvoices() && invoices().length === 0) {
-            <p>No invoices found for this customer.</p>
+            <p class="text-gray-600">No invoices found for this customer.</p>
           }
           @if (!isLoadingInvoices() && invoices().length > 0) {
-            <div class="invoices-table">
-              <table>
-                <thead>
+            <div class="overflow-x-auto">
+              <table class="w-full border-collapse">
+                <thead class="bg-gray-100">
                   <tr>
-                    <th>Invoice ID</th>
-                    <th>Amount</th>
-                    <th>Due Date</th>
-                    <th>Status</th>
-                    <th>Installment</th>
+                    <th class="px-3 py-3 text-left border-b-2 border-gray-300 font-semibold">Invoice ID</th>
+                    <th class="px-3 py-3 text-left border-b-2 border-gray-300 font-semibold">Amount</th>
+                    <th class="px-3 py-3 text-left border-b-2 border-gray-300 font-semibold">Due Date</th>
+                    <th class="px-3 py-3 text-left border-b-2 border-gray-300 font-semibold">Status</th>
+                    <th class="px-3 py-3 text-left border-b-2 border-gray-300 font-semibold">Installment</th>
                   </tr>
                 </thead>
                 <tbody>
                   @for (invoice of invoices(); track invoice.invoiceId) {
-                    <tr>
-                      <td>{{ invoice.invoiceId.substring(0, 8) }}...</td>
-                      <td>{{ invoice.amount | currency }}</td>
-                      <td>{{ invoice.dueDate }}</td>
-                      <td>
-                        <span [class]="'status-badge status-' + invoice.status.toLowerCase()">
+                    <tr class="hover:bg-gray-50">
+                      <td class="px-3 py-3 border-b border-gray-200">{{ invoice.invoiceId.substring(0, 8) }}...</td>
+                      <td class="px-3 py-3 border-b border-gray-200">{{ invoice.amount | currency }}</td>
+                      <td class="px-3 py-3 border-b border-gray-200">{{ invoice.dueDate }}</td>
+                      <td class="px-3 py-3 border-b border-gray-200">
+                        <span *ngIf="invoice.status === 'OPEN'" class="px-2 py-1 rounded text-xs font-semibold uppercase bg-blue-100 text-blue-800">
+                          {{ invoice.status }}
+                        </span>
+                        <span *ngIf="invoice.status === 'PAID'" class="px-2 py-1 rounded text-xs font-semibold uppercase bg-green-100 text-green-800">
+                          {{ invoice.status }}
+                        </span>
+                        <span *ngIf="invoice.status === 'OVERDUE'" class="px-2 py-1 rounded text-xs font-semibold uppercase bg-orange-100 text-orange-800">
+                          {{ invoice.status }}
+                        </span>
+                        <span *ngIf="invoice.status === 'CANCELLED'" class="px-2 py-1 rounded text-xs font-semibold uppercase bg-red-100 text-red-800">
                           {{ invoice.status }}
                         </span>
                       </td>
-                      <td>{{ invoice.isInstallment ? 'Yes (' + invoice.installmentNumber + ')' : 'No' }}</td>
+                      <td class="px-3 py-3 border-b border-gray-200">{{ invoice.isInstallment ? 'Yes (' + invoice.installmentNumber + ')' : 'No' }}</td>
                     </tr>
                   }
                 </tbody>
@@ -260,36 +269,36 @@
 
   <!-- Product Selection Modal -->
   @if (showProductSelection()) {
-    <div class="modal-overlay" (click)="closeProductSelection()">
-      <div class="modal-content" (click)="$event.stopPropagation()">
-        <div class="modal-header">
-          <h3>Select Product</h3>
-          <button (click)="closeProductSelection()" class="modal-close">&times;</button>
+    <div class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50" (click)="closeProductSelection()">
+      <div class="bg-white rounded-lg max-w-5xl w-11/12 max-h-[90vh] overflow-y-auto shadow-xl" (click)="$event.stopPropagation()">
+        <div class="flex justify-between items-center p-6 border-b border-gray-200">
+          <h3 class="text-2xl font-semibold text-gray-800">Select Product</h3>
+          <button (click)="closeProductSelection()" class="text-3xl font-bold text-gray-600 hover:text-gray-800 cursor-pointer bg-transparent border-none">&times;</button>
         </div>
 
-        <div class="modal-body">
+        <div class="p-6">
           @if (isLoadingProducts()) {
-            <div class="loading">Loading products...</div>
+            <div class="text-center py-10 text-gray-500 text-lg">Loading products...</div>
           }
 
           @if (!isLoadingProducts() && availableProducts().length === 0) {
-            <div class="empty-state">No products available</div>
+            <div class="text-center py-20 text-gray-600 text-lg">No products available</div>
           }
 
           @if (!isLoadingProducts() && availableProducts().length > 0) {
-            <div class="product-grid">
+            <div class="grid grid-cols-3 gap-4">
               @for (product of availableProducts(); track product.productId) {
-                <div class="product-card" [class.disabled]="isAssigningProduct()">
-                  <h4>{{ product.name }}</h4>
-                  <div class="product-info">
-                    <div><strong>Code:</strong> {{ product.code }}</div>
-                    <div><strong>Type:</strong> {{ product.productType }}</div>
-                    <div><strong>Price:</strong> {{ product.price | currency }}</div>
-                    <div><strong>Audience:</strong> {{ product.audience }}</div>
+                <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow" [class.opacity-50]="isAssigningProduct()">
+                  <h4 class="text-lg font-semibold text-gray-800 mb-3">{{ product.name }}</h4>
+                  <div class="space-y-2 mb-4 text-sm">
+                    <div><strong class="text-gray-600">Code:</strong> <span class="text-gray-800">{{ product.code }}</span></div>
+                    <div><strong class="text-gray-600">Type:</strong> <span class="text-gray-800">{{ product.productType }}</span></div>
+                    <div><strong class="text-gray-600">Price:</strong> <span class="text-gray-800">{{ product.price | currency }}</span></div>
+                    <div><strong class="text-gray-600">Audience:</strong> <span class="text-gray-800">{{ product.audience }}</span></div>
                   </div>
                   <button
                     (click)="selectProduct(product)"
-                    class="btn btn-primary btn-block"
+                    class="w-full px-4 py-2 bg-blue-500 text-white rounded border-none cursor-pointer text-sm font-medium hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     [disabled]="isAssigningProduct()"
                   >
                     {{ isAssigningProduct() ? 'Assigning...' : 'Select' }}

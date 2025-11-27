@@ -1,74 +1,74 @@
-<div class="customer-list-container">
-  <div class="header">
-    <h2>Customer List</h2>
-    <button (click)="createCustomer()" class="btn btn-primary">Add Customer</button>
+<div class="p-5 max-w-7xl mx-auto">
+  <div class="flex justify-between items-center mb-5">
+    <h2 class="text-3xl font-bold text-gray-800">Customer List</h2>
+    <button (click)="createCustomer()" class="px-4 py-2 bg-blue-500 text-white rounded border-none cursor-pointer text-sm font-medium hover:bg-blue-600 transition-colors">Add Customer</button>
   </div>
 
   @if (!isLoading() && !errorMessage()) {
-    <div class="search-container">
+    <div class="mb-5">
       <input
         type="text"
         [ngModel]="searchTerm()"
         (ngModelChange)="onSearchChange($event)"
         placeholder="Search by customer name..."
-        class="search-input"
+        class="w-full px-3 py-2 text-base border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
       />
     </div>
   }
 
   @if (isLoading()) {
-    <div class="loading">
+    <div class="text-center py-10 text-gray-500 text-lg">
       Loading customers...
     </div>
   }
 
   @if (errorMessage() && !isLoading()) {
-    <div class="alert alert-error">
+    <div class="p-4 mb-4 bg-red-100 border border-red-400 text-red-700 rounded">
       {{ errorMessage() }}
     </div>
   }
 
   @if (!isLoading() && !errorMessage()) {
     @if (customers().length === 0) {
-      <div class="empty-state">
-        <p>No customers found.</p>
-        <button (click)="createCustomer()" class="btn btn-primary">Create First Customer</button>
+      <div class="text-center py-20">
+        <p class="text-gray-600 text-lg mb-4">No customers found.</p>
+        <button (click)="createCustomer()" class="px-4 py-2 bg-blue-500 text-white rounded border-none cursor-pointer text-sm font-medium hover:bg-blue-600 transition-colors">Create First Customer</button>
       </div>
     } @else {
-      <div class="customer-table">
-        <table>
-          <thead>
+      <div class="overflow-x-auto bg-white shadow-md rounded-lg">
+        <table class="w-full border-collapse">
+          <thead class="bg-gray-100">
             <tr>
-              <th (click)="sortBy('name')" class="sortable">
+              <th (click)="sortBy('name')" class="px-3 py-3 text-left border-b-2 border-gray-300 cursor-pointer select-none font-semibold hover:bg-gray-200 transition-colors">
                 Name {{ getSortIcon('name') }}
               </th>
-              <th (click)="sortBy('email')" class="sortable">
+              <th (click)="sortBy('email')" class="px-3 py-3 text-left border-b-2 border-gray-300 cursor-pointer select-none font-semibold hover:bg-gray-200 transition-colors">
                 Email {{ getSortIcon('email') }}
               </th>
-              <th (click)="sortBy('phone')" class="sortable">
+              <th (click)="sortBy('phone')" class="px-3 py-3 text-left border-b-2 border-gray-300 cursor-pointer select-none font-semibold hover:bg-gray-200 transition-colors">
                 Phone {{ getSortIcon('phone') }}
               </th>
-              <th (click)="sortBy('city')" class="sortable">
+              <th (click)="sortBy('city')" class="px-3 py-3 text-left border-b-2 border-gray-300 cursor-pointer select-none font-semibold hover:bg-gray-200 transition-colors">
                 City {{ getSortIcon('city') }}
               </th>
-              <th (click)="sortBy('dateOfBirth')" class="sortable">
+              <th (click)="sortBy('dateOfBirth')" class="px-3 py-3 text-left border-b-2 border-gray-300 cursor-pointer select-none font-semibold hover:bg-gray-200 transition-colors">
                 Date of Birth {{ getSortIcon('dateOfBirth') }}
               </th>
-              <th>Actions</th>
+              <th class="px-3 py-3 text-left border-b-2 border-gray-300 font-semibold">Actions</th>
             </tr>
           </thead>
           <tbody>
             @for (customer of customers(); track customer.customerId) {
-              <tr class="customer-row" (click)="viewCustomer(customer.customerId)">
-                <td>{{ getFullName(customer) }}</td>
-                <td>{{ customer.email }}</td>
-                <td>{{ customer.phoneNumber || 'N/A' }}</td>
-                <td>{{ customer.address.city }}</td>
-                <td>{{ customer.dateOfBirth }}</td>
-                <td>
+              <tr class="hover:bg-gray-50 transition-colors cursor-pointer" (click)="viewCustomer(customer.customerId)">
+                <td class="px-3 py-3 border-b border-gray-200">{{ getFullName(customer) }}</td>
+                <td class="px-3 py-3 border-b border-gray-200">{{ customer.email }}</td>
+                <td class="px-3 py-3 border-b border-gray-200">{{ customer.phoneNumber || 'N/A' }}</td>
+                <td class="px-3 py-3 border-b border-gray-200">{{ customer.address.city }}</td>
+                <td class="px-3 py-3 border-b border-gray-200">{{ customer.dateOfBirth }}</td>
+                <td class="px-3 py-3 border-b border-gray-200">
                   <button
                     (click)="viewCustomer(customer.customerId); $event.stopPropagation()"
-                    class="btn btn-small btn-view">
+                    class="px-3 py-1.5 bg-blue-500 text-white rounded border-none cursor-pointer text-sm hover:bg-blue-600 transition-colors">
                     View Details
                   </button>
                 </td>

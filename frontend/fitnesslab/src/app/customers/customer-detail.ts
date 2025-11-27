@@ -11,8 +11,7 @@ import {Invoices, InvoiceView} from '../invoices/invoices';
   selector: 'app-customer-detail',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
-  templateUrl: './customer-detail.html',
-  styleUrls: ['./customer-detail.css']
+  templateUrl: './customer-detail.html'
 })
 export class CustomerDetail implements OnInit {
   customer = signal<CustomerView | null>(null);

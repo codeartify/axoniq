@@ -1,8 +1,8 @@
-import { Component, OnInit, signal, computed } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
-import { FormsModule } from '@angular/forms';
-import { Products, ProductView } from './products';
+import {Component, computed, OnInit, signal} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {Router} from '@angular/router';
+import {FormsModule} from '@angular/forms';
+import {Products, ProductView} from './products';
 
 type SortColumn = 'name' | 'code' | 'productType' | 'price' | 'audience';
 type SortDirection = 'asc' | 'desc';
@@ -11,8 +11,7 @@ type SortDirection = 'asc' | 'desc';
   selector: 'app-product-list',
   standalone: true,
   imports: [CommonModule, FormsModule],
-  templateUrl: './product-list.html',
-  styleUrls: ['./product-list.css']
+  templateUrl: './product-list.html'
 })
 export class ProductList implements OnInit {
   allProducts = signal<ProductView[]>([]);
@@ -35,7 +34,7 @@ export class ProductList implements OnInit {
     }
 
     // Sort by column
-    const sorted = [...filtered].sort((a, b) => {
+    return [...filtered].sort((a, b) => {
       let comparison = 0;
 
       switch (this.sortColumn()) {
@@ -58,8 +57,6 @@ export class ProductList implements OnInit {
 
       return this.sortDirection() === 'asc' ? comparison : -comparison;
     });
-
-    return sorted;
   });
 
   constructor(

@@ -1,13 +1,18 @@
-<div class="app-container">
-  <header class="app-header">
-    <h1>{{ companyName() }}</h1>
-    <nav class="app-nav">
-      <a routerLink="/customers" routerLinkActive="active" class="nav-link">Customers</a>
-      <a routerLink="/products" routerLinkActive="active" class="nav-link">Products</a>
-      <a routerLink="/invoices" routerLinkActive="active" class="nav-link">Invoices</a>
-    </nav>
+<div class="min-h-screen bg-gray-50">
+  <header class="bg-white shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+      <h1 class="text-2xl font-bold text-gray-900">{{ companyName() }}</h1>
+      <nav class="flex gap-6">
+        <a routerLink="/customers" routerLinkActive="text-blue-600 font-semibold"
+           [routerLinkActiveOptions]="{exact: false}" class="text-gray-700 hover:text-blue-600 transition-colors">Customers</a>
+        <a routerLink="/products" routerLinkActive="text-blue-600 font-semibold"
+           [routerLinkActiveOptions]="{exact: false}" class="text-gray-700 hover:text-blue-600 transition-colors">Products</a>
+        <a routerLink="/invoices" routerLinkActive="text-blue-600 font-semibold"
+           [routerLinkActiveOptions]="{exact: false}" class="text-gray-700 hover:text-blue-600 transition-colors">Invoices</a>
+      </nav>
+    </div>
   </header>
-  <main class="app-content">
+  <main>
     <router-outlet />
   </main>
 </div>

@@ -1,107 +1,116 @@
-<div class="invoice-list-container">
-  <h1>Invoices</h1>
+<div class="p-5 max-w-7xl mx-auto">
+  <h1 class="text-3xl font-bold text-gray-800 mb-5">Invoices</h1>
 
-  <div class="search-bar">
+  <div class="mb-5">
     <input
       type="text"
       placeholder="Search invoices..."
       [ngModel]="searchTerm()"
       (ngModelChange)="searchTerm.set($event)"
-      class="search-input"
+      class="w-full px-3 py-2 text-base border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
     />
   </div>
 
-  <table class="invoice-table">
-    <thead>
-      <tr>
-        <th (click)="sortBy('invoiceId')">
-          Invoice ID {{ getSortIcon('invoiceId') }}
-        </th>
-        <th (click)="sortBy('customerName')">
-          Customer Name {{ getSortIcon('customerName') }}
-        </th>
-        <th (click)="sortBy('amount')">
-          Amount {{ getSortIcon('amount') }}
-        </th>
-        <th (click)="sortBy('dueDate')">
-          Due Date {{ getSortIcon('dueDate') }}
-        </th>
-        <th (click)="sortBy('status')">
-          Status {{ getSortIcon('status') }}
-        </th>
-        <th>Installment</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let invoice of filteredAndSortedInvoices()">
-        <td>{{ invoice.invoiceId.substring(0, 8) }}...</td>
-        <td>
-          <a (click)="viewCustomer(invoice.customerId)" class="customer-link">
-            {{ invoice.customerName }}
-          </a>
-        </td>
-        <td>CHF {{ invoice.amount | number:'1.2-2' }}</td>
-        <td>{{ invoice.dueDate | date:'shortDate' }}</td>
-        <td>
-          <span [ngClass]="getStatusClass(invoice.status)" class="status-badge">
-            {{ invoice.status }}
-          </span>
-        </td>
-        <td>
-          <span *ngIf="invoice.isInstallment">
-            Yes (#{{ invoice.installmentNumber }})
-          </span>
-          <span *ngIf="!invoice.isInstallment">No</span>
-        </td>
-        <td class="actions">
-          <button
-            *ngIf="invoice.status === 'OPEN' || invoice.status === 'OVERDUE'"
-            (click)="markAsPaid(invoice.invoiceId)"
-            class="btn btn-success"
-          >
-            Mark Paid
-          </button>
-          <button
-            *ngIf="invoice.status === 'OPEN'"
-            (click)="markAsOverdue(invoice.invoiceId)"
-            class="btn btn-warning"
-          >
-            Mark Overdue
-          </button>
-          <button
-            *ngIf="invoice.status !== 'PAID' && invoice.status !== 'CANCELLED'"
-            (click)="openCancelModal(invoice.invoiceId)"
-            class="btn btn-danger"
-          >
-            Cancel
-          </button>
-        </td>
-      </tr>
-    </tbody>
-  </table>
+  <div class="overflow-x-auto bg-white shadow-md rounded-lg">
+    <table class="w-full border-collapse">
+      <thead class="bg-gray-100">
+        <tr>
+          <th (click)="sortBy('invoiceId')" class="px-3 py-3 text-left border-b-2 border-gray-300 cursor-pointer select-none font-semibold hover:bg-gray-200 transition-colors">
+            Invoice ID {{ getSortIcon('invoiceId') }}
+          </th>
+          <th (click)="sortBy('customerName')" class="px-3 py-3 text-left border-b-2 border-gray-300 cursor-pointer select-none font-semibold hover:bg-gray-200 transition-colors">
+            Customer Name {{ getSortIcon('customerName') }}
+          </th>
+          <th (click)="sortBy('amount')" class="px-3 py-3 text-left border-b-2 border-gray-300 cursor-pointer select-none font-semibold hover:bg-gray-200 transition-colors">
+            Amount {{ getSortIcon('amount') }}
+          </th>
+          <th (click)="sortBy('dueDate')" class="px-3 py-3 text-left border-b-2 border-gray-300 cursor-pointer select-none font-semibold hover:bg-gray-200 transition-colors">
+            Due Date {{ getSortIcon('dueDate') }}
+          </th>
+          <th (click)="sortBy('status')" class="px-3 py-3 text-left border-b-2 border-gray-300 cursor-pointer select-none font-semibold hover:bg-gray-200 transition-colors">
+            Status {{ getSortIcon('status') }}
+          </th>
+          <th class="px-3 py-3 text-left border-b-2 border-gray-300 font-semibold">Installment</th>
+          <th class="px-3 py-3 text-left border-b-2 border-gray-300 font-semibold">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let invoice of filteredAndSortedInvoices()" class="hover:bg-gray-50 transition-colors">
+          <td class="px-3 py-3 border-b border-gray-200">{{ invoice.invoiceId.substring(0, 8) }}...</td>
+          <td class="px-3 py-3 border-b border-gray-200">
+            <a (click)="viewCustomer(invoice.customerId)" class="text-blue-600 cursor-pointer underline hover:text-blue-800">
+              {{ invoice.customerName }}
+            </a>
+          </td>
+          <td class="px-3 py-3 border-b border-gray-200">CHF {{ invoice.amount | number:'1.2-2' }}</td>
+          <td class="px-3 py-3 border-b border-gray-200">{{ invoice.dueDate | date:'shortDate' }}</td>
+          <td class="px-3 py-3 border-b border-gray-200">
+            <span *ngIf="invoice.status === 'OPEN'" class="px-2 py-1 rounded text-xs font-semibold uppercase bg-blue-100 text-blue-800">
+              {{ invoice.status }}
+            </span>
+            <span *ngIf="invoice.status === 'PAID'" class="px-2 py-1 rounded text-xs font-semibold uppercase bg-green-100 text-green-800">
+              {{ invoice.status }}
+            </span>
+            <span *ngIf="invoice.status === 'OVERDUE'" class="px-2 py-1 rounded text-xs font-semibold uppercase bg-orange-100 text-orange-800">
+              {{ invoice.status }}
+            </span>
+            <span *ngIf="invoice.status === 'CANCELLED'" class="px-2 py-1 rounded text-xs font-semibold uppercase bg-red-100 text-red-800">
+              {{ invoice.status }}
+            </span>
+          </td>
+          <td class="px-3 py-3 border-b border-gray-200">
+            <span *ngIf="invoice.isInstallment">Yes (#{{ invoice.installmentNumber }})</span>
+            <span *ngIf="!invoice.isInstallment">No</span>
+          </td>
+          <td class="px-3 py-3 border-b border-gray-200 whitespace-nowrap">
+            <button
+              *ngIf="invoice.status === 'OPEN' || invoice.status === 'OVERDUE'"
+              (click)="markAsPaid(invoice.invoiceId)"
+              class="px-3 py-1.5 bg-green-500 text-white rounded border-none cursor-pointer text-sm mr-2 hover:bg-green-600 transition-colors"
+            >
+              Mark Paid
+            </button>
+            <button
+              *ngIf="invoice.status === 'OPEN'"
+              (click)="markAsOverdue(invoice.invoiceId)"
+              class="px-3 py-1.5 bg-orange-500 text-white rounded border-none cursor-pointer text-sm mr-2 hover:bg-orange-600 transition-colors"
+            >
+              Mark Overdue
+            </button>
+            <button
+              *ngIf="invoice.status !== 'PAID' && invoice.status !== 'CANCELLED'"
+              (click)="openCancelModal(invoice.invoiceId)"
+              class="px-3 py-1.5 bg-red-500 text-white rounded border-none cursor-pointer text-sm mr-2 hover:bg-red-600 transition-colors"
+            >
+              Cancel
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 
-  <div *ngIf="filteredAndSortedInvoices().length === 0" class="no-results">
+  <div *ngIf="filteredAndSortedInvoices().length === 0" class="text-center py-10 text-gray-500 text-lg">
     No invoices found.
   </div>
 </div>
 
 <!-- Cancel Modal -->
-<div *ngIf="showCancelModal()" class="modal-overlay" (click)="closeCancelModal()">
-  <div class="modal-content" (click)="$event.stopPropagation()">
-    <h2>Cancel Invoice</h2>
-    <p>Please provide a reason for cancellation:</p>
+<div *ngIf="showCancelModal()" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50" (click)="closeCancelModal()">
+  <div class="bg-white p-6 rounded-lg max-w-lg w-11/12 shadow-xl" (click)="$event.stopPropagation()">
+    <h2 class="mt-0 mb-4 text-xl font-semibold text-gray-800">Cancel Invoice</h2>
+    <p class="mb-4">Please provide a reason for cancellation:</p>
     <textarea
       [(ngModel)]="cancelReason"
-      class="cancel-reason-input"
+      class="w-full px-3 py-2 border border-gray-300 rounded text-sm resize-y mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
       placeholder="Enter cancellation reason..."
       rows="4"
     ></textarea>
-    <div class="modal-actions">
-      <button (click)="closeCancelModal()" class="btn btn-secondary">
+    <div class="flex justify-end gap-2">
+      <button (click)="closeCancelModal()" class="px-3 py-1.5 bg-gray-500 text-white rounded border-none cursor-pointer text-sm hover:bg-gray-600 transition-colors">
         Close
       </button>
-      <button (click)="confirmCancel()" class="btn btn-danger">
+      <button (click)="confirmCancel()" class="px-3 py-1.5 bg-red-500 text-white rounded border-none cursor-pointer text-sm hover:bg-red-600 transition-colors">
         Confirm Cancel
       </button>
     </div>

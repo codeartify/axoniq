@@ -11,8 +11,7 @@ type SortDirection = 'asc' | 'desc';
   selector: 'app-customer-list',
   standalone: true,
   imports: [CommonModule, FormsModule],
-  templateUrl: './customer-list.html',
-  styleUrls: ['./customer-list.css']
+  templateUrl: './customer-list.html'
 })
 export class CustomerList implements OnInit {
   allCustomers = signal<CustomerView[]>([]);

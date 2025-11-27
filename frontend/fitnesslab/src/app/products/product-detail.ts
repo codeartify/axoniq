@@ -8,8 +8,7 @@ import { Products, ProductView, UpdateProductRequest } from './products';
   selector: 'app-product-detail',
   standalone: true,
   imports: [CommonModule, FormsModule],
-  templateUrl: './product-detail.html',
-  styleUrls: ['./product-detail.css']
+  templateUrl: './product-detail.html'
 })
 export class ProductDetail implements OnInit {
   product = signal<ProductView | null>(null);

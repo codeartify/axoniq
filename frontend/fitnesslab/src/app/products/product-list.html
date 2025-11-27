@@ -1,76 +1,76 @@
-<div class="product-list-container">
-  <div class="header">
-    <h2>Product List</h2>
-    <button (click)="createProduct()" class="btn btn-primary">Add Product</button>
+<div class="p-5 max-w-7xl mx-auto">
+  <div class="flex justify-between items-center mb-5">
+    <h2 class="text-3xl font-bold text-gray-800">Product List</h2>
+    <button (click)="createProduct()" class="px-4 py-2 bg-blue-500 text-white rounded border-none cursor-pointer text-sm font-medium hover:bg-blue-600 transition-colors">Add Product</button>
   </div>
 
   @if (!isLoading() && !errorMessage()) {
-    <div class="search-container">
+    <div class="mb-5">
       <input
         type="text"
         [ngModel]="searchTerm()"
         (ngModelChange)="onSearchChange($event)"
         placeholder="Search by product name or code..."
-        class="search-input"
+        class="w-full px-3 py-2 text-base border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
       />
     </div>
   }
 
   @if (isLoading()) {
-    <div class="loading">
+    <div class="text-center py-10 text-gray-500 text-lg">
       Loading products...
     </div>
   }
 
   @if (errorMessage() && !isLoading()) {
-    <div class="alert alert-error">
+    <div class="p-4 mb-4 bg-red-100 border border-red-400 text-red-700 rounded">
       {{ errorMessage() }}
     </div>
   }
 
   @if (!isLoading() && !errorMessage()) {
     @if (products().length === 0) {
-      <div class="empty-state">
-        <p>No products found.</p>
-        <button (click)="createProduct()" class="btn btn-primary">Create First Product</button>
+      <div class="text-center py-20">
+        <p class="text-gray-600 text-lg mb-4">No products found.</p>
+        <button (click)="createProduct()" class="px-4 py-2 bg-blue-500 text-white rounded border-none cursor-pointer text-sm font-medium hover:bg-blue-600 transition-colors">Create First Product</button>
       </div>
     } @else {
-      <div class="product-table">
-        <table>
-          <thead>
+      <div class="overflow-x-auto bg-white shadow-md rounded-lg">
+        <table class="w-full border-collapse">
+          <thead class="bg-gray-100">
             <tr>
-              <th (click)="sortBy('code')" class="sortable">
+              <th (click)="sortBy('code')" class="px-3 py-3 text-left border-b-2 border-gray-300 cursor-pointer select-none font-semibold hover:bg-gray-200 transition-colors">
                 Code {{ getSortIcon('code') }}
               </th>
-              <th (click)="sortBy('name')" class="sortable">
+              <th (click)="sortBy('name')" class="px-3 py-3 text-left border-b-2 border-gray-300 cursor-pointer select-none font-semibold hover:bg-gray-200 transition-colors">
                 Name {{ getSortIcon('name') }}
               </th>
-              <th (click)="sortBy('productType')" class="sortable">
+              <th (click)="sortBy('productType')" class="px-3 py-3 text-left border-b-2 border-gray-300 cursor-pointer select-none font-semibold hover:bg-gray-200 transition-colors">
                 Type {{ getSortIcon('productType') }}
               </th>
-              <th (click)="sortBy('price')" class="sortable">
+              <th (click)="sortBy('price')" class="px-3 py-3 text-left border-b-2 border-gray-300 cursor-pointer select-none font-semibold hover:bg-gray-200 transition-colors">
                 Price {{ getSortIcon('price') }}
               </th>
-              <th (click)="sortBy('audience')" class="sortable">
+              <th (click)="sortBy('audience')" class="px-3 py-3 text-left border-b-2 border-gray-300 cursor-pointer select-none font-semibold hover:bg-gray-200 transition-colors">
                 Audience {{ getSortIcon('audience') }}
               </th>
-              <th>Requires Membership</th>
-              <th>Actions</th>
+              <th class="px-3 py-3 text-left border-b-2 border-gray-300 font-semibold">Requires Membership</th>
+              <th class="px-3 py-3 text-left border-b-2 border-gray-300 font-semibold">Actions</th>
             </tr>
           </thead>
           <tbody>
             @for (product of products(); track product.productId) {
-              <tr class="product-row" (click)="viewProduct(product.productId)">
-                <td>{{ product.code }}</td>
-                <td>{{ product.name }}</td>
-                <td>{{ product.productType }}</td>
-                <td>{{ product.price | currency }}</td>
-                <td>{{ product.audience }}</td>
-                <td>{{ product.requiresMembership ? 'Yes' : 'No' }}</td>
-                <td>
+              <tr class="hover:bg-gray-50 transition-colors cursor-pointer" (click)="viewProduct(product.productId)">
+                <td class="px-3 py-3 border-b border-gray-200">{{ product.code }}</td>
+                <td class="px-3 py-3 border-b border-gray-200">{{ product.name }}</td>
+                <td class="px-3 py-3 border-b border-gray-200">{{ product.productType }}</td>
+                <td class="px-3 py-3 border-b border-gray-200">{{ product.price | currency }}</td>
+                <td class="px-3 py-3 border-b border-gray-200">{{ product.audience }}</td>
+                <td class="px-3 py-3 border-b border-gray-200">{{ product.requiresMembership ? 'Yes' : 'No' }}</td>
+                <td class="px-3 py-3 border-b border-gray-200">
                   <button
                     (click)="viewProduct(product.productId); $event.stopPropagation()"
-                    class="btn btn-small btn-view">
+                    class="px-3 py-1.5 bg-blue-500 text-white rounded border-none cursor-pointer text-sm hover:bg-blue-600 transition-colors">
                     View Details
                   </button>
                 </td>

@@ -8,8 +8,7 @@ import { Customers } from './customers';
   selector: 'app-customer-create',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
-  templateUrl: './customer-create.html',
-  styleUrls: ['./customer-create.css']
+  templateUrl: './customer-create.html'
 })
 export class CustomerCreate {
   customerForm: FormGroup;

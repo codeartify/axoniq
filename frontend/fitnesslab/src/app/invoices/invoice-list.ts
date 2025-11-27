@@ -10,8 +10,7 @@ type SortColumn = 'invoiceId' | 'customerName' | 'amount' | 'dueDate' | 'status'
   selector: 'app-invoice-list',
   standalone: true,
   imports: [CommonModule, FormsModule],
-  templateUrl: './invoice-list.html',
-  styleUrls: ['./invoice-list.css']
+  templateUrl: './invoice-list.html'
 })
 export class InvoiceList {
   invoices = signal<InvoiceView[]>([]);
@@ -139,7 +138,4 @@ export class InvoiceList {
     this.router.navigate(['/customers', customerId]);
   }
 
-  getStatusClass(status: string): string {
-    return `status-${status.toLowerCase()}`;
-  }
 }
