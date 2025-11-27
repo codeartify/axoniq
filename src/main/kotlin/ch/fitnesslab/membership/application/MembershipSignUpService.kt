@@ -16,11 +16,8 @@ import ch.fitnesslab.customers.application.CustomerUpdatedUpdate
 import ch.fitnesslab.customers.application.CustomerView
 import ch.fitnesslab.customers.application.FindAllCustomersQuery
 import ch.fitnesslab.product.application.FindAllProductContractsQuery
-import ch.fitnesslab.product.application.FindAllProductsQuery
 import ch.fitnesslab.product.application.ProductContractUpdatedUpdate
 import ch.fitnesslab.product.application.ProductContractView
-import ch.fitnesslab.product.application.ProductUpdatedUpdate
-import ch.fitnesslab.product.application.ProductView
 import ch.fitnesslab.product.domain.commands.CreateProductContractCommand
 import org.axonframework.commandhandling.gateway.CommandGateway
 import org.axonframework.messaging.responsetypes.ResponseTypes

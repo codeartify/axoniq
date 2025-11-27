@@ -198,9 +198,7 @@ export class CustomerDetail implements OnInit {
     this.errorMessage.set(null);
     this.successMessage.set(null);
 
-    // Check if product is a membership type
-    if (product.productType.toUpperCase() === 'MEMBERSHIP') {
-      // Calculate duration months (simplified - you may need to adjust based on product)
+    // Calculate duration months (simplified - you may need to adjust based on product)
       const durationMonths = 12; // Default to 12 months, adjust as needed
 
       const signUpRequest = {
@@ -218,6 +216,7 @@ export class CustomerDetail implements OnInit {
           this.isAssigningProduct.set(false);
           this.successMessage.set(`Membership assigned successfully! Contract ID: ${result.contractId}`);
           this.closeProductSelection();
+          this.loadInvoices(customer.customerId);
         },
         error: (error) => {
           this.isAssigningProduct.set(false);
@@ -225,10 +224,6 @@ export class CustomerDetail implements OnInit {
           console.error('Error assigning membership:', error);
         }
       });
-    } else {
-      // For non-membership products, show a message
-      this.isAssigningProduct.set(false);
-      this.errorMessage.set('Only membership products can be assigned at this time');
-    }
+
   }
 }
