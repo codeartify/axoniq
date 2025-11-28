@@ -1,4 +1,4 @@
-import { Component, effect } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { LoadingService } from './loading.service';
 
@@ -6,6 +6,7 @@ import { LoadingService } from './loading.service';
   selector: 'app-loading-bar',
   standalone: true,
   imports: [CommonModule],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div *ngIf="loadingService.isLoading()" class="fixed top-0 left-0 right-0 z-50">
       <div class="h-1 bg-blue-600 loading-bar"></div>

@@ -92,19 +92,16 @@ export class LoginComponent implements OnInit {
       return;
     }
 
-    // Use setTimeout to avoid ExpressionChangedAfterItHasBeenCheckedError
-    setTimeout(async () => {
-      this.isLoading = true;
-      this.errorMessage = '';
+    this.isLoading = true;
+    this.errorMessage = '';
 
-      try {
-        await this.authService.loginWithCredentials(this.username, this.password);
-        this.router.navigate(['/customers']);
-      } catch (error: any) {
-        console.error('Login error:', error);
-        this.errorMessage = error.error?.error_description || error.error_description || 'Invalid username or password';
-        this.isLoading = false;
-      }
-    }, 0);
+    try {
+      await this.authService.loginWithCredentials(this.username, this.password);
+      this.router.navigate(['/customers']);
+    } catch (error: any) {
+      console.error('Login error:', error);
+      this.errorMessage = error.error?.error_description || error.error_description || 'Invalid username or password';
+      this.isLoading = false;
+    }
   }
 }

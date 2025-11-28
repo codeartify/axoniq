@@ -9,13 +9,13 @@ export class LoadingService {
 
   show(): void {
     this.loadingCount++;
-    this.isLoading.set(true);
+    queueMicrotask(() => this.isLoading.set(true));
   }
 
   hide(): void {
     this.loadingCount = Math.max(0, this.loadingCount - 1);
     if (this.loadingCount === 0) {
-      this.isLoading.set(false);
+      queueMicrotask(() => this.isLoading.set(false));
     }
   }
 
