@@ -45,7 +45,6 @@
   "customer.detail.title": "Customer Details",
   "customer.detail.loadingDetails": "Loading customer details...",
   "customer.detail.personalInformation": "Personal Information",
-  "customer.detail.address": "Address",
   "customer.detail.invoices": "Invoices",
   "customer.detail.loadingInvoices": "Loading invoices...",
   "customer.detail.noInvoicesFound": "No invoices found for this customer.",
@@ -55,7 +54,6 @@
 
   "customer.create.title": "Register New Customer",
   "customer.create.personalInformation": "Personal Information",
-  "customer.create.address": "Address",
 
   "customer.table.name": "Name",
   "customer.table.email": "Email",
@@ -131,6 +129,7 @@
   "form.street": "Street",
   "form.houseNumber": "House Number",
   "form.postalCode": "Postal Code",
+  "form.address": "Address",
   "form.city": "City",
   "form.country": "Country",
 

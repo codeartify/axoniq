@@ -7,7 +7,7 @@ import {Location} from '@angular/common';
 })
 export class TranslationService {
   private readonly SUPPORTED_LANGUAGES = ['en', 'de'];
-  private readonly DEFAULT_LANGUAGE = 'en';
+  private readonly DEFAULT_LANGUAGE = 'de';
 
   private translateService = inject(TranslateService)
   private location = inject(Location)

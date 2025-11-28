@@ -45,7 +45,6 @@
   "customer.detail.title": "Kundendetails",
   "customer.detail.loadingDetails": "Kundendetails werden geladen...",
   "customer.detail.personalInformation": "Persönliche Informationen",
-  "customer.detail.address": "Adresse",
   "customer.detail.invoices": "Rechnungen",
   "customer.detail.loadingInvoices": "Rechnungen werden geladen...",
   "customer.detail.noInvoicesFound": "Keine Rechnungen für diesen Kunden gefunden.",
@@ -55,7 +54,6 @@
 
   "customer.create.title": "Neuen Kunden registrieren",
   "customer.create.personalInformation": "Persönliche Informationen",
-  "customer.create.address": "Adresse",
 
   "customer.table.name": "Name",
   "customer.table.email": "E-Mail",
@@ -128,6 +126,7 @@
   "form.dateOfBirth": "Geburtsdatum",
   "form.email": "E-Mail",
   "form.phoneNumber": "Telefonnummer",
+  "form.address": "Addresse",
   "form.street": "Straße",
   "form.houseNumber": "Hausnummer",
   "form.postalCode": "Postleitzahl",
