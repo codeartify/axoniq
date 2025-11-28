@@ -2,6 +2,7 @@ import {Component, OnInit, signal} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {ActivatedRoute, Router} from '@angular/router';
+import {TranslateModule} from '@ngx-translate/core';
 import {Customers, CustomerView} from './customers';
 import {Products, ProductView} from '../products/products';
 import {Memberships, PaymentMode} from '../memberships/memberships';
@@ -10,7 +11,7 @@ import {Invoices, InvoiceView} from '../invoices/invoices';
 @Component({
   selector: 'app-customer-detail',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, TranslateModule],
   templateUrl: './customer-detail.html'
 })
 export class CustomerDetail implements OnInit {

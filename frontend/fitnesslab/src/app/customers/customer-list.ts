@@ -2,6 +2,7 @@ import {Component, computed, OnInit, signal} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {Router} from '@angular/router';
 import {FormsModule} from '@angular/forms';
+import {TranslateModule} from '@ngx-translate/core';
 import {Customers, CustomerView} from './customers';
 
 type SortColumn = 'name' | 'email' | 'phone' | 'city' | 'dateOfBirth';
@@ -10,7 +11,7 @@ type SortDirection = 'asc' | 'desc';
 @Component({
   selector: 'app-customer-list',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, TranslateModule],
   templateUrl: './customer-list.html'
 })
 export class CustomerList implements OnInit {

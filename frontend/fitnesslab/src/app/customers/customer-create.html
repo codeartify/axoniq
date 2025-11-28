@@ -1,95 +1,95 @@
 <div class="p-5 max-w-4xl mx-auto">
-  <h2 class="text-3xl font-bold text-gray-800 mb-5">Register New Customer</h2>
+  <h2 class="text-3xl font-bold text-gray-800 mb-5">{{ 'customer.create.title' | translate }}</h2>
 
   <form [formGroup]="customerForm" (ngSubmit)="onSubmit()" class="bg-white shadow-md rounded-lg p-6">
     <div class="mb-6">
-      <h3 class="text-xl font-semibold text-gray-700 mb-4">Personal Information</h3>
+      <h3 class="text-xl font-semibold text-gray-700 mb-4">{{ 'customer.sections.personalInformation' | translate }}</h3>
 
       <div class="mb-4">
-        <label for="salutation" class="block text-sm font-medium text-gray-700 mb-1">Salutation *</label>
+        <label for="salutation" class="block text-sm font-medium text-gray-700 mb-1">{{ 'customer.fields.salutation' | translate }} *</label>
         <select id="salutation" formControlName="salutation" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
-          <option value="">Select salutation</option>
+          <option value="">{{ 'form.selectSalutation' | translate }}</option>
           @for (sal of salutations; track $index) {
             <option [value]="sal">{{ sal }}</option>
           }
         </select>
         @if (customerForm.get('salutation')?.invalid && customerForm.get('salutation')?.touched) {
           <div class="text-red-600 text-sm mt-1">
-            Salutation is required
+            {{ 'validation.salutationRequired' | translate }}
           </div>
         }
       </div>
 
       <div class="grid grid-cols-2 gap-4 mb-4">
         <div>
-          <label for="firstName" class="block text-sm font-medium text-gray-700 mb-1">First Name *</label>
+          <label for="firstName" class="block text-sm font-medium text-gray-700 mb-1">{{ 'customer.fields.firstName' | translate }} *</label>
           <input id="firstName" type="text" formControlName="firstName" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
           @if (customerForm.get('firstName')?.invalid && customerForm.get('firstName')?.touched) {
             <div class="text-red-600 text-sm mt-1">
-              First name is required
+              {{ 'validation.firstNameRequired' | translate }}
             </div>
           }
         </div>
 
         <div>
-          <label for="lastName" class="block text-sm font-medium text-gray-700 mb-1">Last Name *</label>
+          <label for="lastName" class="block text-sm font-medium text-gray-700 mb-1">{{ 'customer.fields.lastName' | translate }} *</label>
           <input id="lastName" type="text" formControlName="lastName" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
           @if (customerForm.get('lastName')?.invalid && customerForm.get('lastName')?.touched) {
             <div class="text-red-600 text-sm mt-1">
-              Last name is required
+              {{ 'validation.lastNameRequired' | translate }}
             </div>
           }
         </div>
       </div>
 
       <div class="mb-4">
-        <label for="dateOfBirth" class="block text-sm font-medium text-gray-700 mb-1">Date of Birth *</label>
+        <label for="dateOfBirth" class="block text-sm font-medium text-gray-700 mb-1">{{ 'customer.fields.dateOfBirth' | translate }} *</label>
         <input id="dateOfBirth" type="date" formControlName="dateOfBirth" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
         @if (customerForm.get('dateOfBirth')?.invalid && customerForm.get('dateOfBirth')?.touched) {
           <div class="text-red-600 text-sm mt-1">
-            Date of birth is required
+            {{ 'validation.dateOfBirthRequired' | translate }}
           </div>
         }
       </div>
 
       <div class="grid grid-cols-2 gap-4 mb-4">
         <div>
-          <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email *</label>
+          <label for="email" class="block text-sm font-medium text-gray-700 mb-1">{{ 'customer.fields.email' | translate }} *</label>
           <input id="email" type="email" formControlName="email" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
           @if (customerForm.get('email')?.invalid && customerForm.get('email')?.touched) {
             <div class="text-red-600 text-sm mt-1">
-              Valid email is required
+              {{ 'validation.emailRequired' | translate }}
             </div>
           }
         </div>
 
         <div>
-          <label for="phoneNumber" class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
+          <label for="phoneNumber" class="block text-sm font-medium text-gray-700 mb-1">{{ 'customer.fields.phoneNumber' | translate }}</label>
           <input id="phoneNumber" type="tel" formControlName="phoneNumber" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
         </div>
       </div>
     </div>
 
     <div class="mb-6">
-      <h3 class="text-xl font-semibold text-gray-700 mb-4">Address</h3>
+      <h3 class="text-xl font-semibold text-gray-700 mb-4">{{ 'customer.sections.address' | translate }}</h3>
 
       <div class="grid grid-cols-2 gap-4 mb-4">
         <div>
-          <label for="street" class="block text-sm font-medium text-gray-700 mb-1">Street *</label>
+          <label for="street" class="block text-sm font-medium text-gray-700 mb-1">{{ 'customer.fields.street' | translate }} *</label>
           <input id="street" type="text" formControlName="street" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
           @if (customerForm.get('street')?.invalid && customerForm.get('street')?.touched) {
             <div class="text-red-600 text-sm mt-1">
-              Street is required
+              {{ 'validation.streetRequired' | translate }}
             </div>
           }
         </div>
 
         <div>
-          <label for="houseNumber" class="block text-sm font-medium text-gray-700 mb-1">House Number *</label>
+          <label for="houseNumber" class="block text-sm font-medium text-gray-700 mb-1">{{ 'customer.fields.houseNumber' | translate }} *</label>
           <input id="houseNumber" type="text" formControlName="houseNumber" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
           @if (customerForm.get('houseNumber')?.invalid && customerForm.get('houseNumber')?.touched) {
             <div class="text-red-600 text-sm mt-1">
-              House number is required
+              {{ 'validation.houseNumberRequired' | translate }}
             </div>
           }
         </div>
@@ -97,32 +97,32 @@
 
       <div class="grid grid-cols-2 gap-4 mb-4">
         <div>
-          <label for="postalCode" class="block text-sm font-medium text-gray-700 mb-1">Postal Code *</label>
+          <label for="postalCode" class="block text-sm font-medium text-gray-700 mb-1">{{ 'customer.fields.postalCode' | translate }} *</label>
           <input id="postalCode" type="text" formControlName="postalCode" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
           @if (customerForm.get('postalCode')?.invalid && customerForm.get('postalCode')?.touched) {
             <div class="text-red-600 text-sm mt-1">
-              Postal code is required
+              {{ 'validation.postalCodeRequired' | translate }}
             </div>
           }
         </div>
 
         <div>
-          <label for="city" class="block text-sm font-medium text-gray-700 mb-1">City *</label>
+          <label for="city" class="block text-sm font-medium text-gray-700 mb-1">{{ 'customer.fields.city' | translate }} *</label>
           <input id="city" type="text" formControlName="city" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
           @if (customerForm.get('city')?.invalid && customerForm.get('city')?.touched) {
             <div class="text-red-600 text-sm mt-1">
-              City is required
+              {{ 'validation.cityRequired' | translate }}
             </div>
           }
         </div>
       </div>
 
       <div class="mb-4">
-        <label for="country" class="block text-sm font-medium text-gray-700 mb-1">Country *</label>
+        <label for="country" class="block text-sm font-medium text-gray-700 mb-1">{{ 'customer.fields.country' | translate }} *</label>
         <input id="country" type="text" formControlName="country" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
         @if (customerForm.get('country')?.invalid && customerForm.get('country')?.touched) {
           <div class="text-red-600 text-sm mt-1">
-            Country is required
+            {{ 'validation.countryRequired' | translate }}
           </div>
         }
       </div>
@@ -136,10 +136,10 @@
 
     <div class="flex justify-end gap-3">
       <button type="button" (click)="onCancel()" class="px-4 py-2 bg-gray-500 text-white rounded border-none cursor-pointer text-sm font-medium hover:bg-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed" [disabled]="isSubmitting">
-        Cancel
+        {{ 'button.cancel' | translate }}
       </button>
       <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded border-none cursor-pointer text-sm font-medium hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed" [disabled]="!customerForm.valid || isSubmitting">
-        {{ isSubmitting ? 'Registering...' : 'Register Customer' }}
+        {{ (isSubmitting ? 'button.registering' : 'button.registerCustomer') | translate }}
       </button>
     </div>
   </form>

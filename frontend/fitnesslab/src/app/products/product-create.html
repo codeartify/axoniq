@@ -1,5 +1,5 @@
 <div class="p-5 max-w-4xl mx-auto">
-  <h2 class="text-3xl font-bold text-gray-800 mb-5">Create New Product</h2>
+  <h2 class="text-3xl font-bold text-gray-800 mb-5">{{ 'product.create.title' | translate }}</h2>
 
   @if (errorMessage) {
     <div class="p-4 mb-4 bg-red-100 border border-red-400 text-red-700 rounded">
@@ -9,10 +9,10 @@
 
   <form (ngSubmit)="onSubmit()" class="bg-white shadow-md rounded-lg p-6">
     <div class="mb-6">
-      <h3 class="text-xl font-semibold text-gray-700 mb-4">Basic Information</h3>
+      <h3 class="text-xl font-semibold text-gray-700 mb-4">{{ 'product.basic_info.title' | translate }}</h3>
 
       <div class="mb-4">
-        <label for="code" class="block text-sm font-medium text-gray-700 mb-1">Product Code *</label>
+        <label for="code" class="block text-sm font-medium text-gray-700 mb-1">{{ 'product.code' | translate }} *</label>
         <input
           type="text"
           id="code"
@@ -24,7 +24,7 @@
       </div>
 
       <div class="mb-4">
-        <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Product Name *</label>
+        <label for="name" class="block text-sm font-medium text-gray-700 mb-1">{{ 'product.name' | translate }} *</label>
         <input
           type="text"
           id="name"
@@ -36,7 +36,7 @@
       </div>
 
       <div class="mb-4">
-        <label for="productType" class="block text-sm font-medium text-gray-700 mb-1">Product Type *</label>
+        <label for="productType" class="block text-sm font-medium text-gray-700 mb-1">{{ 'product.type' | translate }} *</label>
         <input
           type="text"
           id="productType"
@@ -48,7 +48,7 @@
       </div>
 
       <div class="mb-4">
-        <label for="price" class="block text-sm font-medium text-gray-700 mb-1">Price *</label>
+        <label for="price" class="block text-sm font-medium text-gray-700 mb-1">{{ 'product.price' | translate }} *</label>
         <input
           type="number"
           id="price"
@@ -62,7 +62,7 @@
       </div>
 
       <div class="mb-4">
-        <label for="audience" class="block text-sm font-medium text-gray-700 mb-1">Audience *</label>
+        <label for="audience" class="block text-sm font-medium text-gray-700 mb-1">{{ 'product.audience' | translate }} *</label>
         <select
           id="audience"
           [(ngModel)]="product.audience"
@@ -84,13 +84,13 @@
             name="requiresMembership"
             class="mr-2 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
           />
-          <span class="text-sm font-medium text-gray-700">Requires Membership</span>
+          <span class="text-sm font-medium text-gray-700">{{ 'product.requires_membership' | translate }}</span>
         </label>
       </div>
     </div>
 
     <div class="mb-6">
-      <h3 class="text-xl font-semibold text-gray-700 mb-4">Behavior Configuration</h3>
+      <h3 class="text-xl font-semibold text-gray-700 mb-4">{{ 'product.behavior.title' | translate }}</h3>
 
       <div class="mb-4 flex items-center">
         <label class="flex items-center cursor-pointer">
@@ -100,7 +100,7 @@
             name="isTimeBased"
             class="mr-2 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
           />
-          <span class="text-sm font-medium text-gray-700">Time Based</span>
+          <span class="text-sm font-medium text-gray-700">{{ 'product.behavior.time_based' | translate }}</span>
         </label>
       </div>
 
@@ -112,7 +112,7 @@
             name="isSessionBased"
             class="mr-2 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
           />
-          <span class="text-sm font-medium text-gray-700">Session Based</span>
+          <span class="text-sm font-medium text-gray-700">{{ 'product.behavior.session_based' | translate }}</span>
         </label>
       </div>
 
@@ -124,7 +124,7 @@
             name="canBePaused"
             class="mr-2 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
           />
-          <span class="text-sm font-medium text-gray-700">Can Be Paused</span>
+          <span class="text-sm font-medium text-gray-700">{{ 'product.behavior.can_be_paused' | translate }}</span>
         </label>
       </div>
 
@@ -136,13 +136,13 @@
             name="autoRenew"
             class="mr-2 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
           />
-          <span class="text-sm font-medium text-gray-700">Auto Renew</span>
+          <span class="text-sm font-medium text-gray-700">{{ 'product.behavior.auto_renew' | translate }}</span>
         </label>
       </div>
 
       @if (product.behavior.autoRenew) {
         <div class="mb-4">
-          <label for="renewalLeadTimeDays" class="block text-sm font-medium text-gray-700 mb-1">Renewal Lead Time (Days)</label>
+          <label for="renewalLeadTimeDays" class="block text-sm font-medium text-gray-700 mb-1">{{ 'product.behavior.renewal_lead_time_days' | translate }}</label>
           <input
             type="number"
             id="renewalLeadTimeDays"
@@ -162,12 +162,12 @@
             name="contributesToMembershipStatus"
             class="mr-2 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
           />
-          <span class="text-sm font-medium text-gray-700">Contributes to Membership Status</span>
+          <span class="text-sm font-medium text-gray-700">{{ 'product.behavior.contributes_to_membership' | translate }}</span>
         </label>
       </div>
 
       <div class="mb-4">
-        <label for="maxActivePerCustomer" class="block text-sm font-medium text-gray-700 mb-1">Max Active Per Customer</label>
+        <label for="maxActivePerCustomer" class="block text-sm font-medium text-gray-700 mb-1">{{ 'product.behavior.max_active_per_customer' | translate }}</label>
         <input
           type="number"
           id="maxActivePerCustomer"
@@ -179,7 +179,7 @@
       </div>
 
       <div class="mb-4">
-        <label for="exclusivityGroup" class="block text-sm font-medium text-gray-700 mb-1">Exclusivity Group</label>
+        <label for="exclusivityGroup" class="block text-sm font-medium text-gray-700 mb-1">{{ 'product.behavior.exclusivity_group' | translate }}</label>
         <input
           type="text"
           id="exclusivityGroup"
@@ -197,14 +197,14 @@
         class="px-4 py-2 bg-gray-500 text-white rounded border-none cursor-pointer text-sm font-medium hover:bg-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         [disabled]="isSubmitting"
       >
-        Cancel
+        {{ 'button.cancel' | translate }}
       </button>
       <button
         type="submit"
         class="px-4 py-2 bg-blue-500 text-white rounded border-none cursor-pointer text-sm font-medium hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         [disabled]="isSubmitting || !isFormValid()"
       >
-        {{ isSubmitting ? 'Creating...' : 'Create Product' }}
+        {{ isSubmitting ? ('button.creating' | translate) : ('button.create_product' | translate) }}
       </button>
     </div>
   </form>

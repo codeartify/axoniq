@@ -3,13 +3,14 @@ import {InvoiceView, Invoices} from './invoices';
 import {CommonModule} from '@angular/common';
 import {FormsModule} from '@angular/forms';
 import {Router} from '@angular/router';
+import {TranslateModule} from '@ngx-translate/core';
 
 type SortColumn = 'invoiceId' | 'customerName' | 'amount' | 'dueDate' | 'status';
 
 @Component({
   selector: 'app-invoice-list',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, TranslateModule],
   templateUrl: './invoice-list.html'
 })
 export class InvoiceList {

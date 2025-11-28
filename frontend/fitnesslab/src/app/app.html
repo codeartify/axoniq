@@ -3,14 +3,17 @@
   <header class="bg-white shadow-sm">
     <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
       <h1 class="text-2xl font-bold text-gray-900">{{ companyName() }}</h1>
-      <nav class="flex gap-6">
-        <a routerLink="/customers" routerLinkActive="text-blue-600 font-semibold"
-           [routerLinkActiveOptions]="{exact: false}" class="text-gray-700 hover:text-blue-600 transition-colors">Customers</a>
-        <a routerLink="/products" routerLinkActive="text-blue-600 font-semibold"
-           [routerLinkActiveOptions]="{exact: false}" class="text-gray-700 hover:text-blue-600 transition-colors">Products</a>
-        <a routerLink="/invoices" routerLinkActive="text-blue-600 font-semibold"
-           [routerLinkActiveOptions]="{exact: false}" class="text-gray-700 hover:text-blue-600 transition-colors">Invoices</a>
-      </nav>
+      <div class="flex items-center gap-6">
+        <nav class="flex gap-6">
+          <a routerLink="/customers" routerLinkActive="text-blue-600 font-semibold"
+             [routerLinkActiveOptions]="{exact: false}" class="text-gray-700 hover:text-blue-600 transition-colors">{{ 'nav.customers' | translate }}</a>
+          <a routerLink="/products" routerLinkActive="text-blue-600 font-semibold"
+             [routerLinkActiveOptions]="{exact: false}" class="text-gray-700 hover:text-blue-600 transition-colors">{{ 'nav.products' | translate }}</a>
+          <a routerLink="/invoices" routerLinkActive="text-blue-600 font-semibold"
+             [routerLinkActiveOptions]="{exact: false}" class="text-gray-700 hover:text-blue-600 transition-colors">{{ 'nav.invoices' | translate }}</a>
+        </nav>
+        <app-language-switcher />
+      </div>
     </div>
   </header>
   <main>

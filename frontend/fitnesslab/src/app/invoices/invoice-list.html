@@ -1,10 +1,10 @@
 <div class="p-5 max-w-7xl mx-auto">
-  <h1 class="text-3xl font-bold text-gray-800 mb-5">Invoices</h1>
+  <h1 class="text-3xl font-bold text-gray-800 mb-5">{{ 'invoice.title' | translate }}</h1>
 
   <div class="mb-5">
     <input
       type="text"
-      placeholder="Search invoices..."
+      [placeholder]="'invoice.search_placeholder' | translate"
       [ngModel]="searchTerm()"
       (ngModelChange)="searchTerm.set($event)"
       class="w-full px-3 py-2 text-base border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -16,22 +16,22 @@
       <thead class="bg-gray-100">
         <tr>
           <th (click)="sortBy('invoiceId')" class="px-3 py-3 text-left border-b-2 border-gray-300 cursor-pointer select-none font-semibold hover:bg-gray-200 transition-colors">
-            Invoice ID {{ getSortIcon('invoiceId') }}
+            {{ 'invoice.invoice_id' | translate }} {{ getSortIcon('invoiceId') }}
           </th>
           <th (click)="sortBy('customerName')" class="px-3 py-3 text-left border-b-2 border-gray-300 cursor-pointer select-none font-semibold hover:bg-gray-200 transition-colors">
-            Customer Name {{ getSortIcon('customerName') }}
+            {{ 'invoice.customer_name' | translate }} {{ getSortIcon('customerName') }}
           </th>
           <th (click)="sortBy('amount')" class="px-3 py-3 text-left border-b-2 border-gray-300 cursor-pointer select-none font-semibold hover:bg-gray-200 transition-colors">
-            Amount {{ getSortIcon('amount') }}
+            {{ 'invoice.amount' | translate }} {{ getSortIcon('amount') }}
           </th>
           <th (click)="sortBy('dueDate')" class="px-3 py-3 text-left border-b-2 border-gray-300 cursor-pointer select-none font-semibold hover:bg-gray-200 transition-colors">
-            Due Date {{ getSortIcon('dueDate') }}
+            {{ 'invoice.due_date' | translate }} {{ getSortIcon('dueDate') }}
           </th>
           <th (click)="sortBy('status')" class="px-3 py-3 text-left border-b-2 border-gray-300 cursor-pointer select-none font-semibold hover:bg-gray-200 transition-colors">
-            Status {{ getSortIcon('status') }}
+            {{ 'invoice.status' | translate }} {{ getSortIcon('status') }}
           </th>
-          <th class="px-3 py-3 text-left border-b-2 border-gray-300 font-semibold">Installment</th>
-          <th class="px-3 py-3 text-left border-b-2 border-gray-300 font-semibold">Actions</th>
+          <th class="px-3 py-3 text-left border-b-2 border-gray-300 font-semibold">{{ 'invoice.installment' | translate }}</th>
+          <th class="px-3 py-3 text-left border-b-2 border-gray-300 font-semibold">{{ 'common.actions' | translate }}</th>
         </tr>
       </thead>
       <tbody>
@@ -59,8 +59,8 @@
             </span>
           </td>
           <td class="px-3 py-3 border-b border-gray-200">
-            <span *ngIf="invoice.isInstallment">Yes (#{{ invoice.installmentNumber }})</span>
-            <span *ngIf="!invoice.isInstallment">No</span>
+            <span *ngIf="invoice.isInstallment">{{ 'common.yes' | translate }} (#{{ invoice.installmentNumber }})</span>
+            <span *ngIf="!invoice.isInstallment">{{ 'common.no' | translate }}</span>
           </td>
           <td class="px-3 py-3 border-b border-gray-200 whitespace-nowrap">
             <button
@@ -68,21 +68,21 @@
               (click)="markAsPaid(invoice.invoiceId)"
               class="px-3 py-1.5 bg-green-500 text-white rounded border-none cursor-pointer text-sm mr-2 hover:bg-green-600 transition-colors"
             >
-              Mark Paid
+              {{ 'button.mark_paid' | translate }}
             </button>
             <button
               *ngIf="invoice.status === 'OPEN'"
               (click)="markAsOverdue(invoice.invoiceId)"
               class="px-3 py-1.5 bg-orange-500 text-white rounded border-none cursor-pointer text-sm mr-2 hover:bg-orange-600 transition-colors"
             >
-              Mark Overdue
+              {{ 'button.mark_overdue' | translate }}
             </button>
             <button
               *ngIf="invoice.status !== 'PAID' && invoice.status !== 'CANCELLED'"
               (click)="openCancelModal(invoice.invoiceId)"
               class="px-3 py-1.5 bg-red-500 text-white rounded border-none cursor-pointer text-sm mr-2 hover:bg-red-600 transition-colors"
             >
-              Cancel
+              {{ 'button.cancel' | translate }}
             </button>
           </td>
         </tr>
@@ -91,27 +91,27 @@
   </div>
 
   <div *ngIf="filteredAndSortedInvoices().length === 0" class="text-center py-10 text-gray-500 text-lg">
-    No invoices found.
+    {{ 'invoice.no_invoices_found' | translate }}
   </div>
 </div>
 
 <!-- Cancel Modal -->
 <div *ngIf="showCancelModal()" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50" (click)="closeCancelModal()">
   <div class="bg-white p-6 rounded-lg max-w-lg w-11/12 shadow-xl" (click)="$event.stopPropagation()">
-    <h2 class="mt-0 mb-4 text-xl font-semibold text-gray-800">Cancel Invoice</h2>
-    <p class="mb-4">Please provide a reason for cancellation:</p>
+    <h2 class="mt-0 mb-4 text-xl font-semibold text-gray-800">{{ 'invoice.cancel_invoice_title' | translate }}</h2>
+    <p class="mb-4">{{ 'invoice.cancel_reason_prompt' | translate }}</p>
     <textarea
       [(ngModel)]="cancelReason"
       class="w-full px-3 py-2 border border-gray-300 rounded text-sm resize-y mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
-      placeholder="Enter cancellation reason..."
+      [placeholder]="'invoice.cancel_reason_placeholder' | translate"
       rows="4"
     ></textarea>
     <div class="flex justify-end gap-2">
       <button (click)="closeCancelModal()" class="px-3 py-1.5 bg-gray-500 text-white rounded border-none cursor-pointer text-sm hover:bg-gray-600 transition-colors">
-        Close
+        {{ 'button.close' | translate }}
       </button>
       <button (click)="confirmCancel()" class="px-3 py-1.5 bg-red-500 text-white rounded border-none cursor-pointer text-sm hover:bg-red-600 transition-colors">
-        Confirm Cancel
+        {{ 'button.confirm_cancel' | translate }}
       </button>
     </div>
   </div>
