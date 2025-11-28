@@ -146,6 +146,9 @@
 
   "auth.logout": "Abmelden",
   "login.welcome": "Willkommen bei FitnessLab",
+  "login.username": "Benutzername",
+  "login.password": "Passwort",
   "login.signIn": "Anmelden",
+  "login.signingIn": "Wird angemeldet...",
   "login.adminCredentials": "Standard-Admin-Zugangsdaten:"
 }

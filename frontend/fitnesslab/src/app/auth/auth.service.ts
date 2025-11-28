@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
 import { OAuthService, AuthConfig } from 'angular-oauth2-oidc';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, Observable, firstValueFrom } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
 export interface UserProfile {
@@ -13,13 +14,21 @@ export interface UserProfile {
   picture?: string;
 }
 
+interface TokenResponse {
+  access_token: string;
+  refresh_token: string;
+  expires_in: number;
+  id_token: string;
+  token_type: string;
+}
+
 const authConfig: AuthConfig = {
   issuer: 'https://auth.oliverzihler.ch/realms/fitnesslab',
   redirectUri: window.location.origin + '/login',
   clientId: 'fitnesslab-app',
   scope: 'openid profile email',
   responseType: 'code',
-  showDebugInformation: true,
+  showDebugInformation: false,
   requireHttps: true,
   oidc: true,
   useSilentRefresh: true,
@@ -32,130 +41,118 @@ const authConfig: AuthConfig = {
 export class AuthService {
   private userProfileSubject = new BehaviorSubject<UserProfile | null>(null);
   public userProfile$: Observable<UserProfile | null> = this.userProfileSubject.asObservable();
-  private isInitialized = new BehaviorSubject<boolean>(false);
-  public isInitialized$ = this.isInitialized.asObservable();
+  private tokenEndpoint = 'https://auth.oliverzihler.ch/realms/fitnesslab/protocol/openid-connect/token';
 
   constructor(
     private oauthService: OAuthService,
-    private router: Router
+    private router: Router,
+    private http: HttpClient
   ) {
     this.configureOAuth();
   }
 
   private configureOAuth(): void {
-    console.log('Configuring OAuth...');
-    console.log('Current URL:', window.location.href);
-    console.log('Redirect URI configured:', authConfig.redirectUri);
-    console.log('Client ID:', authConfig.clientId);
-    console.log('Issuer:', authConfig.issuer);
-
     this.oauthService.configure(authConfig);
 
-    // Add event listeners to see what's happening
-    this.oauthService.events.subscribe(event => {
-      console.log('OAuth Event:', event);
-      if (event.type === 'token_error' || event.type === 'code_error') {
-        console.error('OAuth Error Event:', event);
-      }
-    });
-
-    // First load discovery document
-    this.oauthService.loadDiscoveryDocument()
-      .then(() => {
-        console.log('Discovery document loaded');
-        // Then try to login (exchange code if present)
-        return this.oauthService.tryLogin();
-      })
-      .then(() => {
-        console.log('Login attempt completed');
-        console.log('Has valid access token:', this.oauthService.hasValidAccessToken());
-        console.log('Access token:', this.oauthService.getAccessToken());
-        console.log('ID token:', this.oauthService.getIdToken());
-        console.log('Identity claims:', this.oauthService.getIdentityClaims());
-
+    // Try to restore session from storage
+    this.oauthService.loadDiscoveryDocument().then(() => {
+      this.oauthService.tryLogin().then(() => {
         if (this.oauthService.hasValidAccessToken()) {
           this.loadUserProfile();
-          console.log('User authenticated, current route:', this.router.url);
-
-          // Setup silent refresh after successful login
-          this.oauthService.setupAutomaticSilentRefresh();
-
-          // Redirect to main app if we're on the login page after successful auth
-          if (this.router.url === '/login' || this.router.url === '/' || this.router.url.includes('code=')) {
-            console.log('Redirecting to /customers');
-            this.router.navigate(['/customers']);
-          }
-        } else {
-          console.log('No valid access token after login attempt');
-          console.log('Current URL after tryLogin:', window.location.href);
-          console.log('URL has code param:', window.location.href.includes('code='));
         }
-
-        this.isInitialized.next(true);
-      })
-      .catch((error) => {
-        console.error('Error during OAuth initialization:', error);
-        this.isInitialized.next(true);
       });
+    });
+  }
+
+  public async loginWithCredentials(username: string, password: string): Promise<void> {
+    const body = new URLSearchParams();
+    body.set('grant_type', 'password');
+    if (authConfig.clientId != null) {
+      body.set('client_id', authConfig.clientId);
+    }
+    body.set('username', username);
+    body.set('password', password);
+    body.set('scope', authConfig.scope || '');
+
+    const response = await firstValueFrom(
+      this.http.post<TokenResponse>(this.tokenEndpoint, body.toString(), {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+      })
+    );
+
+    // Manually set tokens in OAuthService
+    this.oauthService.getAccessToken = () => response.access_token;
+    this.oauthService.getIdToken = () => response.id_token;
+    this.oauthService.getRefreshToken = () => response.refresh_token;
+
+    // Store tokens in sessionStorage for persistence
+    sessionStorage.setItem('access_token', response.access_token);
+    sessionStorage.setItem('id_token', response.id_token);
+    sessionStorage.setItem('refresh_token', response.refresh_token);
+    sessionStorage.setItem('expires_at', String(Date.now() + response.expires_in * 1000));
+
+    // Load user profile
+    this.loadUserProfile();
   }
 
   public login(): void {
-    console.log('login() called - initiating code flow');
-    console.log('Discovery document loaded?', this.oauthService.discoveryDocumentLoaded);
+    // This method is no longer used but kept for compatibility
     this.oauthService.initCodeFlow();
-    console.log('initCodeFlow() completed - should redirect to Keycloak now');
   }
 
   public logout(): void {
     this.oauthService.logOut();
+    sessionStorage.clear();
     this.userProfileSubject.next(null);
     this.router.navigate(['/login']);
   }
 
   public isAuthenticated(): boolean {
-    return this.oauthService.hasValidAccessToken();
+    const token = sessionStorage.getItem('access_token');
+    const expiresAt = sessionStorage.getItem('expires_at');
+
+    if (!token || !expiresAt) {
+      return false;
+    }
+
+    return Date.now() < parseInt(expiresAt);
   }
 
   public getAccessToken(): string {
-    return this.oauthService.getAccessToken();
+    return sessionStorage.getItem('access_token') || '';
   }
 
   public loadUserProfile(): void {
-    const claims = this.oauthService.getIdentityClaims() as any;
-    console.log('Loading user profile from claims:', claims);
+    const accessToken = this.getAccessToken();
+    const idToken = sessionStorage.getItem('id_token');
 
-    if (claims) {
-      // Get roles from the access token instead of ID token
-      const accessToken = this.oauthService.getAccessToken();
-      let roles: string[] = [];
+    if (!accessToken || !idToken) {
+      return;
+    }
 
-      if (accessToken) {
-        try {
-          // Decode the access token JWT to get the payload
-          const payload = JSON.parse(atob(accessToken.split('.')[1]));
-          console.log('Access token payload:', payload);
-          roles = this.extractRoles(payload);
-        } catch (error) {
-          console.error('Error decoding access token:', error);
-          // Fallback to ID token claims
-          roles = this.extractRoles(claims);
-        }
-      } else {
-        roles = this.extractRoles(claims);
-      }
+    try {
+      // Decode both tokens
+      const accessPayload = JSON.parse(atob(accessToken.split('.')[1]));
+      const idPayload = JSON.parse(atob(idToken.split('.')[1]));
 
-      console.log('Extracted roles:', roles);
+      // Extract roles from access token
+      const roles = this.extractRoles(accessPayload);
 
+      // Extract user info from ID token
       const profile: UserProfile = {
-        username: claims.preferred_username || claims.sub,
-        email: claims.email || '',
-        firstName: claims.given_name || '',
-        lastName: claims.family_name || '',
+        username: idPayload.preferred_username || idPayload.sub,
+        email: idPayload.email || '',
+        firstName: idPayload.given_name || '',
+        lastName: idPayload.family_name || '',
         roles: roles,
-        picture: claims.picture,
+        picture: idPayload.picture,
       };
-      console.log('User profile:', profile);
+
       this.userProfileSubject.next(profile);
+    } catch (error) {
+      console.error('Error loading user profile:', error);
     }
   }
 
