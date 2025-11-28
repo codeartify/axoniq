@@ -20,7 +20,6 @@ import java.time.Instant
 import java.time.LocalDate
 
 @RestController
-@CrossOrigin
 @RequestMapping("/api/invoices")
 class InvoiceController(
     private val invoiceProjection: InvoiceProjection,

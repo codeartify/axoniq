@@ -16,7 +16,6 @@ import java.time.LocalDate
 import java.time.Duration
 
 @RestController
-@CrossOrigin
 @RequestMapping("/api/customers")
 class CustomerController(
     private val commandGateway: CommandGateway,

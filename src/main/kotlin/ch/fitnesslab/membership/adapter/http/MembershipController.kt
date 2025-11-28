@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.RestController
 import java.math.BigDecimal
 
 @RestController
-@CrossOrigin
 @RequestMapping("/api/memberships")
 class MembershipController(
     private val membershipSignUpService: MembershipSignUpService

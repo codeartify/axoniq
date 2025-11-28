@@ -12,7 +12,10 @@
           <a routerLink="/invoices" routerLinkActive="text-blue-600 font-semibold"
              [routerLinkActiveOptions]="{exact: false}" class="text-gray-700 hover:text-blue-600 transition-colors">{{ 'nav.invoices' | translate }}</a>
         </nav>
-        <app-language-switcher />
+        <div class="flex items-center gap-4">
+          <app-language-switcher />
+          <app-user-profile-menu />
+        </div>
       </div>
     </div>
   </header>

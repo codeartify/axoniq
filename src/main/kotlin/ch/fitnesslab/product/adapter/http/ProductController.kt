@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.*
 import java.math.BigDecimal
 
 @RestController
-@CrossOrigin
 @RequestMapping("/api/products")
 class ProductController(
     private val commandGateway: CommandGateway,

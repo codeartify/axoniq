@@ -142,5 +142,10 @@
   "validation.houseNumberRequired": "Hausnummer ist erforderlich",
   "validation.postalCodeRequired": "Postleitzahl ist erforderlich",
   "validation.cityRequired": "Stadt ist erforderlich",
-  "validation.countryRequired": "Land ist erforderlich"
+  "validation.countryRequired": "Land ist erforderlich",
+
+  "auth.logout": "Abmelden",
+  "login.welcome": "Willkommen bei FitnessLab",
+  "login.signIn": "Anmelden",
+  "login.adminCredentials": "Standard-Admin-Zugangsdaten:"
 }
