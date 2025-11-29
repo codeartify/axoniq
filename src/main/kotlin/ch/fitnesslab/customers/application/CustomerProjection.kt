@@ -1,18 +1,17 @@
 package ch.fitnesslab.customers.application
 
-import ch.fitnesslab.common.types.Address
 import ch.fitnesslab.common.types.CustomerId
-import ch.fitnesslab.common.types.Salutation
 import ch.fitnesslab.customers.domain.events.CustomerRegisteredEvent
 import ch.fitnesslab.customers.domain.events.CustomerUpdatedEvent
 import ch.fitnesslab.customers.infrastructure.CustomerEntity
 import ch.fitnesslab.customers.infrastructure.CustomerRepository
+import ch.fitnesslab.generated.model.AddressDto
+import ch.fitnesslab.generated.model.CustomerView
 import org.axonframework.config.ProcessingGroup
 import org.axonframework.eventhandling.EventHandler
 import org.axonframework.queryhandling.QueryHandler
 import org.axonframework.queryhandling.QueryUpdateEmitter
 import org.springframework.stereotype.Component
-import java.time.LocalDate
 
 @Component
 @ProcessingGroup("customers")
@@ -95,11 +94,11 @@ class CustomerProjection(
 
     private fun CustomerEntity.toCustomerView() = CustomerView(
         customerId = this.customerId.toString(),
-        salutation = this.salutation,
+        salutation = this.salutation.let { ch.fitnesslab.generated.model.Salutation.forValue(it.name) },
         firstName = this.firstName,
         lastName = this.lastName,
         dateOfBirth = this.dateOfBirth,
-        address = Address(
+        address = AddressDto(
             street = this.street,
             houseNumber = this.houseNumber,
             postalCode = this.postalCode,
@@ -111,13 +110,3 @@ class CustomerProjection(
     )
 }
 
-data class CustomerView(
-    val customerId: String,
-    val salutation: Salutation,
-    val firstName: String,
-    val lastName: String,
-    val dateOfBirth: LocalDate,
-    val address: Address,
-    val email: String,
-    val phoneNumber: String?
-)

@@ -1,0 +1,835 @@
+openapi: 3.0.3
+info:
+  title: FitnessLab API
+  description: API for FitnessLab management system
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080
+    description: Local development server
+
+tags:
+  - name: Customers
+    description: Customer management operations
+  - name: Products
+    description: Product management operations
+  - name: Memberships
+    description: Membership operations
+  - name: Product Contracts
+    description: Product contract management
+  - name: Invoices
+    description: Invoice management operations
+
+paths:
+  /api/customers:
+    post:
+      tags:
+        - Customers
+      operationId: registerCustomer
+      summary: Register a new customer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterCustomerRequest'
+      responses:
+        '201':
+          description: Customer registered successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerRegistrationResponse'
+    get:
+      tags:
+        - Customers
+      operationId: getAllCustomers
+      summary: Get all customers
+      responses:
+        '200':
+          description: List of all customers
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CustomerView'
+
+  /api/customers/{customerId}:
+    get:
+      tags:
+        - Customers
+      operationId: getCustomer
+      summary: Get customer by ID
+      parameters:
+        - name: customerId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Customer found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerView'
+        '404':
+          description: Customer not found
+    put:
+      tags:
+        - Customers
+      operationId: updateCustomer
+      summary: Update customer information
+      parameters:
+        - name: customerId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCustomerRequest'
+      responses:
+        '200':
+          description: Customer updated successfully
+
+  /api/products:
+    post:
+      tags:
+        - Products
+      operationId: createProduct
+      summary: Create a new product
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateProductRequest'
+      responses:
+        '201':
+          description: Product created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductCreationResponse'
+    get:
+      tags:
+        - Products
+      operationId: getAllProducts
+      summary: Get all products
+      responses:
+        '200':
+          description: List of all products
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ProductView'
+
+  /api/products/{productId}:
+    get:
+      tags:
+        - Products
+      operationId: getProduct
+      summary: Get product by ID
+      parameters:
+        - name: productId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Product found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductView'
+        '404':
+          description: Product not found
+    put:
+      tags:
+        - Products
+      operationId: updateProduct
+      summary: Update product information
+      parameters:
+        - name: productId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateProductRequest'
+      responses:
+        '200':
+          description: Product updated successfully
+
+  /api/products/memberships:
+    get:
+      tags:
+        - Products
+      operationId: getMembershipVariants
+      summary: Get all membership variants
+      responses:
+        '200':
+          description: List of membership variants
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ProductVariantDto'
+
+  /api/memberships/sign-up:
+    post:
+      tags:
+        - Memberships
+      operationId: signUp
+      summary: Sign up for a membership
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MembershipSignUpRequestDto'
+      responses:
+        '200':
+          description: Membership sign up successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MembershipSignUpResultDto'
+
+  /api/product-contracts/{contractId}:
+    get:
+      tags:
+        - Product Contracts
+      operationId: getContractById
+      summary: Get product contract by ID
+      parameters:
+        - name: contractId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Contract found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductContractDetailDto'
+        '404':
+          description: Contract not found
+
+  /api/product-contracts/{contractId}/pause:
+    post:
+      tags:
+        - Product Contracts
+      operationId: pauseContract
+      summary: Pause a product contract
+      parameters:
+        - name: contractId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PauseContractRequest'
+      responses:
+        '200':
+          description: Contract paused successfully
+
+  /api/product-contracts/{contractId}/resume:
+    post:
+      tags:
+        - Product Contracts
+      operationId: resumeContract
+      summary: Resume a paused product contract
+      parameters:
+        - name: contractId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Contract resumed successfully
+
+  /api/invoices:
+    get:
+      tags:
+        - Invoices
+      operationId: getInvoices
+      summary: Get all invoices, optionally filtered by status
+      parameters:
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [PENDING, PAID, OVERDUE, CANCELLED]
+      responses:
+        '200':
+          description: List of invoices
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/InvoiceDto'
+
+  /api/invoices/customer/{customerId}:
+    get:
+      tags:
+        - Invoices
+      operationId: getInvoicesByCustomerId
+      summary: Get all invoices for a customer
+      parameters:
+        - name: customerId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of customer invoices
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/InvoiceDto'
+
+  /api/invoices/{invoiceId}:
+    get:
+      tags:
+        - Invoices
+      operationId: getInvoiceById
+      summary: Get invoice by ID
+      parameters:
+        - name: invoiceId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Invoice found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvoiceDto'
+        '404':
+          description: Invoice not found
+
+  /api/invoices/{invoiceId}/pay:
+    post:
+      tags:
+        - Invoices
+      operationId: markAsPaid
+      summary: Mark an invoice as paid
+      parameters:
+        - name: invoiceId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Invoice marked as paid
+
+  /api/invoices/{invoiceId}/mark-overdue:
+    post:
+      tags:
+        - Invoices
+      operationId: markAsOverdue
+      summary: Mark an invoice as overdue
+      parameters:
+        - name: invoiceId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Invoice marked as overdue
+
+  /api/invoices/{invoiceId}/cancel:
+    post:
+      tags:
+        - Invoices
+      operationId: cancelInvoice
+      summary: Cancel an invoice
+      parameters:
+        - name: invoiceId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CancelInvoiceRequest'
+      responses:
+        '200':
+          description: Invoice cancelled successfully
+
+components:
+  schemas:
+    RegisterCustomerRequest:
+      type: object
+      required:
+        - salutation
+        - firstName
+        - lastName
+        - dateOfBirth
+        - address
+        - email
+      properties:
+        salutation:
+          $ref: '#/components/schemas/Salutation'
+        firstName:
+          type: string
+        lastName:
+          type: string
+        dateOfBirth:
+          type: string
+          format: date
+        address:
+          $ref: '#/components/schemas/AddressDto'
+        email:
+          type: string
+          format: email
+        phoneNumber:
+          type: string
+          nullable: true
+
+    Salutation:
+      type: string
+      enum: [ MR, MS, MRS, MX, DR ]
+    UpdateCustomerRequest:
+      type: object
+      required:
+        - salutation
+        - firstName
+        - lastName
+        - dateOfBirth
+        - address
+        - email
+      properties:
+        salutation:
+          $ref: '#/components/schemas/Salutation'
+        firstName:
+          type: string
+        lastName:
+          type: string
+        dateOfBirth:
+          type: string
+          format: date
+        address:
+          $ref: '#/components/schemas/AddressDto'
+        email:
+          type: string
+          format: email
+        phoneNumber:
+          type: string
+          nullable: true
+
+    AddressDto:
+      type: object
+      required:
+        - street
+        - houseNumber
+        - postalCode
+        - city
+        - country
+      properties:
+        street:
+          type: string
+        houseNumber:
+          type: string
+        postalCode:
+          type: string
+        city:
+          type: string
+        country:
+          type: string
+
+    CustomerRegistrationResponse:
+      type: object
+      properties:
+        customerId:
+          type: string
+          nullable: true
+        error:
+          type: string
+          nullable: true
+
+    CustomerView:
+      type: object
+      required:
+        - customerId
+        - salutation
+        - firstName
+        - lastName
+        - dateOfBirth
+        - address
+        - email
+        - phoneNumber
+      properties:
+        customerId:
+          type: string
+        salutation:
+          $ref: '#/components/schemas/Salutation'
+        firstName:
+          type: string
+        lastName:
+          type: string
+        dateOfBirth:
+          type: string
+          format: date
+        address:
+          $ref: '#/components/schemas/AddressDto'
+        email:
+          type: string
+        phoneNumber:
+          type: string
+          nullable: true
+
+    CreateProductRequest:
+      type: object
+      required:
+        - code
+        - name
+        - productType
+        - audience
+        - requiresMembership
+        - price
+        - behavior
+      properties:
+        code:
+          type: string
+        name:
+          type: string
+        productType:
+          type: string
+        audience:
+          $ref: '#/components/schemas/Audience'
+        requiresMembership:
+          type: boolean
+        price:
+          type: number
+          format: decimal
+        behavior:
+          $ref: '#/components/schemas/ProductBehaviorConfig'
+
+    UpdateProductRequest:
+      type: object
+      required:
+        - code
+        - name
+        - productType
+        - audience
+        - requiresMembership
+        - price
+        - behavior
+      properties:
+        code:
+          type: string
+        name:
+          type: string
+        productType:
+          type: string
+        audience:
+          $ref: '#/components/schemas/Audience'
+        requiresMembership:
+          type: boolean
+        price:
+          type: number
+          format: decimal
+        behavior:
+          $ref: '#/components/schemas/ProductBehaviorConfig'
+
+    Audience:
+      type: string
+      enum: [ INTERNAL, EXTERNAL, BOTH ]
+
+    ProductBehaviorConfig:
+      type: object
+      required:
+        - isTimeBased
+        - isSessionBased
+        - canBePaused
+        - autoRenew
+        - contributesToMembershipStatus
+      properties:
+        isTimeBased:
+          type: boolean
+          description: Indicates if the product is time-based (has a validity period).
+        isSessionBased:
+          type: boolean
+          description: Indicates if the product is session-based (limited number of sessions).
+        canBePaused:
+          type: boolean
+          description: Whether the contract for this product can be paused.
+        autoRenew:
+          type: boolean
+          description: Whether the contract auto-renews before expiry.
+        renewalLeadTimeDays:
+          type: integer
+          nullable: true
+          description: >
+            Number of days before expiry when auto-renewal should be triggered.
+            Null if auto-renewal is not time-based or not applicable.
+        contributesToMembershipStatus:
+          type: boolean
+          description: >
+            Whether an active contract of this product contributes to the customer's
+            overall membership status.
+        maxActivePerCustomer:
+          type: integer
+          nullable: true
+          description: >
+            Maximum number of concurrently active contracts of this product (or group)
+            allowed per customer. Null means no explicit limit.
+        exclusivityGroup:
+          type: string
+          nullable: true
+          description: >
+            Logical group name used to enforce exclusivity rules between products
+            (e.g. "FITNESS", "RUNNING_SCHOOL"). Null if no exclusivity group applies.
+
+    ProductCreationResponse:
+      type: object
+      properties:
+        productId:
+          type: string
+          nullable: true
+        error:
+          type: string
+          nullable: true
+
+    ProductView:
+      type: object
+      properties:
+        productId:
+          type: string
+        code:
+          type: string
+        name:
+          type: string
+        productType:
+          type: string
+        audience:
+          type: string
+        requiresMembership:
+          type: boolean
+        price:
+          type: number
+          format: decimal
+        behavior:
+          $ref: '#/components/schemas/ProductBehaviorConfig'
+
+    ProductVariantDto:
+      type: object
+      required:
+        - id
+        - code
+        - name
+        - productType
+        - price
+        - durationMonths
+      properties:
+        id:
+          type: string
+        code:
+          type: string
+        name:
+          type: string
+        productType:
+          type: string
+        price:
+          type: number
+          format: decimal
+        durationMonths:
+          type: integer
+
+    MembershipSignUpRequestDto:
+      type: object
+      required:
+        - customerId
+        - customerName
+        - customerEmail
+        - productVariantId
+        - price
+        - durationMonths
+        - paymentMode
+      properties:
+        customerId:
+          type: string
+        customerName:
+          type: string
+        customerEmail:
+          type: string
+        productVariantId:
+          type: string
+        price:
+          type: number
+          format: decimal
+        durationMonths:
+          type: integer
+        paymentMode:
+          type: string
+          enum: [ PAY_ON_SITE, INVOICE_EMAIL ]
+    MembershipSignUpResultDto:
+      type: object
+      required:
+        - contractId
+        - bookingId
+        - invoiceId
+      properties:
+        contractId:
+          type: string
+        bookingId:
+          type: string
+        invoiceId:
+          type: string
+
+    ProductContractDetailDto:
+      type: object
+      required:
+        - contractId
+        - customerId
+        - productVariantId
+        - bookingId
+        - status
+        - sessionsUsed
+        - pauseHistory
+        - canBePaused
+      properties:
+        contractId:
+          type: string
+        customerId:
+          type: string
+        productVariantId:
+          type: string
+        bookingId:
+          type: string
+        status:
+          type: string
+        validity:
+          $ref: '#/components/schemas/DateRangeDto'
+          nullable: true
+        sessionsTotal:
+          type: integer
+          nullable: true
+        sessionsUsed:
+          type: integer
+        pauseHistory:
+          type: array
+          items:
+            $ref: '#/components/schemas/PauseHistoryEntryDto'
+        canBePaused:
+          type: boolean
+
+    DateRangeDto:
+      type: object
+      required:
+        - start
+        - end
+      properties:
+        start:
+          type: string
+          format: date
+        end:
+          type: string
+          format: date
+
+    PauseHistoryEntryDto:
+      type: object
+      required:
+        - pauseRange
+        - reason
+      properties:
+        pauseRange:
+          $ref: '#/components/schemas/DateRangeDto'
+        reason:
+          type: string
+
+    PauseContractRequest:
+      type: object
+      required:
+        - startDate
+        - endDate
+        - reason
+      properties:
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+        reason:
+          type: string
+          enum: [MEDICAL, VACATION, OTHER]
+
+    InvoiceDto:
+      type: object
+      required:
+        - invoiceId
+        - customerId
+        - customerName
+        - bookingId
+        - amount
+        - dueDate
+        - status
+        - isInstallment
+      properties:
+        invoiceId:
+          type: string
+        customerId:
+          type: string
+        customerName:
+          type: string
+        bookingId:
+          type: string
+        amount:
+          type: number
+          format: decimal
+        dueDate:
+          type: string
+          format: date
+        status:
+          type: string
+        isInstallment:
+          type: boolean
+        installmentNumber:
+          type: integer
+          nullable: true
+        paidAt:
+          type: string
+          format: date-time
+          nullable: true
+
+    CancelInvoiceRequest:
+      type: object
+      required:
+        - reason
+      properties:
+        reason:
+          type: string

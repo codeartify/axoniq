@@ -23,6 +23,7 @@ export interface CreateProductRequest {
   behavior: ProductBehaviorConfig;
 }
 
+
 export interface UpdateProductRequest {
   code: string;
   name: string;

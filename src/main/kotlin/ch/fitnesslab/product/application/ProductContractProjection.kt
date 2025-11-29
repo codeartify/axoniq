@@ -3,7 +3,6 @@ package ch.fitnesslab.product.application
 import ch.fitnesslab.common.types.DateRange
 import ch.fitnesslab.common.types.ProductContractId
 import ch.fitnesslab.product.domain.ProductContractStatus
-import ch.fitnesslab.product.domain.commands.PauseReason
 import ch.fitnesslab.product.domain.events.ProductContractSignedEvent
 import ch.fitnesslab.product.domain.events.ProductContractPausedEvent
 import ch.fitnesslab.product.domain.events.ProductContractResumedEvent
@@ -134,19 +133,3 @@ class ProductContractProjection(
     )
 }
 
-data class ProductContractView(
-    val contractId: String,
-    val customerId: String,
-    val productVariantId: String,
-    val bookingId: String,
-    val status: ProductContractStatus,
-    val validity: DateRange?,
-    val sessionsTotal: Int?,
-    val sessionsUsed: Int,
-    val pauseHistory: List<PauseHistoryEntry>
-)
-
-data class PauseHistoryEntry(
-    val pauseRange: DateRange,
-    val reason: PauseReason
-)

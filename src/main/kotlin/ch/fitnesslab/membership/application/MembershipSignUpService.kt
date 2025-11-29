@@ -12,9 +12,6 @@ import ch.fitnesslab.booking.domain.Participant
 import ch.fitnesslab.booking.domain.PurchasedProduct
 import ch.fitnesslab.booking.domain.commands.PlaceBookingCommand
 import ch.fitnesslab.common.types.*
-import ch.fitnesslab.customers.application.CustomerUpdatedUpdate
-import ch.fitnesslab.customers.application.CustomerView
-import ch.fitnesslab.customers.application.FindAllCustomersQuery
 import ch.fitnesslab.product.application.FindAllProductContractsQuery
 import ch.fitnesslab.product.application.ProductContractUpdatedUpdate
 import ch.fitnesslab.product.application.ProductContractView

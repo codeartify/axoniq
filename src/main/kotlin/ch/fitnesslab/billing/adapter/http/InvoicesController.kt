@@ -9,23 +9,26 @@ import ch.fitnesslab.billing.domain.commands.CancelInvoiceCommand
 import ch.fitnesslab.billing.domain.commands.MarkInvoiceOverdueCommand
 import ch.fitnesslab.billing.domain.commands.MarkInvoicePaidCommand
 import ch.fitnesslab.common.types.InvoiceId
+import ch.fitnesslab.generated.api.InvoicesApi
+import ch.fitnesslab.generated.model.CancelInvoiceRequest
+import ch.fitnesslab.generated.model.InvoiceDto
 import org.axonframework.commandhandling.gateway.CommandGateway
 import org.axonframework.messaging.responsetypes.ResponseTypes
 import org.axonframework.queryhandling.QueryGateway
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
-import java.math.BigDecimal
 import java.time.Duration
 import java.time.Instant
-import java.time.LocalDate
+import java.time.OffsetDateTime
+import java.time.ZoneId
 
 @RestController
 @RequestMapping("/api/invoices")
-class InvoiceController(
+class InvoicesController(
     private val invoiceProjection: InvoiceProjection,
     private val commandGateway: CommandGateway,
     private val queryGateway: QueryGateway
-) {
+): InvoicesApi {
 
     @GetMapping
     fun getInvoices(@RequestParam(required = false) status: InvoiceStatus?): ResponseEntity<List<InvoiceDto>> {
@@ -39,13 +42,13 @@ class InvoiceController(
     }
 
     @GetMapping("/customer/{customerId}")
-    fun getInvoicesByCustomerId(@PathVariable customerId: String): ResponseEntity<List<InvoiceDto>> {
+    override fun getInvoicesByCustomerId(@PathVariable customerId: String): ResponseEntity<List<InvoiceDto>> {
         val invoices = invoiceProjection.findByCustomerId(customerId)
         return ResponseEntity.ok(invoices.map { it.toDto() })
     }
 
     @GetMapping("/{invoiceId}")
-    fun getInvoiceById(@PathVariable invoiceId: String): ResponseEntity<InvoiceDto> {
+    override fun getInvoiceById(@PathVariable invoiceId: String): ResponseEntity<InvoiceDto> {
         val invoice = invoiceProjection.findById(InvoiceId.from(invoiceId))
             ?: return ResponseEntity.notFound().build()
 
@@ -53,7 +56,7 @@ class InvoiceController(
     }
 
     @PostMapping("/{invoiceId}/pay")
-    fun markAsPaid(@PathVariable invoiceId: String): ResponseEntity<Void> {
+    override fun markAsPaid(@PathVariable invoiceId: String): ResponseEntity<Unit> {
         val subscriptionQuery = queryGateway.subscriptionQuery(
             FindAllInvoicesQuery(),
             ResponseTypes.multipleInstancesOf(InvoiceView::class.java),
@@ -78,7 +81,7 @@ class InvoiceController(
     }
 
     @PostMapping("/{invoiceId}/mark-overdue")
-    fun markAsOverdue(@PathVariable invoiceId: String): ResponseEntity<Void> {
+    override fun markAsOverdue(@PathVariable invoiceId: String): ResponseEntity<Unit> {
         val subscriptionQuery = queryGateway.subscriptionQuery(
             FindAllInvoicesQuery(),
             ResponseTypes.multipleInstancesOf(InvoiceView::class.java),
@@ -102,10 +105,10 @@ class InvoiceController(
     }
 
     @PostMapping("/{invoiceId}/cancel")
-    fun cancelInvoice(
+    override fun cancelInvoice(
         @PathVariable invoiceId: String,
-        @RequestBody request: CancelInvoiceRequest
-    ): ResponseEntity<Void> {
+        @RequestBody cancelInvoiceRequest: CancelInvoiceRequest
+    ): ResponseEntity<Unit> {
         val subscriptionQuery = queryGateway.subscriptionQuery(
             FindAllInvoicesQuery(),
             ResponseTypes.multipleInstancesOf(InvoiceView::class.java),
@@ -116,7 +119,7 @@ class InvoiceController(
             commandGateway.sendAndWait<Any>(
                 CancelInvoiceCommand(
                     invoiceId = InvoiceId.from(invoiceId),
-                    reason = request.reason
+                    reason = cancelInvoiceRequest.reason
                 )
             )
 
@@ -130,23 +133,6 @@ class InvoiceController(
     }
 }
 
-data class CancelInvoiceRequest(
-    val reason: String
-)
-
-data class InvoiceDto(
-    val invoiceId: String,
-    val customerId: String,
-    val customerName: String,
-    val bookingId: String,
-    val amount: BigDecimal,
-    val dueDate: LocalDate,
-    val status: String,
-    val isInstallment: Boolean,
-    val installmentNumber: Int?,
-    val paidAt: Instant?
-)
-
 private fun InvoiceView.toDto() = InvoiceDto(
     invoiceId = invoiceId,
     customerId = customerId,
@@ -157,5 +143,5 @@ private fun InvoiceView.toDto() = InvoiceDto(
     status = status.name,
     isInstallment = isInstallment,
     installmentNumber = installmentNumber,
-    paidAt = paidAt
+    paidAt = paidAt?.let{ OffsetDateTime.ofInstant(it, ZoneId.systemDefault()) }
 )

@@ -1,44 +1,76 @@
 package ch.fitnesslab.product.adapter.http
 
 import ch.fitnesslab.common.types.ProductVariantId
+import ch.fitnesslab.generated.model.CreateProductRequest
+import ch.fitnesslab.generated.model.ProductCreationResponse
+import ch.fitnesslab.generated.model.ProductVariantDto
+import ch.fitnesslab.generated.model.UpdateProductRequest
+import ch.fitnesslab.product.application.FindAllProductsQuery
 import ch.fitnesslab.product.application.ProductProjection
+import ch.fitnesslab.product.application.ProductUpdatedUpdate
 import ch.fitnesslab.product.application.ProductView
 import ch.fitnesslab.product.domain.ProductAudience
 import ch.fitnesslab.product.domain.ProductBehaviorConfig
 import ch.fitnesslab.product.domain.commands.CreateProductCommand
 import ch.fitnesslab.product.domain.commands.UpdateProductCommand
 import org.axonframework.commandhandling.gateway.CommandGateway
+import org.axonframework.messaging.responsetypes.ResponseTypes
+import org.axonframework.queryhandling.QueryGateway
+import org.axonframework.queryhandling.SubscriptionQueryResult
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import java.math.BigDecimal
+import java.time.Duration
 
 @RestController
 @RequestMapping("/api/products")
 class ProductController(
     private val commandGateway: CommandGateway,
+    private val queryGateway: QueryGateway,
     private val productProjection: ProductProjection
 ) {
 
     @PostMapping
     fun createProduct(@RequestBody request: CreateProductRequest): ResponseEntity<ProductCreationResponse> {
-        val productId = ProductVariantId.generate()
-
-        val command = CreateProductCommand(
-            productId = productId,
-            code = request.code,
-            name = request.name,
-            productType = request.productType,
-            audience = request.audience,
-            requiresMembership = request.requiresMembership,
-            price = request.price,
-            behavior = request.behavior
+        val subscriptionQuery = queryGateway.subscriptionQuery(
+            FindAllProductsQuery(),
+            ResponseTypes.multipleInstancesOf(ProductView::class.java),
+            ResponseTypes.instanceOf(ProductUpdatedUpdate::class.java)
         )
-        commandGateway.sendAndWait<Any>(command)
 
-        return ResponseEntity
-            .status(HttpStatus.CREATED)
-            .body(ProductCreationResponse(productId.toString()))
+        try {
+            val productId = ProductVariantId.generate()
+
+            val command = CreateProductCommand(
+                productId = productId,
+                code = request.code,
+                name = request.name,
+                productType = request.productType,
+                audience = request.audience.let { ProductAudience.valueOf(it.name) },
+                requiresMembership = request.requiresMembership,
+                price = request.price,
+                behavior = ProductBehaviorConfig(
+                    isTimeBased = request.behavior.isTimeBased,
+                    isSessionBased = request.behavior.isSessionBased,
+                    canBePaused = request.behavior.canBePaused,
+                    autoRenew = request.behavior.autoRenew,
+                    renewalLeadTimeDays = request.behavior.renewalLeadTimeDays,
+                    contributesToMembershipStatus = request.behavior.contributesToMembershipStatus,
+                    maxActivePerCustomer = request.behavior.maxActivePerCustomer,
+                    exclusivityGroup = request.behavior.exclusivityGroup
+                )
+            )
+            commandGateway.sendAndWait<Any>(command)
+
+            waitForProjectionUpdate(subscriptionQuery)
+
+            return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(ProductCreationResponse(productId.toString()))
+        } finally {
+            subscriptionQuery.close()
+        }
     }
 
     @GetMapping("/{productId}")
@@ -61,76 +93,44 @@ class ProductController(
         @PathVariable productId: String,
         @RequestBody request: UpdateProductRequest
     ): ResponseEntity<Void> {
-        val command = UpdateProductCommand(
-            productId = ProductVariantId.from(productId),
-            code = request.code,
-            name = request.name,
-            productType = request.productType,
-            audience = request.audience,
-            requiresMembership = request.requiresMembership,
-            price = request.price,
-            behavior = request.behavior
+        val subscriptionQuery = queryGateway.subscriptionQuery(
+            FindAllProductsQuery(),
+            ResponseTypes.multipleInstancesOf(ProductView::class.java),
+            ResponseTypes.instanceOf(ProductUpdatedUpdate::class.java)
         )
 
-        commandGateway.sendAndWait<Any>(command)
-        return ResponseEntity.ok().build()
+        try {
+            val command = UpdateProductCommand(
+                productId = ProductVariantId.from(productId),
+                code = request.code,
+                name = request.name,
+                productType = request.productType,
+                audience = request.audience.let { ProductAudience.valueOf(it.name) },
+                requiresMembership = request.requiresMembership,
+                price = request.price,
+                behavior = ProductBehaviorConfig(
+                    isTimeBased = request.behavior.isTimeBased,
+                    isSessionBased = request.behavior.isSessionBased,
+                    canBePaused = request.behavior.canBePaused,
+                    autoRenew = request.behavior.autoRenew,
+                    renewalLeadTimeDays = request.behavior.renewalLeadTimeDays,
+                    contributesToMembershipStatus = request.behavior.contributesToMembershipStatus,
+                    maxActivePerCustomer = request.behavior.maxActivePerCustomer,
+                    exclusivityGroup = request.behavior.exclusivityGroup
+                )
+            )
+
+            commandGateway.sendAndWait<Any>(command)
+
+            waitForProjectionUpdate(subscriptionQuery)
+
+            return ResponseEntity.ok().build()
+        } finally {
+            subscriptionQuery.close()
+        }
     }
 
-    @GetMapping("/memberships")
-    fun getMembershipVariants(): ResponseEntity<List<ProductVariantDto>> {
-        // TODO: Replace with actual repository/service call
-        val variants = listOf(
-            ProductVariantDto(
-                id = "550e8400-e29b-41d4-a716-446655440001",
-                code = "FITNESS_12M",
-                name = "Fitness Membership 12 Months",
-                productType = "MEMBERSHIP",
-                price = BigDecimal("1200.00"),
-                durationMonths = 12
-            ),
-            ProductVariantDto(
-                id = "550e8400-e29b-41d4-a716-446655440002",
-                code = "FITNESS_6M",
-                name = "Fitness Membership 6 Months",
-                productType = "MEMBERSHIP",
-                price = BigDecimal("660.00"),
-                durationMonths = 6
-            )
-        )
-        return ResponseEntity.ok(variants)
+    private fun waitForProjectionUpdate(subscriptionQuery: SubscriptionQueryResult<MutableList<ProductView>, ProductUpdatedUpdate>?) {
+        subscriptionQuery?.updates()?.blockFirst(Duration.ofSeconds(5))
     }
 }
-
-data class CreateProductRequest(
-    val code: String,
-    val name: String,
-    val productType: String,
-    val audience: ProductAudience,
-    val requiresMembership: Boolean,
-    val price: BigDecimal,
-    val behavior: ProductBehaviorConfig
-)
-
-data class UpdateProductRequest(
-    val code: String,
-    val name: String,
-    val productType: String,
-    val audience: ProductAudience,
-    val requiresMembership: Boolean,
-    val price: BigDecimal,
-    val behavior: ProductBehaviorConfig
-)
-
-data class ProductCreationResponse(
-    val productId: String? = null,
-    val error: String? = null
-)
-
-data class ProductVariantDto(
-    val id: String,
-    val code: String,
-    val name: String,
-    val productType: String,
-    val price: BigDecimal,
-    val durationMonths: Int
-)
