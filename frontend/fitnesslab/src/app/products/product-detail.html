@@ -33,27 +33,27 @@
             <h3 class="text-xl font-semibold text-gray-700 mb-4">{{ 'product.detail.basicInformation' | translate }}</h3>
             <div class="grid grid-cols-2 gap-4">
               <div>
-                <label class="block text-sm font-medium text-gray-600 mb-1">{{ 'product.fields.productCode' | translate }}:</label>
+                <span class="block text-sm font-medium text-gray-600 mb-1">{{ 'product.fields.productCode' | translate }}:</span>
                 <span class="text-gray-800">{{ product()!.code }}</span>
               </div>
               <div>
-                <label class="block text-sm font-medium text-gray-600 mb-1">{{ 'product.fields.productName' | translate }}:</label>
+                <span class="block text-sm font-medium text-gray-600 mb-1">{{ 'product.fields.productName' | translate }}:</span>
                 <span class="text-gray-800">{{ product()!.name }}</span>
               </div>
               <div>
-                <label class="block text-sm font-medium text-gray-600 mb-1">{{ 'product.fields.productType' | translate }}:</label>
+                <span class="block text-sm font-medium text-gray-600 mb-1">{{ 'product.fields.productType' | translate }}:</span>
                 <span class="text-gray-800">{{ product()!.productType }}</span>
               </div>
               <div>
-                <label class="block text-sm font-medium text-gray-600 mb-1">{{ 'product.fields.price' | translate }}:</label>
+                <span class="block text-sm font-medium text-gray-600 mb-1">{{ 'product.fields.price' | translate }}:</span>
                 <span class="text-gray-800">{{ product()!.price | currency }}</span>
               </div>
               <div>
-                <label class="block text-sm font-medium text-gray-600 mb-1">{{ 'product.fields.audience' | translate }}:</label>
+                <span class="block text-sm font-medium text-gray-600 mb-1">{{ 'product.fields.audience' | translate }}:</span>
                 <span class="text-gray-800">{{ product()!.audience }}</span>
               </div>
               <div>
-                <label class="block text-sm font-medium text-gray-600 mb-1">{{ 'product.fields.requiresMembership' | translate }}:</label>
+                <span class="block text-sm font-medium text-gray-600 mb-1">{{ 'product.fields.requiresMembership' | translate }}:</span>
                 <span class="text-gray-800">{{ product()!.requiresMembership ? ('common.yes' | translate) : ('common.no' | translate) }}</span>
               </div>
             </div>
@@ -63,40 +63,40 @@
             <h3 class="text-xl font-semibold text-gray-700 mb-4">{{ 'product.detail.behaviorConfiguration' | translate }}</h3>
             <div class="grid grid-cols-2 gap-4">
               <div>
-                <label class="block text-sm font-medium text-gray-600 mb-1">{{ 'product.fields.timeBased' | translate }}:</label>
+                <span class="block text-sm font-medium text-gray-600 mb-1">{{ 'product.fields.timeBased' | translate }}:</span>
                 <span class="text-gray-800">{{ product()!.behavior.isTimeBased ? ('common.yes' | translate) : ('common.no' | translate) }}</span>
               </div>
               <div>
-                <label class="block text-sm font-medium text-gray-600 mb-1">{{ 'product.fields.sessionBased' | translate }}:</label>
+                <span class="block text-sm font-medium text-gray-600 mb-1">{{ 'product.fields.sessionBased' | translate }}:</span>
                 <span class="text-gray-800">{{ product()!.behavior.isSessionBased ? ('common.yes' | translate) : ('common.no' | translate) }}</span>
               </div>
               <div>
-                <label class="block text-sm font-medium text-gray-600 mb-1">{{ 'product.fields.canBePaused' | translate }}:</label>
+                <span class="block text-sm font-medium text-gray-600 mb-1">{{ 'product.fields.canBePaused' | translate }}:</span>
                 <span class="text-gray-800">{{ product()!.behavior.canBePaused ? ('common.yes' | translate) : ('common.no' | translate) }}</span>
               </div>
               <div>
-                <label class="block text-sm font-medium text-gray-600 mb-1">{{ 'product.fields.autoRenew' | translate }}:</label>
+                <span class="block text-sm font-medium text-gray-600 mb-1">{{ 'product.fields.autoRenew' | translate }}:</span>
                 <span class="text-gray-800">{{ product()!.behavior.autoRenew ? ('common.yes' | translate) : ('common.no' | translate) }}</span>
               </div>
               @if (product()!.behavior.renewalLeadTimeDays) {
                 <div>
-                  <label class="block text-sm font-medium text-gray-600 mb-1">{{ 'product.fields.renewalLeadTimeDays' | translate }}:</label>
+                  <span class="block text-sm font-medium text-gray-600 mb-1">{{ 'product.fields.renewalLeadTimeDays' | translate }}:</span>
                   <span class="text-gray-800">{{ product()!.behavior.renewalLeadTimeDays }} days</span>
                 </div>
               }
               <div>
-                <label class="block text-sm font-medium text-gray-600 mb-1">{{ 'product.fields.contributesToMembership' | translate }}:</label>
+                <span class="block text-sm font-medium text-gray-600 mb-1">{{ 'product.fields.contributesToMembership' | translate }}:</span>
                 <span class="text-gray-800">{{ product()!.behavior.contributesToMembershipStatus ? ('common.yes' | translate) : ('common.no' | translate) }}</span>
               </div>
               @if (product()!.behavior.maxActivePerCustomer) {
                 <div>
-                  <label class="block text-sm font-medium text-gray-600 mb-1">{{ 'product.fields.maxActivePerCustomer' | translate }}:</label>
+                  <span class="block text-sm font-medium text-gray-600 mb-1">{{ 'product.fields.maxActivePerCustomer' | translate }}:</span>
                   <span class="text-gray-800">{{ product()!.behavior.maxActivePerCustomer }}</span>
                 </div>
               }
               @if (product()!.behavior.exclusivityGroup) {
                 <div>
-                  <label class="block text-sm font-medium text-gray-600 mb-1">{{ 'product.fields.exclusivityGroup' | translate }}:</label>
+                  <span class="block text-sm font-medium text-gray-600 mb-1">{{ 'product.fields.exclusivityGroup' | translate }}:</span>
                   <span class="text-gray-800">{{ product()!.behavior.exclusivityGroup }}</span>
                 </div>
               }

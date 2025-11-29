@@ -1,4 +1,4 @@
-import {Component, OnInit, signal} from '@angular/core';
+import {Component, OnInit, signal, inject} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {ActivatedRoute, Router} from '@angular/router';
@@ -15,6 +15,14 @@ import {Invoices, InvoiceView} from '../invoices/invoices';
   templateUrl: './customer-detail.html'
 })
 export class CustomerDetail implements OnInit {
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
+  private customerService = inject(Customers);
+  private productService = inject(Products);
+  private membershipService = inject(Memberships);
+  private invoiceService = inject(Invoices);
+  private fb = inject(FormBuilder);
+
   customer = signal<CustomerView | null>(null);
   errorMessage = signal<string | null>(null);
   isLoading = signal<boolean>(true);
@@ -31,15 +39,7 @@ export class CustomerDetail implements OnInit {
   customerForm: FormGroup;
   salutations = ['MR', 'MS', 'MRS', 'MX', 'DR'];
 
-  constructor(
-    private route: ActivatedRoute,
-    private router: Router,
-    private customerService: Customers,
-    private productService: Products,
-    private membershipService: Memberships,
-    private invoiceService: Invoices,
-    private fb: FormBuilder
-  ) {
+  constructor() {
     this.customerForm = this.fb.group({
       salutation: ['', Validators.required],
       firstName: ['', [Validators.required, Validators.minLength(1)]],
@@ -73,8 +73,8 @@ export class CustomerDetail implements OnInit {
         this.isLoading.set(false);
         this.loadInvoices(customerId);
       },
-      error: (error) => {
-        this.errorMessage.set(error.status === 404
+      error: (err) => {
+        this.errorMessage.set(err.status === 404
           ? 'Customer not found'
           : 'Failed to load customer details');
         this.isLoading.set(false);
@@ -89,8 +89,8 @@ export class CustomerDetail implements OnInit {
         this.invoices.set(invoices);
         this.isLoadingInvoices.set(false);
       },
-      error: (error) => {
-        console.error('Failed to load invoices:', error);
+      error: (err) => {
+        console.error(err);
         this.isLoadingInvoices.set(false);
       }
     });
@@ -152,8 +152,8 @@ export class CustomerDetail implements OnInit {
           this.isSubmitting.set(false);
           this.loadCustomer(this.customer()!.customerId);
         },
-        error: (error) => {
-          this.errorMessage.set(error.error?.message || 'Failed to update customer');
+        error: (err) => {
+          this.errorMessage.set(err.error?.message || 'Failed to update customer');
           this.isSubmitting.set(false);
         }
       });
@@ -179,7 +179,7 @@ export class CustomerDetail implements OnInit {
         this.availableProducts.set(products);
         this.isLoadingProducts.set(false);
       },
-      error: (error) => {
+      error: () => {
         this.errorMessage.set('Failed to load products');
         this.isLoadingProducts.set(false);
       }
@@ -219,10 +219,10 @@ export class CustomerDetail implements OnInit {
           this.closeProductSelection();
           this.loadInvoices(customer.customerId);
         },
-        error: (error) => {
+        error: (err) => {
           this.isAssigningProduct.set(false);
           this.errorMessage.set('Failed to assign membership product');
-          console.error('Error assigning membership:', error);
+          console.error(err);
         }
       });
 

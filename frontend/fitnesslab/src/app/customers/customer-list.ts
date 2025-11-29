@@ -1,4 +1,4 @@
-import {Component, computed, OnInit, signal} from '@angular/core';
+import {Component, computed, OnInit, signal, inject} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {Router} from '@angular/router';
 import {FormsModule} from '@angular/forms';
@@ -15,6 +15,9 @@ type SortDirection = 'asc' | 'desc';
   templateUrl: './customer-list.html'
 })
 export class CustomerList implements OnInit {
+  private customerService = inject(Customers);
+  private router = inject(Router);
+
   allCustomers = signal<CustomerView[]>([]);
   isLoading = signal<boolean>(true);
   errorMessage = signal<string | null>(null);
@@ -59,11 +62,6 @@ export class CustomerList implements OnInit {
     });
   });
 
-  constructor(
-    private customerService: Customers,
-    private router: Router
-  ) {}
-
   ngOnInit(): void {
     this.loadCustomers();
   }
@@ -77,7 +75,7 @@ export class CustomerList implements OnInit {
         this.allCustomers.set(customers);
         this.isLoading.set(false);
       },
-      error: (error) => {
+      error: () => {
         this.errorMessage.set('Failed to load customers');
         this.isLoading.set(false);
       }

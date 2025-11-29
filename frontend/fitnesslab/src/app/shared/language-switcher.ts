@@ -1,7 +1,7 @@
-import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { TranslateModule } from '@ngx-translate/core';
-import { TranslationService } from './translation.service';
+import {Component, inject} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {TranslateModule} from '@ngx-translate/core';
+import {TranslationService} from './translation.service';
 
 @Component({
   selector: 'app-language-switcher',
@@ -58,7 +58,9 @@ export class LanguageSwitcher {
     { code: 'de', label: 'Deutsch' }
   ];
 
-  constructor(private translationService: TranslationService) {
+  private translationService = inject(TranslationService);
+
+  constructor() {
     this.currentLanguage = this.translationService.getCurrentLanguage();
   }
 

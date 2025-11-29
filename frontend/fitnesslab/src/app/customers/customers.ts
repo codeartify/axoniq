@@ -1,4 +1,4 @@
-import {Injectable} from '@angular/core';
+import {Injectable, inject} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {Observable} from 'rxjs';
 
@@ -50,9 +50,8 @@ export interface CustomerView {
   providedIn: 'root'
 })
 export class Customers {
+  private http = inject(HttpClient);
   private apiUrl = 'http://localhost:8080/api/customers';
-
-  constructor(private http: HttpClient) {}
 
   registerCustomer(request: RegisterCustomerRequest): Observable<CustomerRegistrationResponse> {
     return this.http.post<CustomerRegistrationResponse>(this.apiUrl, request);

@@ -1,6 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { AuthService } from './auth.service';
+import AuthService from './auth.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TranslateModule } from '@ngx-translate/core';
@@ -48,20 +48,26 @@ import { TranslateModule } from '@ngx-translate/core';
             />
           </div>
 
-          <div *ngIf="errorMessage" class="text-red-600 text-sm text-center">
-            {{ errorMessage }}
-          </div>
+          @if (errorMessage) {
+            <div class="text-red-600 text-sm text-center">
+              {{ errorMessage }}
+            </div>
+          }
 
           <button
             type="submit"
             [disabled]="isLoading"
             class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition duration-200 ease-in-out transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <span *ngIf="!isLoading">{{ 'login.signIn' | translate }}</span>
-            <span *ngIf="isLoading" class="flex items-center justify-center">
-              <div class="inline-block animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-              {{ 'login.signingIn' | translate }}
-            </span>
+            @if (!isLoading) {
+              <span>{{ 'login.signIn' | translate }}</span>
+            }
+            @if (isLoading) {
+              <span class="flex items-center justify-center">
+                <div class="inline-block animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                {{ 'login.signingIn' | translate }}
+              </span>
+            }
           </button>
         </form>
       </div>
@@ -74,10 +80,8 @@ export class LoginComponent implements OnInit {
   isLoading = false;
   errorMessage = '';
 
-  constructor(
-    private authService: AuthService,
-    private router: Router
-  ) {}
+  private authService = inject(AuthService);
+  private router = inject(Router);
 
   ngOnInit(): void {
     // If already authenticated, redirect
@@ -98,9 +102,10 @@ export class LoginComponent implements OnInit {
     try {
       await this.authService.loginWithCredentials(this.username, this.password);
       this.router.navigate(['/customers']);
-    } catch (error: any) {
-      console.error('Login error:', error);
-      this.errorMessage = error.error?.error_description || error.error_description || 'Invalid username or password';
+    } catch (error: unknown) {
+      console.error(error);
+      const err = error as { error?: { error_description?: string }; error_description?: string };
+      this.errorMessage = err.error?.error_description || err.error_description || 'Invalid username or password';
       this.isLoading = false;
     }
   }

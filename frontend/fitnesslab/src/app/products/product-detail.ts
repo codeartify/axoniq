@@ -1,4 +1,4 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -12,6 +12,10 @@ import { Products, ProductView, UpdateProductRequest } from './products';
   templateUrl: './product-detail.html'
 })
 export class ProductDetail implements OnInit {
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
+  private productService = inject(Products);
+
   product = signal<ProductView | null>(null);
   isLoading = signal<boolean>(true);
   isEditing = signal<boolean>(false);
@@ -21,12 +25,6 @@ export class ProductDetail implements OnInit {
 
   editedProduct: UpdateProductRequest | null = null;
   audiences = ['INTERNAL', 'EXTERNAL', 'BOTH'];
-
-  constructor(
-    private route: ActivatedRoute,
-    private router: Router,
-    private productService: Products
-  ) {}
 
   ngOnInit(): void {
     const productId = this.route.snapshot.paramMap.get('id');
@@ -44,7 +42,7 @@ export class ProductDetail implements OnInit {
         this.product.set(product);
         this.isLoading.set(false);
       },
-      error: (error) => {
+      error: () => {
         this.errorMessage.set('Failed to load product');
         this.isLoading.set(false);
       }
@@ -89,10 +87,10 @@ export class ProductDetail implements OnInit {
         this.successMessage.set('Product updated successfully');
         this.loadProduct(prod.productId);
       },
-      error: (error) => {
+      error: (err) => {
         this.isSaving.set(false);
         this.errorMessage.set('Failed to update product');
-        console.error('Error updating product:', error);
+        console.error(err);
       }
     });
   }

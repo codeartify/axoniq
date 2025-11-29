@@ -1,4 +1,4 @@
-import {Component, computed, OnInit, signal} from '@angular/core';
+import {Component, computed, OnInit, signal, inject} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {Router} from '@angular/router';
 import {FormsModule} from '@angular/forms';
@@ -15,6 +15,9 @@ type SortDirection = 'asc' | 'desc';
   templateUrl: './product-list.html'
 })
 export class ProductList implements OnInit {
+  private productService = inject(Products);
+  private router = inject(Router);
+
   allProducts = signal<ProductView[]>([]);
   isLoading = signal<boolean>(true);
   errorMessage = signal<string | null>(null);
@@ -60,11 +63,6 @@ export class ProductList implements OnInit {
     });
   });
 
-  constructor(
-    private productService: Products,
-    private router: Router
-  ) {}
-
   ngOnInit(): void {
     this.loadProducts();
   }
@@ -78,7 +76,7 @@ export class ProductList implements OnInit {
         this.allProducts.set(products);
         this.isLoading.set(false);
       },
-      error: (error) => {
+      error: () => {
         this.errorMessage.set('Failed to load products');
         this.isLoading.set(false);
       }

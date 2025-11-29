@@ -1,4 +1,4 @@
-import {Injectable} from '@angular/core';
+import {Injectable, inject} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {Observable} from 'rxjs';
 
@@ -19,9 +19,8 @@ export interface InvoiceView {
   providedIn: 'root'
 })
 export class Invoices {
+  private http = inject(HttpClient);
   private apiUrl = 'http://localhost:8080/api/invoices';
-
-  constructor(private http: HttpClient) {}
 
   getAllInvoices(): Observable<InvoiceView[]> {
     return this.http.get<InvoiceView[]>(this.apiUrl);

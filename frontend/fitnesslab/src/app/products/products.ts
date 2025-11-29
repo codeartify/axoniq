@@ -1,4 +1,4 @@
-import {Injectable} from '@angular/core';
+import {inject, Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {Observable} from 'rxjs';
 
@@ -55,8 +55,8 @@ export interface ProductView {
 })
 export class Products {
   private apiUrl = 'http://localhost:8080/api/products';
+  private http = inject(HttpClient);
 
-  constructor(private http: HttpClient) {}
 
   createProduct(request: CreateProductRequest): Observable<ProductCreationResponse> {
     return this.http.post<ProductCreationResponse>(this.apiUrl, request);

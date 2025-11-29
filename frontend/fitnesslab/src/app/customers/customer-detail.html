@@ -43,32 +43,32 @@
           <h3 class="text-xl font-semibold text-gray-700 mb-4">{{ 'customer.detail.personalInformation' | translate }}</h3>
           <div class="grid grid-cols-2 gap-4">
             <div>
-              <label class="block text-sm font-medium text-gray-600 mb-1">{{ 'form.customerId' | translate }}</label>
+              <span class="block text-sm font-medium text-gray-600 mb-1">{{ 'form.customerId' | translate }}</span>
               <span class="text-gray-800">{{ customer()!.customerId }}</span>
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-600 mb-1">{{ 'form.salutation' | translate }}:</label>
+              <span class="block text-sm font-medium text-gray-600 mb-1">{{ 'form.salutation' | translate }}:</span>
               <span class="text-gray-800">{{ customer()!.salutation }}</span>
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-600 mb-1">{{ 'form.firstName' | translate }}:</label>
+              <span class="block text-sm font-medium text-gray-600 mb-1">{{ 'form.firstName' | translate }}:</span>
               <span class="text-gray-800">{{ customer()!.firstName }}</span>
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-600 mb-1">{{ 'form.lastName' | translate }}:</label>
+              <span class="block text-sm font-medium text-gray-600 mb-1">{{ 'form.lastName' | translate }}:</span>
               <span class="text-gray-800">{{ customer()!.lastName }}</span>
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-600 mb-1">{{ 'form.dateOfBirth' | translate }}:</label>
+              <span class="block text-sm font-medium text-gray-600 mb-1">{{ 'form.dateOfBirth' | translate }}:</span>
               <span class="text-gray-800">{{ customer()!.dateOfBirth }}</span>
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-600 mb-1">{{ 'form.email' | translate }}:</label>
+              <span class="block text-sm font-medium text-gray-600 mb-1">{{ 'form.email' | translate }}:</span>
               <span class="text-gray-800">{{ customer()!.email }}</span>
             </div>
             @if (customer()!.phoneNumber) {
               <div>
-                <label class="block text-sm font-medium text-gray-600 mb-1">{{ 'form.phoneNumber' | translate }}:</label>
+                <span class="block text-sm font-medium text-gray-600 mb-1">{{ 'form.phoneNumber' | translate }}:</span>
                 <span class="text-gray-800">{{ customer()!.phoneNumber }}</span>
               </div>
             }
@@ -79,23 +79,23 @@
           <h3 class="text-xl font-semibold text-gray-700 mb-4">{{ 'form.address' | translate }}</h3>
           <div class="grid grid-cols-2 gap-4">
             <div>
-              <label class="block text-sm font-medium text-gray-600 mb-1">{{ 'form.street' | translate }}:</label>
+              <span class="block text-sm font-medium text-gray-600 mb-1">{{ 'form.street' | translate }}:</span>
               <span class="text-gray-800">{{ customer()!.address.street }}</span>
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-600 mb-1">{{ 'form.houseNumber' | translate }}:</label>
+              <span class="block text-sm font-medium text-gray-600 mb-1">{{ 'form.houseNumber' | translate }}:</span>
               <span class="text-gray-800">{{ customer()!.address.houseNumber }}</span>
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-600 mb-1">{{ 'form.postalCode' | translate }}:</label>
+              <span class="block text-sm font-medium text-gray-600 mb-1">{{ 'form.postalCode' | translate }}:</span>
               <span class="text-gray-800">{{ customer()!.address.postalCode }}</span>
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-600 mb-1">{{ 'form.city' | translate }}:</label>
+              <span class="block text-sm font-medium text-gray-600 mb-1">{{ 'form.city' | translate }}:</span>
               <span class="text-gray-800">{{ customer()!.address.city }}</span>
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-600 mb-1">{{ 'form.country' | translate }}:</label>
+              <span class="block text-sm font-medium text-gray-600 mb-1">{{ 'form.country' | translate }}:</span>
               <span class="text-gray-800">{{ customer()!.address.country }}</span>
             </div>
           </div>
@@ -242,18 +242,26 @@
                       <td class="px-3 py-3 border-b border-gray-200">{{ invoice.amount | currency }}</td>
                       <td class="px-3 py-3 border-b border-gray-200">{{ invoice.dueDate }}</td>
                       <td class="px-3 py-3 border-b border-gray-200">
-                        <span *ngIf="invoice.status === 'OPEN'" class="px-2 py-1 rounded text-xs font-semibold uppercase bg-blue-100 text-blue-800">
+                        @if (invoice.status === 'OPEN') {
+                          <span class="px-2 py-1 rounded text-xs font-semibold uppercase bg-blue-100 text-blue-800">
                           {{ invoice.status }}
                         </span>
-                        <span *ngIf="invoice.status === 'PAID'" class="px-2 py-1 rounded text-xs font-semibold uppercase bg-green-100 text-green-800">
+                        }
+                        @if (invoice.status === 'PAID') {
+                          <span class="px-2 py-1 rounded text-xs font-semibold uppercase bg-green-100 text-green-800">
                           {{ invoice.status }}
                         </span>
-                        <span *ngIf="invoice.status === 'OVERDUE'" class="px-2 py-1 rounded text-xs font-semibold uppercase bg-orange-100 text-orange-800">
+                        }
+                        @if (invoice.status === 'OVERDUE') {
+                          <span class="px-2 py-1 rounded text-xs font-semibold uppercase bg-orange-100 text-orange-800">
                           {{ invoice.status }}
                         </span>
-                        <span *ngIf="invoice.status === 'CANCELLED'" class="px-2 py-1 rounded text-xs font-semibold uppercase bg-red-100 text-red-800">
+                        }
+                        @if (invoice.status === 'CANCELLED') {
+                          <span class="px-2 py-1 rounded text-xs font-semibold uppercase bg-red-100 text-red-800">
                           {{ invoice.status }}
                         </span>
+                        }
                       </td>
                       <td class="px-3 py-3 border-b border-gray-200">{{ invoice.isInstallment ? (('common.yes' | translate) + ' (' + invoice.installmentNumber + ')') : ('common.no' | translate) }}</td>
                     </tr>
@@ -269,8 +277,8 @@
 
   <!-- Product Selection Modal -->
   @if (showProductSelection()) {
-    <div class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50" (click)="closeProductSelection()">
-      <div class="bg-white rounded-lg max-w-5xl w-11/12 max-h-[90vh] overflow-y-auto shadow-xl" (click)="$event.stopPropagation()">
+    <div class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50" (click)="closeProductSelection()" (keydown.escape)="closeProductSelection()" tabindex="0" role="dialog" aria-modal="true">
+      <div class="bg-white rounded-lg max-w-5xl w-11/12 max-h-[90vh] overflow-y-auto shadow-xl" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()" tabindex="-1">
         <div class="flex justify-between items-center p-6 border-b border-gray-200">
           <h3 class="text-2xl font-semibold text-gray-800">{{ 'customer.detail.selectProduct' | translate }}</h3>
           <button (click)="closeProductSelection()" class="text-3xl font-bold text-gray-600 hover:text-gray-800 cursor-pointer bg-transparent border-none">&times;</button>

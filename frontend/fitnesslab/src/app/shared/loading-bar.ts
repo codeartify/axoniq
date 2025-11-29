@@ -1,6 +1,6 @@
-import { Component, ChangeDetectionStrategy } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { LoadingService } from './loading.service';
+import {CommonModule} from '@angular/common';
+import {LoadingService} from './loading.service';
+import {ChangeDetectionStrategy, Component, inject} from '@angular/core';
 
 @Component({
   selector: 'app-loading-bar',
@@ -8,9 +8,11 @@ import { LoadingService } from './loading.service';
   imports: [CommonModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div *ngIf="loadingService.isLoading()" class="fixed top-0 left-0 right-0 z-50">
-      <div class="h-1 bg-blue-600 loading-bar"></div>
-    </div>
+    @if (loadingService.isLoading()) {
+      <div class="fixed top-0 left-0 right-0 z-50">
+        <div class="h-1 bg-blue-600 loading-bar"></div>
+      </div>
+    }
   `,
   styles: [`
     .loading-bar {
@@ -31,5 +33,6 @@ import { LoadingService } from './loading.service';
   `]
 })
 export class LoadingBar {
-  constructor(public loadingService: LoadingService) {}
+
+  loadingService = inject(LoadingService)
 }

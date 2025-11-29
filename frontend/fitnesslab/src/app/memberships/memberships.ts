@@ -1,4 +1,4 @@
-import {Injectable} from '@angular/core';
+import {Injectable, inject} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {Observable} from 'rxjs';
 
@@ -27,9 +27,8 @@ export interface MembershipSignUpResult {
   providedIn: 'root'
 })
 export class Memberships {
+  private http = inject(HttpClient);
   private apiUrl = 'http://localhost:8080/api/memberships';
-
-  constructor(private http: HttpClient) {}
 
   signUp(request: MembershipSignUpRequest): Observable<MembershipSignUpResult> {
     return this.http.post<MembershipSignUpResult>(`${this.apiUrl}/sign-up`, request);

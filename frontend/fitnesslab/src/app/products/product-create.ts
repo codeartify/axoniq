@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -12,6 +12,9 @@ import { Products, CreateProductRequest } from './products';
   templateUrl: './product-create.html'
 })
 export class ProductCreate {
+  private productService = inject(Products);
+  private router = inject(Router);
+
   product: CreateProductRequest = {
     code: '',
     name: '',
@@ -32,11 +35,6 @@ export class ProductCreate {
   isSubmitting = false;
   errorMessage: string | null = null;
 
-  constructor(
-    private productService: Products,
-    private router: Router
-  ) {}
-
   onSubmit(): void {
     if (!this.isFormValid()) {
       this.errorMessage = 'Please fill in all required fields';
@@ -56,7 +54,7 @@ export class ProductCreate {
       error: (error) => {
         this.isSubmitting = false;
         this.errorMessage = 'Failed to create product. Please try again.';
-        console.error('Error creating product:', error);
+        console.error(error);
       }
     });
   }

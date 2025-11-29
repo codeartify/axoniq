@@ -3,7 +3,6 @@ import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { OAuthService, AuthConfig } from 'angular-oauth2-oidc';
 import { BehaviorSubject, Observable, firstValueFrom } from 'rxjs';
-import { filter, map } from 'rxjs/operators';
 import {toSignal} from '@angular/core/rxjs-interop';
 
 export interface UserProfile {
@@ -14,6 +13,16 @@ export interface UserProfile {
   roles: string[];
   picture?: string;
 }
+
+interface RealmAccess {
+  roles?: string[];
+}
+
+interface ResourceAccessEntry {
+  roles?: string[];
+}
+
+type ResourceAccess = Record<string, ResourceAccessEntry>;
 
 interface TokenResponse {
   access_token: string;
@@ -39,18 +48,18 @@ const authConfig: AuthConfig = {
 @Injectable({
   providedIn: 'root',
 })
-export class AuthService {
+class AuthService {
   private userProfileSubject = new BehaviorSubject<UserProfile | null>(null);
   public userProfile$: Observable<UserProfile | null> = this.userProfileSubject.asObservable();
   private tokenEndpoint = 'https://auth.oliverzihler.ch/realms/fitnesslab/protocol/openid-connect/token';
 
   isLoggedIn = toSignal((this.userProfile$));
 
-  constructor(
-    private oauthService: OAuthService,
-    private router: Router,
-    private http: HttpClient
-  ) {
+  private oauthService = inject(OAuthService);
+  private router = inject(Router);
+  private http = inject(HttpClient);
+
+  constructor() {
     this.configureOAuth();
   }
 
@@ -141,7 +150,7 @@ export class AuthService {
       const idPayload = JSON.parse(atob(idToken.split('.')[1]));
 
       // Extract roles from access token
-      const roles = this.extractRoles(accessPayload);
+      const roles = this.extractRolesFromClaims(accessPayload);
 
       // Extract user info from ID token
       const profile: UserProfile = {
@@ -155,39 +164,42 @@ export class AuthService {
 
       this.userProfileSubject.next(profile);
     } catch (error) {
-      console.error('Error loading user profile:', error);
+      console.error(error);
     }
   }
 
-  private extractRoles(claims: any): string[] {
-    console.log('Extracting roles from claims:', claims);
-    const roles: string[] = [];
+private extractRolesFromClaims(claims: Record<string, unknown>): string[] {
+  const roles: string[] = [];
 
-    // Try different locations where Keycloak might put roles
-    if (claims.realm_access && claims.realm_access.roles) {
-      console.log('Found roles in realm_access:', claims.realm_access.roles);
-      roles.push(...claims.realm_access.roles);
-    }
-
-    // Also check resource_access
-    if (claims.resource_access) {
-      Object.keys(claims.resource_access).forEach(key => {
-        if (claims.resource_access[key].roles) {
-          console.log(`Found roles in resource_access.${key}:`, claims.resource_access[key].roles);
-          roles.push(...claims.resource_access[key].roles);
-        }
-      });
-    }
-
-    // Check for roles claim directly
-    if (claims.roles && Array.isArray(claims.roles)) {
-      console.log('Found roles in claims.roles:', claims.roles);
-      roles.push(...claims.roles);
-    }
-
-    console.log('Final extracted roles:', roles);
-    return roles;
+  // Try different locations where Keycloak might put roles
+  const realmAccess = claims['realm_access'] as RealmAccess | undefined;
+  if (realmAccess && Array.isArray(realmAccess.roles)) {
+    console.log('Found roles in realm_access:', realmAccess.roles);
+    roles.push(...realmAccess.roles);
   }
+
+  // Also check resource_access
+  const resourceAccess = claims['resource_access'] as ResourceAccess | undefined;
+  if (resourceAccess) {
+    Object.keys(resourceAccess).forEach((key) => {
+      const entry = resourceAccess[key];
+      if (entry && Array.isArray(entry.roles)) {
+        console.log(`Found roles in resource_access.${key}:`, entry.roles);
+        roles.push(...entry.roles);
+      }
+    });
+  }
+
+  // Check for roles claim directly
+  const directRoles = claims['roles'] as unknown;
+  if (Array.isArray(directRoles)) {
+    console.log('Found roles in claims.roles:', directRoles);
+    roles.push(...directRoles);
+  }
+
+  console.log('Final extracted roles:', roles);
+  return roles;
+}
 
   public hasRole(role: string): boolean {
     const profile = this.userProfileSubject.value;
@@ -214,3 +226,5 @@ export class AuthService {
     return this.hasRole('MEMBER');
   }
 }
+
+export default AuthService

@@ -64,7 +64,4 @@ export class TranslationService {
     this.location.replaceState(url.pathname + url.search);
   }
 
-  translate(key: string, params?: any): string {
-    return this.translateService.instant(key, params);
-  }
 }

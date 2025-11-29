@@ -1,4 +1,4 @@
-import {Component, computed, effect, signal} from '@angular/core';
+import {Component, computed, effect, signal, inject} from '@angular/core';
 import {InvoiceView, Invoices} from './invoices';
 import {CommonModule} from '@angular/common';
 import {FormsModule} from '@angular/forms';
@@ -14,6 +14,9 @@ type SortColumn = 'invoiceId' | 'customerName' | 'amount' | 'dueDate' | 'status'
   templateUrl: './invoice-list.html'
 })
 export class InvoiceList {
+  private invoiceService = inject(Invoices);
+  private router = inject(Router);
+
   invoices = signal<InvoiceView[]>([]);
   searchTerm = signal('');
   sortColumn = signal<SortColumn>('dueDate');
@@ -42,8 +45,8 @@ export class InvoiceList {
     const column = this.sortColumn();
     const direction = this.sortDirection();
     result = [...result].sort((a, b) => {
-      let aVal: any = a[column];
-      let bVal: any = b[column];
+      let aVal: string | number = a[column];
+      let bVal: string | number = b[column];
 
       if (column === 'amount') {
         aVal = Number(aVal);
@@ -61,10 +64,7 @@ export class InvoiceList {
     return result;
   });
 
-  constructor(
-    private invoiceService: Invoices,
-    private router: Router
-  ) {
+  constructor() {
     effect(() => {
       this.loadInvoices();
     }, { allowSignalWrites: true });
@@ -73,7 +73,7 @@ export class InvoiceList {
   loadInvoices(): void {
     this.invoiceService.getAllInvoices().subscribe({
       next: (invoices) => this.invoices.set(invoices),
-      error: (err) => console.error('Failed to load invoices', err)
+      error: (err) => console.error(err)
     });
   }
 

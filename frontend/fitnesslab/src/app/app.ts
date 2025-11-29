@@ -4,8 +4,7 @@ import { TranslateModule } from '@ngx-translate/core';
 import { LoadingBar } from './shared/loading-bar';
 import { LanguageSwitcher } from './shared/language-switcher';
 import { UserProfileMenuComponent } from './auth/user-profile-menu.component';
-import {AuthService} from './auth/auth.service';
-import {toSignal} from '@angular/core/rxjs-interop';
+import AuthService from './auth/auth.service';
 import {AsyncPipe} from '@angular/common';
 
 @Component({

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -12,17 +12,17 @@ import { Customers } from './customers';
   templateUrl: './customer-create.html'
 })
 export class CustomerCreate {
+  private fb = inject(FormBuilder);
+  private customerService = inject(Customers);
+  private router = inject(Router);
+
   customerForm: FormGroup;
   errorMessage: string | null = null;
   isSubmitting = false;
 
   salutations = ['MR', 'MS', 'MRS', 'MX', 'DR'];
 
-  constructor(
-    private fb: FormBuilder,
-    private customerService: Customers,
-    private router: Router
-  ) {
+  constructor() {
     this.customerForm = this.fb.group({
       salutation: ['', Validators.required],
       firstName: ['', [Validators.required, Validators.minLength(1)]],
