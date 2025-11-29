@@ -42,6 +42,38 @@
         }
       ],
       "realmRoles": ["ADMIN"]
+    },
+    {
+      "username": "trainer",
+      "enabled": true,
+      "email": "trainer@fitnesslab.ch",
+      "firstName": "Trainer",
+      "lastName": "User",
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "trainer123",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["TRAINER"]
+    },
+    {
+      "username": "member",
+      "enabled": true,
+      "email": "member@fitnesslab.ch",
+      "firstName": "Member",
+      "lastName": "User",
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "member123",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["MEMBER"]
     }
   ],
   "clients": [

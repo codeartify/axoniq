@@ -1,9 +1,10 @@
-import { Injectable } from '@angular/core';
+import {inject, Injectable} from '@angular/core';
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { OAuthService, AuthConfig } from 'angular-oauth2-oidc';
 import { BehaviorSubject, Observable, firstValueFrom } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
+import {toSignal} from '@angular/core/rxjs-interop';
 
 export interface UserProfile {
   username: string;
@@ -42,6 +43,8 @@ export class AuthService {
   private userProfileSubject = new BehaviorSubject<UserProfile | null>(null);
   public userProfile$: Observable<UserProfile | null> = this.userProfileSubject.asObservable();
   private tokenEndpoint = 'https://auth.oliverzihler.ch/realms/fitnesslab/protocol/openid-connect/token';
+
+  isLoggedIn = toSignal((this.userProfile$));
 
   constructor(
     private oauthService: OAuthService,
