@@ -1,9 +1,10 @@
-import {Component, computed, OnInit, signal, inject} from '@angular/core';
+import {Component, computed, inject, OnInit, signal} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {Router} from '@angular/router';
 import {FormsModule} from '@angular/forms';
 import {TranslateModule} from '@ngx-translate/core';
 import {Products, ProductView} from './products';
+import AuthService from '../auth/auth.service';
 
 type SortColumn = 'name' | 'code' | 'productType' | 'price' | 'audience';
 type SortDirection = 'asc' | 'desc';
@@ -17,6 +18,7 @@ type SortDirection = 'asc' | 'desc';
 export class ProductList implements OnInit {
   private productService = inject(Products);
   private router = inject(Router);
+  private authService = inject(AuthService);
 
   allProducts = signal<ProductView[]>([]);
   isLoading = signal<boolean>(true);
@@ -24,6 +26,8 @@ export class ProductList implements OnInit {
   searchTerm = signal<string>('');
   sortColumn = signal<SortColumn>('name');
   sortDirection = signal<SortDirection>('asc');
+
+  canAddProducts = computed(() => this.authService.hasRole('products.write'));
 
   products = computed(() => {
     let filtered = this.allProducts();

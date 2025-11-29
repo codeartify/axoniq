@@ -1,7 +1,11 @@
 <div class="p-5 max-w-7xl mx-auto">
   <div class="flex justify-between items-center mb-5">
     <h2 class="text-3xl font-bold text-gray-800">{{ 'product.list.title' | translate }}</h2>
-    <button (click)="createProduct()" class="px-4 py-2 bg-blue-500 text-white rounded border-none cursor-pointer text-sm font-medium hover:bg-blue-600 transition-colors">{{ 'button.addProduct' | translate }}</button>
+    @if (canAddProducts()) {
+      <button (click)="createProduct()"
+              class="px-4 py-2 bg-blue-500 text-white rounded border-none cursor-pointer text-sm font-medium hover:bg-blue-600 transition-colors">{{ 'button.addProduct' | translate }}
+      </button>
+    }
   </div>
 
   @if (!isLoading() && !errorMessage()) {
@@ -32,31 +36,42 @@
     @if (products().length === 0) {
       <div class="text-center py-20">
         <p class="text-gray-600 text-lg mb-4">{{ 'product.list.noProductsFound' | translate }}</p>
-        <button (click)="createProduct()" class="px-4 py-2 bg-blue-500 text-white rounded border-none cursor-pointer text-sm font-medium hover:bg-blue-600 transition-colors">{{ 'button.createFirstProduct' | translate }}</button>
+        <button (click)="createProduct()"
+                class="px-4 py-2 bg-blue-500 text-white rounded border-none cursor-pointer text-sm font-medium hover:bg-blue-600 transition-colors">{{ 'button.createFirstProduct' | translate }}
+        </button>
       </div>
     } @else {
       <div class="overflow-x-auto bg-white shadow-md rounded-lg">
         <table class="w-full border-collapse">
           <thead class="bg-gray-100">
-            <tr>
-              <th (click)="sortBy('code')" class="px-3 py-3 text-left border-b-2 border-gray-300 cursor-pointer select-none font-semibold hover:bg-gray-200 transition-colors">
-                {{ 'product.table.code' | translate }} {{ getSortIcon('code') }}
-              </th>
-              <th (click)="sortBy('name')" class="px-3 py-3 text-left border-b-2 border-gray-300 cursor-pointer select-none font-semibold hover:bg-gray-200 transition-colors">
-                {{ 'product.table.name' | translate }} {{ getSortIcon('name') }}
-              </th>
-              <th (click)="sortBy('productType')" class="px-3 py-3 text-left border-b-2 border-gray-300 cursor-pointer select-none font-semibold hover:bg-gray-200 transition-colors">
-                {{ 'product.table.type' | translate }} {{ getSortIcon('productType') }}
-              </th>
-              <th (click)="sortBy('price')" class="px-3 py-3 text-left border-b-2 border-gray-300 cursor-pointer select-none font-semibold hover:bg-gray-200 transition-colors">
-                {{ 'product.table.price' | translate }} {{ getSortIcon('price') }}
-              </th>
-              <th (click)="sortBy('audience')" class="px-3 py-3 text-left border-b-2 border-gray-300 cursor-pointer select-none font-semibold hover:bg-gray-200 transition-colors">
-                {{ 'product.table.audience' | translate }} {{ getSortIcon('audience') }}
-              </th>
-              <th class="px-3 py-3 text-left border-b-2 border-gray-300 font-semibold">{{ 'product.table.requiresMembership' | translate }}</th>
-              <th class="px-3 py-3 text-left border-b-2 border-gray-300 font-semibold">{{ 'common.actions' | translate }}</th>
-            </tr>
+          <tr>
+            <th (click)="sortBy('code')"
+                class="px-3 py-3 text-left border-b-2 border-gray-300 cursor-pointer select-none font-semibold hover:bg-gray-200 transition-colors">
+              {{ 'product.table.code' | translate }} {{ getSortIcon('code') }}
+            </th>
+            <th (click)="sortBy('name')"
+                class="px-3 py-3 text-left border-b-2 border-gray-300 cursor-pointer select-none font-semibold hover:bg-gray-200 transition-colors">
+              {{ 'product.table.name' | translate }} {{ getSortIcon('name') }}
+            </th>
+            <th (click)="sortBy('productType')"
+                class="px-3 py-3 text-left border-b-2 border-gray-300 cursor-pointer select-none font-semibold hover:bg-gray-200 transition-colors">
+              {{ 'product.table.type' | translate }} {{ getSortIcon('productType') }}
+            </th>
+            <th (click)="sortBy('price')"
+                class="px-3 py-3 text-left border-b-2 border-gray-300 cursor-pointer select-none font-semibold hover:bg-gray-200 transition-colors">
+              {{ 'product.table.price' | translate }} {{ getSortIcon('price') }}
+            </th>
+            <th (click)="sortBy('audience')"
+                class="px-3 py-3 text-left border-b-2 border-gray-300 cursor-pointer select-none font-semibold hover:bg-gray-200 transition-colors">
+              {{ 'product.table.audience' | translate }} {{ getSortIcon('audience') }}
+            </th>
+            <th
+              class="px-3 py-3 text-left border-b-2 border-gray-300 font-semibold">{{ 'product.table.requiresMembership' | translate }}
+            </th>
+            <th
+              class="px-3 py-3 text-left border-b-2 border-gray-300 font-semibold">{{ 'common.actions' | translate }}
+            </th>
+          </tr>
           </thead>
           <tbody>
             @for (product of products(); track product.productId) {
@@ -66,7 +81,9 @@
                 <td class="px-3 py-3 border-b border-gray-200">{{ product.productType }}</td>
                 <td class="px-3 py-3 border-b border-gray-200">{{ product.price | currency }}</td>
                 <td class="px-3 py-3 border-b border-gray-200">{{ product.audience }}</td>
-                <td class="px-3 py-3 border-b border-gray-200">{{ product.requiresMembership ? ('common.yes' | translate) : ('common.no' | translate) }}</td>
+                <td
+                  class="px-3 py-3 border-b border-gray-200">{{ product.requiresMembership ? ('common.yes' | translate) : ('common.no' | translate) }}
+                </td>
                 <td class="px-3 py-3 border-b border-gray-200">
                   <button
                     (click)="viewProduct(product.productId); $event.stopPropagation()"

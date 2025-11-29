@@ -1,8 +1,8 @@
-import {inject, Injectable} from '@angular/core';
-import { Router } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
-import { OAuthService, AuthConfig } from 'angular-oauth2-oidc';
-import { BehaviorSubject, Observable, firstValueFrom } from 'rxjs';
+import {inject, Injectable, signal} from '@angular/core';
+import {Router} from '@angular/router';
+import {HttpClient} from '@angular/common/http';
+import {AuthConfig, OAuthService} from 'angular-oauth2-oidc';
+import {BehaviorSubject, firstValueFrom, Observable} from 'rxjs';
 import {toSignal} from '@angular/core/rxjs-interop';
 
 export interface UserProfile {
@@ -55,6 +55,7 @@ class AuthService {
 
   isLoggedIn = toSignal((this.userProfile$));
 
+  roles = signal<string[]>([]);
   private oauthService = inject(OAuthService);
   private router = inject(Router);
   private http = inject(HttpClient);
@@ -118,6 +119,7 @@ class AuthService {
     this.oauthService.logOut();
     sessionStorage.clear();
     this.userProfileSubject.next(null);
+    this.roles.set([]);               // 🔹 clear roles
     this.router.navigate(['/login']);
   }
 
@@ -145,20 +147,22 @@ class AuthService {
     }
 
     try {
-      // Decode both tokens
       const accessPayload = JSON.parse(atob(accessToken.split('.')[1]));
       const idPayload = JSON.parse(atob(idToken.split('.')[1]));
 
-      // Extract roles from access token
+      // 1) Extract roles from access token
       const roles = this.extractRolesFromClaims(accessPayload);
 
-      // Extract user info from ID token
+      // 2) Update roles signal
+      this.roles.set(roles);
+
+      // 3) Build profile as before
       const profile: UserProfile = {
         username: idPayload.preferred_username || idPayload.sub,
         email: idPayload.email || '',
         firstName: idPayload.given_name || '',
         lastName: idPayload.family_name || '',
-        roles: roles,
+        roles,
         picture: idPayload.picture,
       };
 
@@ -202,28 +206,12 @@ private extractRolesFromClaims(claims: Record<string, unknown>): string[] {
 }
 
   public hasRole(role: string): boolean {
-    const profile = this.userProfileSubject.value;
-    return profile ? profile.roles.includes(role) : false;
+    return this.roles().includes(role);
   }
 
   public hasAnyRole(roles: string[]): boolean {
-    return roles.some((role) => this.hasRole(role));
-  }
-
-  public getUserProfile(): UserProfile | null {
-    return this.userProfileSubject.value;
-  }
-
-  public get isAdmin(): boolean {
-    return this.hasRole('ADMIN');
-  }
-
-  public get isTrainer(): boolean {
-    return this.hasRole('TRAINER');
-  }
-
-  public get isMember(): boolean {
-    return this.hasRole('MEMBER');
+    const currentRoles = this.roles();
+    return roles.some((role) => currentRoles.includes(role));
   }
 }
 
