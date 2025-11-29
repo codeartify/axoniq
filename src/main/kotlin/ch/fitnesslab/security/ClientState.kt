@@ -7,5 +7,5 @@ data class ClientState(
     var windowStart: Instant,
     val requestCount: AtomicInteger = AtomicInteger(0),
     var violationCount: Int = 0,
-    var lastViolation: Instant? = null
+    var lastViolation: Instant? = null,
 )

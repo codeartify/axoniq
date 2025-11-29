@@ -15,5 +15,5 @@ data class CustomerUpdatedEvent(
     val dateOfBirth: LocalDate,
     val address: Address,
     val email: String,
-    val phoneNumber: String?
+    val phoneNumber: String?,
 )

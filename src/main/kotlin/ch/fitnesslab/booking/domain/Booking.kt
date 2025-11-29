@@ -13,7 +13,6 @@ import org.axonframework.spring.stereotype.Aggregate
 
 @Aggregate
 class Booking() {
-
     @AggregateIdentifier
     private lateinit var bookingId: BookingId
     private lateinit var payerCustomerId: CustomerId
@@ -30,8 +29,8 @@ class Booking() {
                 bookingId = command.bookingId,
                 payerCustomerId = command.payerCustomerId,
                 purchasedProducts = command.purchasedProducts,
-                status = BookingStatus.PENDING
-            )
+                status = BookingStatus.PENDING,
+            ),
         )
     }
 

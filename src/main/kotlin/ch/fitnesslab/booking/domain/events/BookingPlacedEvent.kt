@@ -11,5 +11,5 @@ data class BookingPlacedEvent(
     val bookingId: BookingId,
     val payerCustomerId: CustomerId,
     val purchasedProducts: List<PurchasedProduct>,
-    val status: BookingStatus
+    val status: BookingStatus,
 )

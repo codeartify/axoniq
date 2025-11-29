@@ -8,6 +8,5 @@ data class PauseProductContractCommand(
     @TargetAggregateIdentifier
     val contractId: ProductContractId,
     val pauseRange: DateRange,
-    val reason: PauseReason
+    val reason: PauseReason,
 )
-

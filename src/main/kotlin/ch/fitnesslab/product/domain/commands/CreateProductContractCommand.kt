@@ -14,5 +14,5 @@ data class CreateProductContractCommand(
     val productVariantId: ProductVariantId,
     val bookingId: BookingId,
     val validity: DateRange?,
-    val sessionsTotal: Int?
+    val sessionsTotal: Int?,
 )

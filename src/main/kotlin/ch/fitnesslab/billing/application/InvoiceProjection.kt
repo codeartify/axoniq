@@ -27,23 +27,23 @@ class InvoiceProjection(
     private val invoiceRepository: InvoiceRepository,
     private val invoiceEmailService: InvoiceEmailService,
     private val customerProjection: CustomerProjection,
-    private val queryUpdateEmitter: QueryUpdateEmitter
+    private val queryUpdateEmitter: QueryUpdateEmitter,
 ) {
-
     @EventHandler
     fun on(event: InvoiceCreatedEvent) {
-        val entity = InvoiceEntity(
-            invoiceId = event.invoiceId.value,
-            customerId = event.customerId.value,
-            bookingId = event.bookingId.value,
-            productVariantId = event.productVariantId?.value,
-            amount = event.amount,
-            dueDate = event.dueDate,
-            status = event.status,
-            isInstallment = event.isInstallment,
-            installmentNumber = event.installmentNumber,
-            paidAt = null
-        )
+        val entity =
+            InvoiceEntity(
+                invoiceId = event.invoiceId.value,
+                customerId = event.customerId.value,
+                bookingId = event.bookingId.value,
+                productVariantId = event.productVariantId?.value,
+                amount = event.amount,
+                dueDate = event.dueDate,
+                status = event.status,
+                isInstallment = event.isInstallment,
+                installmentNumber = event.installmentNumber,
+                paidAt = null,
+            )
 
         invoiceRepository.save(entity)
 
@@ -61,31 +61,32 @@ class InvoiceProjection(
         queryUpdateEmitter.emit(
             FindAllInvoicesQuery::class.java,
             { true },
-            InvoiceUpdatedUpdate(event.invoiceId.value.toString())
+            InvoiceUpdatedUpdate(event.invoiceId.value.toString()),
         )
     }
 
     @EventHandler
     fun on(event: InvoicePaidEvent) {
         invoiceRepository.findById(event.invoiceId.value).ifPresent { existing ->
-            val updated = InvoiceEntity(
-                invoiceId = existing.invoiceId,
-                customerId = existing.customerId,
-                bookingId = existing.bookingId,
-                productVariantId = existing.productVariantId,
-                amount = existing.amount,
-                dueDate = existing.dueDate,
-                status = InvoiceStatus.PAID,
-                isInstallment = existing.isInstallment,
-                installmentNumber = existing.installmentNumber,
-                paidAt = event.paidAt
-            )
+            val updated =
+                InvoiceEntity(
+                    invoiceId = existing.invoiceId,
+                    customerId = existing.customerId,
+                    bookingId = existing.bookingId,
+                    productVariantId = existing.productVariantId,
+                    amount = existing.amount,
+                    dueDate = existing.dueDate,
+                    status = InvoiceStatus.PAID,
+                    isInstallment = existing.isInstallment,
+                    installmentNumber = existing.installmentNumber,
+                    paidAt = event.paidAt,
+                )
             invoiceRepository.save(updated)
 
             queryUpdateEmitter.emit(
                 FindAllInvoicesQuery::class.java,
                 { true },
-                InvoiceUpdatedUpdate(event.invoiceId.value.toString())
+                InvoiceUpdatedUpdate(event.invoiceId.value.toString()),
             )
         }
     }
@@ -93,24 +94,25 @@ class InvoiceProjection(
     @EventHandler
     fun on(event: InvoiceMarkedOverdueEvent) {
         invoiceRepository.findById(event.invoiceId.value).ifPresent { existing ->
-            val updated = InvoiceEntity(
-                invoiceId = existing.invoiceId,
-                customerId = existing.customerId,
-                bookingId = existing.bookingId,
-                productVariantId = existing.productVariantId,
-                amount = existing.amount,
-                dueDate = existing.dueDate,
-                status = InvoiceStatus.OVERDUE,
-                isInstallment = existing.isInstallment,
-                installmentNumber = existing.installmentNumber,
-                paidAt = existing.paidAt
-            )
+            val updated =
+                InvoiceEntity(
+                    invoiceId = existing.invoiceId,
+                    customerId = existing.customerId,
+                    bookingId = existing.bookingId,
+                    productVariantId = existing.productVariantId,
+                    amount = existing.amount,
+                    dueDate = existing.dueDate,
+                    status = InvoiceStatus.OVERDUE,
+                    isInstallment = existing.isInstallment,
+                    installmentNumber = existing.installmentNumber,
+                    paidAt = existing.paidAt,
+                )
             invoiceRepository.save(updated)
 
             queryUpdateEmitter.emit(
                 FindAllInvoicesQuery::class.java,
                 { true },
-                InvoiceUpdatedUpdate(event.invoiceId.value.toString())
+                InvoiceUpdatedUpdate(event.invoiceId.value.toString()),
             )
         }
     }
@@ -118,56 +120,52 @@ class InvoiceProjection(
     @EventHandler
     fun on(event: InvoiceCancelledEvent) {
         invoiceRepository.findById(event.invoiceId.value).ifPresent { existing ->
-            val updated = InvoiceEntity(
-                invoiceId = existing.invoiceId,
-                customerId = existing.customerId,
-                bookingId = existing.bookingId,
-                productVariantId = existing.productVariantId,
-                amount = existing.amount,
-                dueDate = existing.dueDate,
-                status = InvoiceStatus.CANCELLED,
-                isInstallment = existing.isInstallment,
-                installmentNumber = existing.installmentNumber,
-                paidAt = existing.paidAt
-            )
+            val updated =
+                InvoiceEntity(
+                    invoiceId = existing.invoiceId,
+                    customerId = existing.customerId,
+                    bookingId = existing.bookingId,
+                    productVariantId = existing.productVariantId,
+                    amount = existing.amount,
+                    dueDate = existing.dueDate,
+                    status = InvoiceStatus.CANCELLED,
+                    isInstallment = existing.isInstallment,
+                    installmentNumber = existing.installmentNumber,
+                    paidAt = existing.paidAt,
+                )
             invoiceRepository.save(updated)
 
             queryUpdateEmitter.emit(
                 FindAllInvoicesQuery::class.java,
                 { true },
-                InvoiceUpdatedUpdate(event.invoiceId.value.toString())
+                InvoiceUpdatedUpdate(event.invoiceId.value.toString()),
             )
         }
     }
 
     @QueryHandler
-    fun handle(query: FindAllInvoicesQuery): List<InvoiceView> {
-        return findAll()
-    }
+    fun handle(query: FindAllInvoicesQuery): List<InvoiceView> = findAll()
 
     @QueryHandler
-    fun handle(query: FindInvoiceByIdQuery): InvoiceView? {
-        return findById(query.invoiceId)
-    }
+    fun handle(query: FindInvoiceByIdQuery): InvoiceView? = findById(query.invoiceId)
 
     fun findAll(): List<InvoiceView> = invoiceRepository.findAll().map { it.toInvoiceView() }
 
-    fun findByStatus(status: InvoiceStatus): List<InvoiceView> =
-        invoiceRepository.findByStatus(status).map { it.toInvoiceView() }
+    fun findByStatus(status: InvoiceStatus): List<InvoiceView> = invoiceRepository.findByStatus(status).map { it.toInvoiceView() }
 
-    fun findById(invoiceId: InvoiceId): InvoiceView? =
-        invoiceRepository.findById(invoiceId.value).map { it.toInvoiceView() }.orElse(null)
+    fun findById(invoiceId: InvoiceId): InvoiceView? = invoiceRepository.findById(invoiceId.value).map { it.toInvoiceView() }.orElse(null)
 
     fun findByCustomerId(customerId: String): List<InvoiceView> =
         invoiceRepository.findByCustomerId(UUID.fromString(customerId)).map { it.toInvoiceView() }
 
     private fun InvoiceEntity.toInvoiceView(): InvoiceView {
         val customer = customerProjection.findById(CustomerId.from(this.customerId.toString()))
-        val customerName = if (customer != null) {
-            "${customer.firstName} ${customer.lastName}"
-        } else {
-            "Unknown"
-        }
+        val customerName =
+            if (customer != null) {
+                "${customer.firstName} ${customer.lastName}"
+            } else {
+                "Unknown"
+            }
 
         return InvoiceView(
             invoiceId = this.invoiceId.toString(),
@@ -179,7 +177,7 @@ class InvoiceProjection(
             status = this.status,
             isInstallment = this.isInstallment,
             installmentNumber = this.installmentNumber,
-            paidAt = this.paidAt
+            paidAt = this.paidAt,
         )
     }
 }
@@ -194,5 +192,5 @@ data class InvoiceView(
     val status: InvoiceStatus,
     val isInstallment: Boolean,
     val installmentNumber: Int?,
-    val paidAt: Instant?
+    val paidAt: Instant?,
 )

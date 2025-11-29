@@ -5,5 +5,5 @@ import org.axonframework.modelling.command.TargetAggregateIdentifier
 
 data class MarkInvoiceOverdueCommand(
     @TargetAggregateIdentifier
-    val invoiceId: InvoiceId
+    val invoiceId: InvoiceId,
 )

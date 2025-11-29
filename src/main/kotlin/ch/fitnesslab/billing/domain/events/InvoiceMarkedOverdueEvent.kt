@@ -5,5 +5,5 @@ import org.axonframework.serialization.Revision
 
 @Revision("1.0")
 data class InvoiceMarkedOverdueEvent(
-    val invoiceId: InvoiceId
+    val invoiceId: InvoiceId,
 )

@@ -7,5 +7,5 @@ enum class ProductContractStatus {
     COMPLETED,
     EXPIRED,
     BLOCKED,
-    CANCELLED
+    CANCELLED,
 }

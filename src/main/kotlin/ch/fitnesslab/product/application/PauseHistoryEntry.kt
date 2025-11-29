@@ -5,5 +5,5 @@ import ch.fitnesslab.product.domain.commands.PauseReason
 
 data class PauseHistoryEntry(
     val pauseRange: DateRange,
-    val reason: PauseReason
+    val reason: PauseReason,
 )

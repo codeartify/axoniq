@@ -7,5 +7,5 @@ import java.time.Instant
 @Revision("1.0")
 data class InvoicePaidEvent(
     val invoiceId: InvoiceId,
-    val paidAt: Instant
+    val paidAt: Instant,
 )

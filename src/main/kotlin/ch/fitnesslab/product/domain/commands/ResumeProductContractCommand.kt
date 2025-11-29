@@ -5,5 +5,5 @@ import org.axonframework.modelling.command.TargetAggregateIdentifier
 
 data class ResumeProductContractCommand(
     @TargetAggregateIdentifier
-    val contractId: ProductContractId
+    val contractId: ProductContractId,
 )

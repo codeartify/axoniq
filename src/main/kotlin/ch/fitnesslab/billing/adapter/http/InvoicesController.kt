@@ -27,48 +27,58 @@ import java.time.ZoneId
 class InvoicesController(
     private val invoiceProjection: InvoiceProjection,
     private val commandGateway: CommandGateway,
-    private val queryGateway: QueryGateway
-): InvoicesApi {
-
+    private val queryGateway: QueryGateway,
+) : InvoicesApi {
     @GetMapping
-    fun getInvoices(@RequestParam(required = false) status: InvoiceStatus?): ResponseEntity<List<InvoiceDto>> {
-        val invoices = if (status != null) {
-            invoiceProjection.findByStatus(status)
-        } else {
-            invoiceProjection.findAll()
-        }
+    fun getInvoices(
+        @RequestParam(required = false) status: InvoiceStatus?,
+    ): ResponseEntity<List<InvoiceDto>> {
+        val invoices =
+            if (status != null) {
+                invoiceProjection.findByStatus(status)
+            } else {
+                invoiceProjection.findAll()
+            }
 
         return ResponseEntity.ok(invoices.map { it.toDto() })
     }
 
     @GetMapping("/customer/{customerId}")
-    override fun getInvoicesByCustomerId(@PathVariable customerId: String): ResponseEntity<List<InvoiceDto>> {
+    override fun getInvoicesByCustomerId(
+        @PathVariable customerId: String,
+    ): ResponseEntity<List<InvoiceDto>> {
         val invoices = invoiceProjection.findByCustomerId(customerId)
         return ResponseEntity.ok(invoices.map { it.toDto() })
     }
 
     @GetMapping("/{invoiceId}")
-    override fun getInvoiceById(@PathVariable invoiceId: String): ResponseEntity<InvoiceDto> {
-        val invoice = invoiceProjection.findById(InvoiceId.from(invoiceId))
-            ?: return ResponseEntity.notFound().build()
+    override fun getInvoiceById(
+        @PathVariable invoiceId: String,
+    ): ResponseEntity<InvoiceDto> {
+        val invoice =
+            invoiceProjection.findById(InvoiceId.from(invoiceId))
+                ?: return ResponseEntity.notFound().build()
 
         return ResponseEntity.ok(invoice.toDto())
     }
 
     @PostMapping("/{invoiceId}/pay")
-    override fun markAsPaid(@PathVariable invoiceId: String): ResponseEntity<Unit> {
-        val subscriptionQuery = queryGateway.subscriptionQuery(
-            FindAllInvoicesQuery(),
-            ResponseTypes.multipleInstancesOf(InvoiceView::class.java),
-            ResponseTypes.instanceOf(InvoiceUpdatedUpdate::class.java)
-        )
+    override fun markAsPaid(
+        @PathVariable invoiceId: String,
+    ): ResponseEntity<Unit> {
+        val subscriptionQuery =
+            queryGateway.subscriptionQuery(
+                FindAllInvoicesQuery(),
+                ResponseTypes.multipleInstancesOf(InvoiceView::class.java),
+                ResponseTypes.instanceOf(InvoiceUpdatedUpdate::class.java),
+            )
 
         try {
             commandGateway.sendAndWait<Any>(
                 MarkInvoicePaidCommand(
                     invoiceId = InvoiceId.from(invoiceId),
-                    paidAt = Instant.now()
-                )
+                    paidAt = Instant.now(),
+                ),
             )
 
             // Wait for projection update
@@ -81,18 +91,21 @@ class InvoicesController(
     }
 
     @PostMapping("/{invoiceId}/mark-overdue")
-    override fun markAsOverdue(@PathVariable invoiceId: String): ResponseEntity<Unit> {
-        val subscriptionQuery = queryGateway.subscriptionQuery(
-            FindAllInvoicesQuery(),
-            ResponseTypes.multipleInstancesOf(InvoiceView::class.java),
-            ResponseTypes.instanceOf(InvoiceUpdatedUpdate::class.java)
-        )
+    override fun markAsOverdue(
+        @PathVariable invoiceId: String,
+    ): ResponseEntity<Unit> {
+        val subscriptionQuery =
+            queryGateway.subscriptionQuery(
+                FindAllInvoicesQuery(),
+                ResponseTypes.multipleInstancesOf(InvoiceView::class.java),
+                ResponseTypes.instanceOf(InvoiceUpdatedUpdate::class.java),
+            )
 
         try {
             commandGateway.sendAndWait<Any>(
                 MarkInvoiceOverdueCommand(
-                    invoiceId = InvoiceId.from(invoiceId)
-                )
+                    invoiceId = InvoiceId.from(invoiceId),
+                ),
             )
 
             // Wait for projection update
@@ -107,20 +120,21 @@ class InvoicesController(
     @PostMapping("/{invoiceId}/cancel")
     override fun cancelInvoice(
         @PathVariable invoiceId: String,
-        @RequestBody cancelInvoiceRequest: CancelInvoiceRequest
+        @RequestBody cancelInvoiceRequest: CancelInvoiceRequest,
     ): ResponseEntity<Unit> {
-        val subscriptionQuery = queryGateway.subscriptionQuery(
-            FindAllInvoicesQuery(),
-            ResponseTypes.multipleInstancesOf(InvoiceView::class.java),
-            ResponseTypes.instanceOf(InvoiceUpdatedUpdate::class.java)
-        )
+        val subscriptionQuery =
+            queryGateway.subscriptionQuery(
+                FindAllInvoicesQuery(),
+                ResponseTypes.multipleInstancesOf(InvoiceView::class.java),
+                ResponseTypes.instanceOf(InvoiceUpdatedUpdate::class.java),
+            )
 
         try {
             commandGateway.sendAndWait<Any>(
                 CancelInvoiceCommand(
                     invoiceId = InvoiceId.from(invoiceId),
-                    reason = cancelInvoiceRequest.reason
-                )
+                    reason = cancelInvoiceRequest.reason,
+                ),
             )
 
             // Wait for projection update
@@ -133,15 +147,16 @@ class InvoicesController(
     }
 }
 
-private fun InvoiceView.toDto() = InvoiceDto(
-    invoiceId = invoiceId,
-    customerId = customerId,
-    customerName = customerName,
-    bookingId = bookingId,
-    amount = amount,
-    dueDate = dueDate,
-    status = status.name,
-    isInstallment = isInstallment,
-    installmentNumber = installmentNumber,
-    paidAt = paidAt?.let{ OffsetDateTime.ofInstant(it, ZoneId.systemDefault()) }
-)
+private fun InvoiceView.toDto() =
+    InvoiceDto(
+        invoiceId = invoiceId,
+        customerId = customerId,
+        customerName = customerName,
+        bookingId = bookingId,
+        amount = amount,
+        dueDate = dueDate,
+        status = status.name,
+        isInstallment = isInstallment,
+        installmentNumber = installmentNumber,
+        paidAt = paidAt?.let { OffsetDateTime.ofInstant(it, ZoneId.systemDefault()) },
+    )

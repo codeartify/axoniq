@@ -5,5 +5,5 @@ enum class Salutation {
     MS,
     MRS,
     MX,
-    DR
+    DR,
 }

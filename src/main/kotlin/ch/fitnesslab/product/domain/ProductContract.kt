@@ -9,9 +9,9 @@ import ch.fitnesslab.product.domain.commands.CreateProductContractCommand
 import ch.fitnesslab.product.domain.commands.PauseProductContractCommand
 import ch.fitnesslab.product.domain.commands.PauseReason
 import ch.fitnesslab.product.domain.commands.ResumeProductContractCommand
-import ch.fitnesslab.product.domain.events.ProductContractSignedEvent
 import ch.fitnesslab.product.domain.events.ProductContractPausedEvent
 import ch.fitnesslab.product.domain.events.ProductContractResumedEvent
+import ch.fitnesslab.product.domain.events.ProductContractSignedEvent
 import org.axonframework.commandhandling.CommandHandler
 import org.axonframework.eventsourcing.EventSourcingHandler
 import org.axonframework.modelling.command.AggregateIdentifier
@@ -21,7 +21,6 @@ import java.time.temporal.ChronoUnit
 
 @Aggregate
 class ProductContract() {
-
     @AggregateIdentifier
     private lateinit var contractId: ProductContractId
     private lateinit var customerId: CustomerId
@@ -37,11 +36,12 @@ class ProductContract() {
     constructor(command: CreateProductContractCommand) : this() {
         // For memberships, activate immediately
         // For session-based products, wait for payment
-        val initialStatus = if (command.sessionsTotal == null) {
-            ProductContractStatus.ACTIVE
-        } else {
-            ProductContractStatus.PENDING_ACTIVATION
-        }
+        val initialStatus =
+            if (command.sessionsTotal == null) {
+                ProductContractStatus.ACTIVE
+            } else {
+                ProductContractStatus.PENDING_ACTIVATION
+            }
 
         AggregateLifecycle.apply(
             ProductContractSignedEvent(
@@ -51,8 +51,8 @@ class ProductContract() {
                 bookingId = command.bookingId,
                 status = initialStatus,
                 validity = command.validity,
-                sessionsTotal = command.sessionsTotal
-            )
+                sessionsTotal = command.sessionsTotal,
+            ),
         )
     }
 
@@ -71,8 +71,8 @@ class ProductContract() {
             ProductContractPausedEvent(
                 contractId = command.contractId,
                 pauseRange = command.pauseRange,
-                reason = command.reason
-            )
+                reason = command.reason,
+            ),
         )
     }
 
@@ -89,8 +89,8 @@ class ProductContract() {
         AggregateLifecycle.apply(
             ProductContractResumedEvent(
                 contractId = command.contractId,
-                extendedValidity = extendedValidity
-            )
+                extendedValidity = extendedValidity,
+            ),
         )
     }
 
@@ -121,5 +121,5 @@ class ProductContract() {
 
 data class PauseEntry(
     val pauseRange: DateRange,
-    val reason: PauseReason
+    val reason: PauseReason,
 )

@@ -3,7 +3,6 @@ package ch.fitnesslab.product.adapter.http
 import ch.fitnesslab.common.types.ProductVariantId
 import ch.fitnesslab.generated.model.CreateProductRequest
 import ch.fitnesslab.generated.model.ProductCreationResponse
-import ch.fitnesslab.generated.model.ProductVariantDto
 import ch.fitnesslab.generated.model.UpdateProductRequest
 import ch.fitnesslab.product.application.FindAllProductsQuery
 import ch.fitnesslab.product.application.ProductProjection
@@ -20,7 +19,6 @@ import org.axonframework.queryhandling.SubscriptionQueryResult
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
-import java.math.BigDecimal
 import java.time.Duration
 
 @RestController
@@ -28,39 +26,43 @@ import java.time.Duration
 class ProductController(
     private val commandGateway: CommandGateway,
     private val queryGateway: QueryGateway,
-    private val productProjection: ProductProjection
+    private val productProjection: ProductProjection,
 ) {
-
     @PostMapping
-    fun createProduct(@RequestBody request: CreateProductRequest): ResponseEntity<ProductCreationResponse> {
-        val subscriptionQuery = queryGateway.subscriptionQuery(
-            FindAllProductsQuery(),
-            ResponseTypes.multipleInstancesOf(ProductView::class.java),
-            ResponseTypes.instanceOf(ProductUpdatedUpdate::class.java)
-        )
+    fun createProduct(
+        @RequestBody request: CreateProductRequest,
+    ): ResponseEntity<ProductCreationResponse> {
+        val subscriptionQuery =
+            queryGateway.subscriptionQuery(
+                FindAllProductsQuery(),
+                ResponseTypes.multipleInstancesOf(ProductView::class.java),
+                ResponseTypes.instanceOf(ProductUpdatedUpdate::class.java),
+            )
 
         try {
             val productId = ProductVariantId.generate()
 
-            val command = CreateProductCommand(
-                productId = productId,
-                code = request.code,
-                name = request.name,
-                productType = request.productType,
-                audience = request.audience.let { ProductAudience.valueOf(it.name) },
-                requiresMembership = request.requiresMembership,
-                price = request.price,
-                behavior = ProductBehaviorConfig(
-                    isTimeBased = request.behavior.isTimeBased,
-                    isSessionBased = request.behavior.isSessionBased,
-                    canBePaused = request.behavior.canBePaused,
-                    autoRenew = request.behavior.autoRenew,
-                    renewalLeadTimeDays = request.behavior.renewalLeadTimeDays,
-                    contributesToMembershipStatus = request.behavior.contributesToMembershipStatus,
-                    maxActivePerCustomer = request.behavior.maxActivePerCustomer,
-                    exclusivityGroup = request.behavior.exclusivityGroup
+            val command =
+                CreateProductCommand(
+                    productId = productId,
+                    code = request.code,
+                    name = request.name,
+                    productType = request.productType,
+                    audience = request.audience.let { ProductAudience.valueOf(it.name) },
+                    requiresMembership = request.requiresMembership,
+                    price = request.price,
+                    behavior =
+                        ProductBehaviorConfig(
+                            isTimeBased = request.behavior.isTimeBased,
+                            isSessionBased = request.behavior.isSessionBased,
+                            canBePaused = request.behavior.canBePaused,
+                            autoRenew = request.behavior.autoRenew,
+                            renewalLeadTimeDays = request.behavior.renewalLeadTimeDays,
+                            contributesToMembershipStatus = request.behavior.contributesToMembershipStatus,
+                            maxActivePerCustomer = request.behavior.maxActivePerCustomer,
+                            exclusivityGroup = request.behavior.exclusivityGroup,
+                        ),
                 )
-            )
             commandGateway.sendAndWait<Any>(command)
 
             waitForProjectionUpdate(subscriptionQuery)
@@ -74,7 +76,9 @@ class ProductController(
     }
 
     @GetMapping("/{productId}")
-    fun getProduct(@PathVariable productId: String): ResponseEntity<ProductView> {
+    fun getProduct(
+        @PathVariable productId: String,
+    ): ResponseEntity<ProductView> {
         val product = productProjection.findById(ProductVariantId.from(productId))
         return if (product != null) {
             ResponseEntity.ok(product)
@@ -84,41 +88,42 @@ class ProductController(
     }
 
     @GetMapping
-    fun getAllProducts(): ResponseEntity<List<ProductView>> {
-        return ResponseEntity.ok(productProjection.findAll())
-    }
+    fun getAllProducts(): ResponseEntity<List<ProductView>> = ResponseEntity.ok(productProjection.findAll())
 
     @PutMapping("/{productId}")
     fun updateProduct(
         @PathVariable productId: String,
-        @RequestBody request: UpdateProductRequest
+        @RequestBody request: UpdateProductRequest,
     ): ResponseEntity<Void> {
-        val subscriptionQuery = queryGateway.subscriptionQuery(
-            FindAllProductsQuery(),
-            ResponseTypes.multipleInstancesOf(ProductView::class.java),
-            ResponseTypes.instanceOf(ProductUpdatedUpdate::class.java)
-        )
+        val subscriptionQuery =
+            queryGateway.subscriptionQuery(
+                FindAllProductsQuery(),
+                ResponseTypes.multipleInstancesOf(ProductView::class.java),
+                ResponseTypes.instanceOf(ProductUpdatedUpdate::class.java),
+            )
 
         try {
-            val command = UpdateProductCommand(
-                productId = ProductVariantId.from(productId),
-                code = request.code,
-                name = request.name,
-                productType = request.productType,
-                audience = request.audience.let { ProductAudience.valueOf(it.name) },
-                requiresMembership = request.requiresMembership,
-                price = request.price,
-                behavior = ProductBehaviorConfig(
-                    isTimeBased = request.behavior.isTimeBased,
-                    isSessionBased = request.behavior.isSessionBased,
-                    canBePaused = request.behavior.canBePaused,
-                    autoRenew = request.behavior.autoRenew,
-                    renewalLeadTimeDays = request.behavior.renewalLeadTimeDays,
-                    contributesToMembershipStatus = request.behavior.contributesToMembershipStatus,
-                    maxActivePerCustomer = request.behavior.maxActivePerCustomer,
-                    exclusivityGroup = request.behavior.exclusivityGroup
+            val command =
+                UpdateProductCommand(
+                    productId = ProductVariantId.from(productId),
+                    code = request.code,
+                    name = request.name,
+                    productType = request.productType,
+                    audience = request.audience.let { ProductAudience.valueOf(it.name) },
+                    requiresMembership = request.requiresMembership,
+                    price = request.price,
+                    behavior =
+                        ProductBehaviorConfig(
+                            isTimeBased = request.behavior.isTimeBased,
+                            isSessionBased = request.behavior.isSessionBased,
+                            canBePaused = request.behavior.canBePaused,
+                            autoRenew = request.behavior.autoRenew,
+                            renewalLeadTimeDays = request.behavior.renewalLeadTimeDays,
+                            contributesToMembershipStatus = request.behavior.contributesToMembershipStatus,
+                            maxActivePerCustomer = request.behavior.maxActivePerCustomer,
+                            exclusivityGroup = request.behavior.exclusivityGroup,
+                        ),
                 )
-            )
 
             commandGateway.sendAndWait<Any>(command)
 

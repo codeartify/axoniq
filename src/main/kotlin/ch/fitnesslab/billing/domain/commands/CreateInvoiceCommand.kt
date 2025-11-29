@@ -17,5 +17,5 @@ data class CreateInvoiceCommand(
     val amount: BigDecimal,
     val dueDate: LocalDate,
     val isInstallment: Boolean = false,
-    val installmentNumber: Int? = null
+    val installmentNumber: Int? = null,
 )

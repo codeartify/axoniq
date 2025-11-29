@@ -9,5 +9,5 @@ import org.axonframework.serialization.Revision
 data class ProductContractPausedEvent(
     val contractId: ProductContractId,
     val pauseRange: DateRange,
-    val reason: PauseReason
+    val reason: PauseReason,
 )

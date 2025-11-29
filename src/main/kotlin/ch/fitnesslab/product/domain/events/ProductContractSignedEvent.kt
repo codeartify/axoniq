@@ -12,5 +12,5 @@ data class ProductContractSignedEvent(
     val bookingId: BookingId,
     val status: ProductContractStatus,
     val validity: DateRange?,
-    val sessionsTotal: Int?
+    val sessionsTotal: Int?,
 )

@@ -2,8 +2,14 @@ package ch.fitnesslab.customers.application
 
 import ch.fitnesslab.common.types.CustomerId
 
-data class FindAllCustomersQuery(val timestamp: Long = System.currentTimeMillis())
+data class FindAllCustomersQuery(
+    val timestamp: Long = System.currentTimeMillis(),
+)
 
-data class FindCustomerByIdQuery(val customerId: CustomerId)
+data class FindCustomerByIdQuery(
+    val customerId: CustomerId,
+)
 
-data class CustomerUpdatedUpdate(val customerId: String)
+data class CustomerUpdatedUpdate(
+    val customerId: String,
+)

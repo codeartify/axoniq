@@ -12,5 +12,5 @@ data class ProductContractView(
     val validity: DateRange?,
     val sessionsTotal: Int?,
     val sessionsUsed: Int,
-    val pauseHistory: List<PauseHistoryEntry>
+    val pauseHistory: List<PauseHistoryEntry>,
 )

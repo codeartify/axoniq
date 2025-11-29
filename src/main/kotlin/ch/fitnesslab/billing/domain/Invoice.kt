@@ -23,7 +23,6 @@ import java.time.LocalDate
 
 @Aggregate
 class Invoice() {
-
     @AggregateIdentifier
     private lateinit var invoiceId: InvoiceId
     private lateinit var bookingId: BookingId
@@ -48,8 +47,8 @@ class Invoice() {
                 dueDate = command.dueDate,
                 status = InvoiceStatus.OPEN,
                 isInstallment = command.isInstallment,
-                installmentNumber = command.installmentNumber
-            )
+                installmentNumber = command.installmentNumber,
+            ),
         )
     }
 
@@ -62,8 +61,8 @@ class Invoice() {
         AggregateLifecycle.apply(
             InvoicePaidEvent(
                 invoiceId = command.invoiceId,
-                paidAt = command.paidAt
-            )
+                paidAt = command.paidAt,
+            ),
         )
     }
 
@@ -88,8 +87,8 @@ class Invoice() {
 
         AggregateLifecycle.apply(
             InvoiceMarkedOverdueEvent(
-                invoiceId = command.invoiceId
-            )
+                invoiceId = command.invoiceId,
+            ),
         )
     }
 
@@ -102,8 +101,8 @@ class Invoice() {
         AggregateLifecycle.apply(
             InvoiceCancelledEvent(
                 invoiceId = command.invoiceId,
-                reason = command.reason
-            )
+                reason = command.reason,
+            ),
         )
     }
 

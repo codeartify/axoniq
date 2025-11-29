@@ -15,5 +15,5 @@ data class CreateProductCommand(
     val audience: ProductAudience,
     val requiresMembership: Boolean,
     val price: BigDecimal,
-    val behavior: ProductBehaviorConfig
+    val behavior: ProductBehaviorConfig,
 )

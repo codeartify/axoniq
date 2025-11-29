@@ -9,5 +9,5 @@ data class PlaceBookingCommand(
     @TargetAggregateIdentifier
     val bookingId: BookingId,
     val payerCustomerId: CustomerId,
-    val purchasedProducts: List<PurchasedProduct>
+    val purchasedProducts: List<PurchasedProduct>,
 )

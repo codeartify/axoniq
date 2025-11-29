@@ -5,7 +5,7 @@ data class Address(
     val houseNumber: String,
     val postalCode: String,
     val city: String,
-    val country: String
+    val country: String,
 ) {
     init {
         require(street.isNotBlank()) { "Street cannot be blank" }

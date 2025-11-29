@@ -6,5 +6,5 @@ import org.axonframework.serialization.Revision
 @Revision("1.0")
 data class InvoiceCancelledEvent(
     val invoiceId: InvoiceId,
-    val reason: String
+    val reason: String,
 )

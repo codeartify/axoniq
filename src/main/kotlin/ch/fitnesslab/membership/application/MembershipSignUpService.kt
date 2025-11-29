@@ -27,32 +27,34 @@ import java.time.LocalDate
 @Service
 class MembershipSignUpService(
     private val commandGateway: CommandGateway,
-    private val queryGateway: QueryGateway
+    private val queryGateway: QueryGateway,
 ) {
-
     fun signUp(request: MembershipSignUpRequest): MembershipSignUpResult {
         val bookingId = BookingId.generate()
         val contractId = ProductContractId.generate()
         val invoiceId = InvoiceId.generate()
 
         // Create subscription queries for all projections that will be updated
-        val bookingSubscription = queryGateway.subscriptionQuery(
-            FindAllBookingsQuery(),
-            ResponseTypes.multipleInstancesOf(BookingView::class.java),
-            ResponseTypes.instanceOf(BookingUpdatedUpdate::class.java)
-        )
+        val bookingSubscription =
+            queryGateway.subscriptionQuery(
+                FindAllBookingsQuery(),
+                ResponseTypes.multipleInstancesOf(BookingView::class.java),
+                ResponseTypes.instanceOf(BookingUpdatedUpdate::class.java),
+            )
 
-        val contractSubscription = queryGateway.subscriptionQuery(
-            FindAllProductContractsQuery(),
-            ResponseTypes.multipleInstancesOf(ProductContractView::class.java),
-            ResponseTypes.instanceOf(ProductContractUpdatedUpdate::class.java)
-        )
+        val contractSubscription =
+            queryGateway.subscriptionQuery(
+                FindAllProductContractsQuery(),
+                ResponseTypes.multipleInstancesOf(ProductContractView::class.java),
+                ResponseTypes.instanceOf(ProductContractUpdatedUpdate::class.java),
+            )
 
-        val invoiceSubscription = queryGateway.subscriptionQuery(
-            FindAllInvoicesQuery(),
-            ResponseTypes.multipleInstancesOf(InvoiceView::class.java),
-            ResponseTypes.instanceOf(InvoiceUpdatedUpdate::class.java)
-        )
+        val invoiceSubscription =
+            queryGateway.subscriptionQuery(
+                FindAllInvoicesQuery(),
+                ResponseTypes.multipleInstancesOf(InvoiceView::class.java),
+                ResponseTypes.instanceOf(InvoiceUpdatedUpdate::class.java),
+            )
 
         try {
             // 1. Place booking
@@ -60,28 +62,31 @@ class MembershipSignUpService(
                 PlaceBookingCommand(
                     bookingId = bookingId,
                     payerCustomerId = request.customerId,
-                    purchasedProducts = listOf(
-                        PurchasedProduct(
-                            productVariantId = request.productVariantId,
-                            participants = listOf(
-                                Participant(
-                                    displayName = request.customerName,
-                                    email = request.customerEmail
-                                )
+                    purchasedProducts =
+                        listOf(
+                            PurchasedProduct(
+                                productVariantId = request.productVariantId,
+                                participants =
+                                    listOf(
+                                        Participant(
+                                            displayName = request.customerName,
+                                            email = request.customerEmail,
+                                        ),
+                                    ),
+                                totalPrice = request.price,
                             ),
-                            totalPrice = request.price
-                        )
-                    )
-                )
+                        ),
+                ),
             )
             // Wait for booking projection update
             bookingSubscription.updates().blockFirst(Duration.ofSeconds(5))
 
             // 2. Create product contract (ACTIVE immediately for membership)
-            val validity = DateRange(
-                start = LocalDate.now(),
-                end = LocalDate.now().plusMonths(request.durationMonths.toLong())
-            )
+            val validity =
+                DateRange(
+                    start = LocalDate.now(),
+                    end = LocalDate.now().plusMonths(request.durationMonths.toLong()),
+                )
 
             commandGateway.sendAndWait<Any>(
                 CreateProductContractCommand(
@@ -90,8 +95,8 @@ class MembershipSignUpService(
                     productVariantId = request.productVariantId,
                     bookingId = bookingId,
                     validity = validity,
-                    sessionsTotal = null
-                )
+                    sessionsTotal = null,
+                ),
             )
             // Wait for contract projection update
             contractSubscription.updates().blockFirst(Duration.ofSeconds(5))
@@ -106,8 +111,8 @@ class MembershipSignUpService(
                     amount = request.price,
                     dueDate = LocalDate.now().plusDays(30),
                     isInstallment = false,
-                    installmentNumber = null
-                )
+                    installmentNumber = null,
+                ),
             )
             // Wait for invoice projection update
             invoiceSubscription.updates().blockFirst(Duration.ofSeconds(5))
@@ -115,7 +120,7 @@ class MembershipSignUpService(
             // 4. If PAY_ON_SITE, mark as paid immediately
             if (request.paymentMode == PaymentMode.PAY_ON_SITE) {
                 commandGateway.sendAndWait<Any>(
-                    MarkInvoicePaidCommand(invoiceId = invoiceId)
+                    MarkInvoicePaidCommand(invoiceId = invoiceId),
                 )
                 // Wait for invoice paid update
                 invoiceSubscription.updates().blockFirst(Duration.ofSeconds(5))
@@ -124,7 +129,7 @@ class MembershipSignUpService(
             return MembershipSignUpResult(
                 contractId = contractId,
                 bookingId = bookingId,
-                invoiceId = invoiceId
+                invoiceId = invoiceId,
             )
         } finally {
             bookingSubscription.close()
@@ -141,16 +146,16 @@ data class MembershipSignUpRequest(
     val productVariantId: ProductVariantId,
     val price: BigDecimal,
     val durationMonths: Int,
-    val paymentMode: PaymentMode
+    val paymentMode: PaymentMode,
 )
 
 enum class PaymentMode {
     PAY_ON_SITE,
-    INVOICE_EMAIL
+    INVOICE_EMAIL,
 }
 
 data class MembershipSignUpResult(
     val contractId: ProductContractId,
     val bookingId: BookingId,
-    val invoiceId: InvoiceId
+    val invoiceId: InvoiceId,
 )

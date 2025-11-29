@@ -14,7 +14,6 @@ import java.math.BigDecimal
 
 @Aggregate
 class ProductAggregate() {
-
     @AggregateIdentifier
     private lateinit var productId: ProductVariantId
     private lateinit var code: String
@@ -36,8 +35,8 @@ class ProductAggregate() {
                 audience = command.audience,
                 requiresMembership = command.requiresMembership,
                 price = command.price,
-                behavior = command.behavior
-            )
+                behavior = command.behavior,
+            ),
         )
     }
 
@@ -52,8 +51,8 @@ class ProductAggregate() {
                 audience = command.audience,
                 requiresMembership = command.requiresMembership,
                 price = command.price,
-                behavior = command.behavior
-            )
+                behavior = command.behavior,
+            ),
         )
     }
 

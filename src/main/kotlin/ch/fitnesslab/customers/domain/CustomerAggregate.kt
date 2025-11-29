@@ -16,7 +16,6 @@ import java.time.LocalDate
 
 @Aggregate
 class CustomerAggregate() {
-
     @AggregateIdentifier
     private lateinit var customerId: CustomerId
     private lateinit var salutation: Salutation
@@ -55,8 +54,8 @@ class CustomerAggregate() {
                 dateOfBirth = command.dateOfBirth,
                 address = command.address,
                 email = command.email,
-                phoneNumber = command.phoneNumber
-            )
+                phoneNumber = command.phoneNumber,
+            ),
         )
     }
 
@@ -88,8 +87,8 @@ class CustomerAggregate() {
                 dateOfBirth = command.dateOfBirth,
                 address = command.address,
                 email = command.email,
-                phoneNumber = command.phoneNumber
-            )
+                phoneNumber = command.phoneNumber,
+            ),
         )
     }
 

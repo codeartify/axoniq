@@ -8,5 +8,6 @@ import java.util.*
 @Repository
 interface InvoiceRepository : JpaRepository<InvoiceEntity, UUID> {
     fun findByStatus(status: InvoiceStatus): List<InvoiceEntity>
+
     fun findByCustomerId(customerId: UUID): List<InvoiceEntity>
 }

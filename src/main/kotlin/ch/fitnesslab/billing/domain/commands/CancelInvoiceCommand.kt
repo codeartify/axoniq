@@ -6,5 +6,5 @@ import org.axonframework.modelling.command.TargetAggregateIdentifier
 data class CancelInvoiceCommand(
     @TargetAggregateIdentifier
     val invoiceId: InvoiceId,
-    val reason: String
+    val reason: String,
 )

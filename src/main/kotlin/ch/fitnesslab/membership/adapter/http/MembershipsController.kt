@@ -17,31 +17,34 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping("/api/memberships")
 class MembershipsController(
-    private val membershipSignUpService: MembershipSignUpService
-): MembershipsApi {
-
+    private val membershipSignUpService: MembershipSignUpService,
+) : MembershipsApi {
     @PostMapping("/sign-up")
-    override fun signUp(@RequestBody membershipSignUpRequestDto: MembershipSignUpRequestDto): ResponseEntity<MembershipSignUpResultDto> {
-        val signUpRequest = MembershipSignUpRequest(
-            customerId = CustomerId.from(membershipSignUpRequestDto.customerId),
-            customerName = membershipSignUpRequestDto.customerName,
-            customerEmail = membershipSignUpRequestDto.customerEmail,
-            productVariantId = ProductVariantId.from(membershipSignUpRequestDto.productVariantId),
-            price = membershipSignUpRequestDto.price,
-            durationMonths = membershipSignUpRequestDto.durationMonths,
-            paymentMode = membershipSignUpRequestDto.paymentMode.let { PaymentMode.valueOf(it.name) }
-        )
+    override fun signUp(
+        @RequestBody membershipSignUpRequestDto: MembershipSignUpRequestDto,
+    ): ResponseEntity<MembershipSignUpResultDto> {
+        val signUpRequest =
+            MembershipSignUpRequest(
+                customerId = CustomerId.from(membershipSignUpRequestDto.customerId),
+                customerName = membershipSignUpRequestDto.customerName,
+                customerEmail = membershipSignUpRequestDto.customerEmail,
+                productVariantId = ProductVariantId.from(membershipSignUpRequestDto.productVariantId),
+                price = membershipSignUpRequestDto.price,
+                durationMonths = membershipSignUpRequestDto.durationMonths,
+                paymentMode = membershipSignUpRequestDto.paymentMode.let { PaymentMode.valueOf(it.name) },
+            )
 
-        val result = membershipSignUpService.signUp(
-            signUpRequest
-        )
+        val result =
+            membershipSignUpService.signUp(
+                signUpRequest,
+            )
 
         return ResponseEntity.ok(
             MembershipSignUpResultDto(
                 contractId = result.contractId.toString(),
                 bookingId = result.bookingId.toString(),
-                invoiceId = result.invoiceId.toString()
-            )
+                invoiceId = result.invoiceId.toString(),
+            ),
         )
     }
 }

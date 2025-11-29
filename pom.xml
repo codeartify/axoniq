@@ -230,6 +230,44 @@
                     </execution>
                 </executions>
             </plugin>
+
+            <plugin>
+                <groupId>com.github.gantsign.maven</groupId>
+                <artifactId>ktlint-maven-plugin</artifactId>
+                <version>3.5.0</version>
+                <configuration>
+                    <!-- Use Pinterest ktlint -->
+                    <ktlintVersion>1.4.1</ktlintVersion>
+                    <!-- Fail the build on style violations -->
+                    <failOnError>true</failOnError>
+                    <!-- Optionally restrict to certain folders -->
+                    <!--
+                    <includes>
+                      <include>src/main/kotlin/**/*.kt</include>
+                      <include>src/test/kotlin/**/*.kt</include>
+                    </includes>
+                    -->
+                </configuration>
+                <executions>
+                    <!-- Run ktlint checks on verify -->
+                    <execution>
+                        <id>ktlint</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+
+                    <!-- Optional: run formatting manually with `mvn ktlint:format` -->
+                    <execution>
+                        <id>ktlint-format</id>
+                        <phase>none</phase>
+                        <goals>
+                            <goal>format</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 

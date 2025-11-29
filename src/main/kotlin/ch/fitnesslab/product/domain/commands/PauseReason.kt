@@ -4,5 +4,5 @@ enum class PauseReason {
     MEDICAL,
     TRAVEL,
     MILITARY,
-    OTHER
+    OTHER,
 }

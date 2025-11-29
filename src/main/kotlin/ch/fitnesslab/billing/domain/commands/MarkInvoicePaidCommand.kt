@@ -7,5 +7,5 @@ import java.time.Instant
 data class MarkInvoicePaidCommand(
     @TargetAggregateIdentifier
     val invoiceId: InvoiceId,
-    val paidAt: Instant = Instant.now()
+    val paidAt: Instant = Instant.now(),
 )

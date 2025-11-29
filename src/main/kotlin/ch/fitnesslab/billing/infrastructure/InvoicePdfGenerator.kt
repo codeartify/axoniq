@@ -13,8 +13,11 @@ import java.time.format.DateTimeFormatter
 
 @Service
 class InvoicePdfGenerator {
-
-    fun generateInvoicePdf(invoice: InvoiceView, customerName: String, customerEmail: String): ByteArray {
+    fun generateInvoicePdf(
+        invoice: InvoiceView,
+        customerName: String,
+        customerEmail: String,
+    ): ByteArray {
         val outputStream = ByteArrayOutputStream()
         val pdfWriter = PdfWriter(outputStream)
         val pdfDocument = PdfDocument(pdfWriter)
@@ -25,7 +28,7 @@ class InvoicePdfGenerator {
             Paragraph("INVOICE")
                 .setFontSize(24f)
                 .setBold()
-                .setTextAlignment(TextAlignment.CENTER)
+                .setTextAlignment(TextAlignment.CENTER),
         )
 
         document.add(Paragraph("\n"))
@@ -50,18 +53,22 @@ class InvoicePdfGenerator {
 
         // Invoice Items Table
         val table = Table(floatArrayOf(3f, 1f))
-        table.setWidth(com.itextpdf.layout.properties.UnitValue.createPercentValue(100f))
+        table.setWidth(
+            com.itextpdf.layout.properties.UnitValue
+                .createPercentValue(100f),
+        )
 
         // Table Header
         table.addHeaderCell(Paragraph("Description").setBold())
         table.addHeaderCell(Paragraph("Amount").setBold())
 
         // Table Data
-        val description = if (invoice.isInstallment) {
-            "Installment ${invoice.installmentNumber ?: 1} - Membership Fee"
-        } else {
-            "Membership Fee"
-        }
+        val description =
+            if (invoice.isInstallment) {
+                "Installment ${invoice.installmentNumber ?: 1} - Membership Fee"
+            } else {
+                "Membership Fee"
+            }
         table.addCell(Paragraph(description))
         table.addCell(Paragraph("$${invoice.amount}").setTextAlignment(TextAlignment.RIGHT))
 
@@ -73,7 +80,7 @@ class InvoicePdfGenerator {
             Paragraph("Total Amount Due: $${invoice.amount}")
                 .setFontSize(14f)
                 .setBold()
-                .setTextAlignment(TextAlignment.RIGHT)
+                .setTextAlignment(TextAlignment.RIGHT),
         )
 
         document.add(Paragraph("\n\n"))
