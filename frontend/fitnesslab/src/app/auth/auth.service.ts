@@ -211,6 +211,7 @@ private extractRolesFromClaims(claims: Record<string, unknown>): string[] {
 
   public hasAnyRole(roles: string[]): boolean {
     const currentRoles = this.roles();
+    console.log('Checking roles:', currentRoles, 'against:', roles);
     return roles.some((role) => currentRoles.includes(role));
   }
 }

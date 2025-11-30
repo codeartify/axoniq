@@ -25,7 +25,6 @@
           @if (!isEditMode()) {
             <button (click)="openProductSelection()" class="px-4 py-2 bg-purple-500 text-white rounded border-none cursor-pointer text-sm font-medium hover:bg-purple-600 transition-colors">{{ 'button.addProduct' | translate }}</button>
             <button (click)="enableEditMode()" class="px-4 py-2 bg-yellow-500 text-white rounded border-none cursor-pointer text-sm font-medium hover:bg-yellow-600 transition-colors">{{ 'button.editCustomer' | translate }}</button>
-            <button (click)="createNew()" class="px-4 py-2 bg-blue-500 text-white rounded border-none cursor-pointer text-sm font-medium hover:bg-blue-600 transition-colors">{{ 'button.createNewCustomer' | translate }}</button>
             <button (click)="goBack()" class="px-4 py-2 bg-gray-500 text-white rounded border-none cursor-pointer text-sm font-medium hover:bg-gray-600 transition-colors">{{ 'button.backToList' | translate }}</button>
           }
           @if (isEditMode()) {

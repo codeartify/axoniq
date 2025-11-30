@@ -9,7 +9,7 @@ import {AsyncPipe} from '@angular/common';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, LoadingBar, LanguageSwitcher, UserProfileMenuComponent, TranslateModule, AsyncPipe],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, LoadingBar, LanguageSwitcher, UserProfileMenuComponent, TranslateModule],
   templateUrl: './app.html',
   standalone: true
 })

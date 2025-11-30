@@ -1,18 +1,36 @@
 import {Component, computed, OnInit, signal, inject} from '@angular/core';
-import {CommonModule} from '@angular/common';
 import {Router} from '@angular/router';
-import {FormsModule} from '@angular/forms';
-import {TranslateModule} from '@ngx-translate/core';
 import {Customers, CustomerView} from './customers';
+import {GenericListComponent, ColumnDefinition, RowAction, CollectionAction} from '../shared/generic-list/generic-list.component';
 
 type SortColumn = 'name' | 'email' | 'phone' | 'city' | 'dateOfBirth';
-type SortDirection = 'asc' | 'desc';
 
 @Component({
   selector: 'app-customer-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, TranslateModule],
-  templateUrl: './customer-list.html'
+  imports: [GenericListComponent],
+  template: `
+    <app-generic-list
+      [titleKey]="'customer.list.title'"
+      [searchPlaceholderKey]="'customer.list.searchPlaceholder'"
+      [noItemsFoundKey]="'customer.list.noCustomersFound'"
+      [loadingKey]="'customer.list.loadingCustomers'"
+      [createFirstItemKey]="'button.createFirstCustomer'"
+      [items]="displayedCustomers()"
+      [columns]="columns"
+      [rowActions]="actions"
+      [collectionActions]="collectionActions"
+      [isLoading]="isLoading()"
+      [errorMessage]="errorMessage()"
+      [searchTerm]="searchTerm()"
+      [sortColumn]="sortColumn()"
+      [sortDirection]="sortDirection()"
+      [trackByFn]="trackByCustomerId"
+      [onRowClick]="viewCustomer.bind(this)"
+      (searchTermChange)="onSearchChange($event)"
+      (sortChange)="onSortChange($event)"
+    />
+  `
 })
 export class CustomerList implements OnInit {
   private customerService = inject(Customers);
@@ -23,9 +41,55 @@ export class CustomerList implements OnInit {
   errorMessage = signal<string | null>(null);
   searchTerm = signal<string>('');
   sortColumn = signal<SortColumn>('name');
-  sortDirection = signal<SortDirection>('asc');
+  sortDirection = signal<'asc' | 'desc'>('asc');
 
-  customers = computed(() => {
+  columns: ColumnDefinition<CustomerView>[] = [
+    {
+      key: 'name',
+      headerKey: 'customer.table.name',
+      sortable: true,
+      getValue: (customer) => this.getFullName(customer)
+    },
+    {
+      key: 'email',
+      headerKey: 'customer.table.email',
+      sortable: true
+    },
+    {
+      key: 'phoneNumber',
+      headerKey: 'customer.table.phone',
+      sortable: true,
+      getValue: (customer) => customer.phoneNumber || 'N/A'
+    },
+    {
+      key: 'address.city',
+      headerKey: 'customer.table.city',
+      sortable: true,
+      getValue: (customer) => customer.address.city
+    },
+    {
+      key: 'dateOfBirth',
+      headerKey: 'customer.table.dateOfBirth',
+      sortable: true
+    }
+  ];
+
+  actions: RowAction<CustomerView>[] = [
+    {
+      labelKey: 'button.viewDetails',
+      onClick: (customer) => this.viewCustomer(customer),
+      stopPropagation: true
+    }
+  ];
+
+  collectionActions: CollectionAction[] = [
+    {
+      labelKey: 'button.addCustomer',
+      onClick: () => this.createCustomer()
+    }
+  ];
+
+  displayedCustomers = computed(() => {
     let filtered = this.allCustomers();
 
     // Filter by search term
@@ -82,8 +146,8 @@ export class CustomerList implements OnInit {
     });
   }
 
-  viewCustomer(customerId: string): void {
-    this.router.navigate(['/customers', customerId]);
+  viewCustomer(customer: CustomerView): void {
+    this.router.navigate(['/customers', customer.customerId]);
   }
 
   createCustomer(): void {
@@ -98,21 +162,12 @@ export class CustomerList implements OnInit {
     this.searchTerm.set(term);
   }
 
-  sortBy(column: SortColumn): void {
-    if (this.sortColumn() === column) {
-      // Toggle direction if same column
-      this.sortDirection.set(this.sortDirection() === 'asc' ? 'desc' : 'asc');
-    } else {
-      // New column, default to ascending
-      this.sortColumn.set(column);
-      this.sortDirection.set('asc');
-    }
+  onSortChange(event: { column: string, direction: 'asc' | 'desc' }): void {
+    this.sortColumn.set(event.column as SortColumn);
+    this.sortDirection.set(event.direction);
   }
 
-  getSortIcon(column: SortColumn): string {
-    if (this.sortColumn() !== column) {
-      return '⇅';
-    }
-    return this.sortDirection() === 'asc' ? '↑' : '↓';
+  trackByCustomerId(index: number, customer: CustomerView): string {
+    return customer.customerId;
   }
 }
