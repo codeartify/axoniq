@@ -1,0 +1,15 @@
+{
+  "salutation": "MR",
+  "firstName": "John",
+  "lastName": "Doe",
+  "dateOfBirth": "1990-01-01",
+  "address": {
+    "street": "Main Street",
+    "houseNumber": "1A",
+    "postalCode": "8000",
+    "city": "Zurich",
+    "country": "CH"
+  },
+  "email": "john.doe@example.com",
+  "phoneNumber": "0123456789"
+}

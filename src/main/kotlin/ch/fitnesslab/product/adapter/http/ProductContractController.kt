@@ -24,6 +24,26 @@ import org.springframework.web.bind.annotation.*
 import java.time.Duration
 import java.time.LocalDate
 
+private fun toDto(productContractView: ProductContractView) =
+    ProductContractDetailDto(
+        contractId = productContractView.contractId,
+        customerId = productContractView.customerId,
+        productVariantId = productContractView.productVariantId,
+        bookingId = productContractView.bookingId,
+        status = productContractView.status.name,
+        validity = productContractView.validity?.let { DateRangeDto(it.start, it.end) },
+        sessionsTotal = productContractView.sessionsTotal,
+        sessionsUsed = productContractView.sessionsUsed,
+        pauseHistory =
+            productContractView.pauseHistory.map {
+                PauseHistoryEntryDto(
+                    pauseRange = DateRangeDto(it.pauseRange.start, it.pauseRange.end),
+                    reason = it.reason.name,
+                )
+            },
+        canBePaused = productContractView.status == ProductContractStatus.ACTIVE,
+    )
+
 @RestController
 @RequestMapping("/api/product-contracts")
 class ProductContractController(
@@ -35,11 +55,15 @@ class ProductContractController(
     override fun getContractById(
         @PathVariable contractId: String,
     ): ResponseEntity<ProductContractDetailDto> {
-        val contract =
-            productContractProjection.findById(ProductContractId.from(contractId))
-                ?: return ResponseEntity.notFound().build()
+        val productContractId = ProductContractId.from(contractId)
 
-        return ResponseEntity.ok(contract.toDto())
+        val contract = productContractProjection.findById(productContractId)
+
+        return if (contract == null) {
+            ResponseEntity.notFound().build()
+        } else {
+            ResponseEntity.ok(toDto(contract))
+        }
     }
 
     @PostMapping("/{contractId}/pause")
@@ -47,86 +71,95 @@ class ProductContractController(
         @PathVariable contractId: String,
         @RequestBody pauseContractRequest: PauseContractRequest,
     ): ResponseEntity<Unit> {
-        val subscriptionQuery =
-            queryGateway.subscriptionQuery(
-                FindAllProductContractsQuery(),
-                ResponseTypes.multipleInstancesOf(ProductContractView::class.java),
-                ResponseTypes.instanceOf(ProductContractUpdatedUpdate::class.java),
-            )
+        val subscriptionQuery = createFindAllProductContractsQuery()
 
         try {
-            val command =
-                PauseProductContractCommand(
-                    contractId = ProductContractId.from(contractId),
-                    pauseRange =
-                        DateRange(
-                            start = LocalDate.parse(pauseContractRequest.startDate.toString()),
-                            end = LocalDate.parse(pauseContractRequest.endDate.toString()),
-                        ),
-                    reason = pauseContractRequest.reason.let { PauseReason.valueOf(it.name) },
-                )
-            commandGateway.sendAndWait<Any>(
-                command,
-            )
+            val command = pauseCommandFrom(contractId, pauseContractRequest)
+
+            commandGateway.sendAndWait<Any>(command)
 
             waitForProjectionUpdate(subscriptionQuery)
 
             return ResponseEntity.ok().build()
         } finally {
-            subscriptionQuery.close()
+            subscriptionQuery?.close()
         }
     }
+
+    private fun pauseCommandFrom(
+        contractId: String,
+        pauseContractRequest: PauseContractRequest
+    ): PauseProductContractCommand {
+        val productContractId = ProductContractId.from(contractId)
+
+        val startDate = pauseContractRequest.startDate
+        val endDate = pauseContractRequest.endDate
+        val pauseRange = definePauseDuration(startDate, endDate)
+        val pauseReason = toPauseReason(pauseContractRequest)
+
+        val command =
+            PauseProductContractCommand(
+                contractId = productContractId,
+                pauseRange = pauseRange,
+                reason = pauseReason,
+            )
+        return command
+    }
+
+    private fun createFindAllProductContractsQuery(): SubscriptionQueryResult<MutableList<ProductContractView>, ProductContractUpdatedUpdate>? =
+        queryGateway.subscriptionQuery(
+            FindAllProductContractsQuery(),
+            ResponseTypes.multipleInstancesOf(ProductContractView::class.java),
+            ResponseTypes.instanceOf(ProductContractUpdatedUpdate::class.java),
+        )
+
+    private fun toPauseReason(pauseContractRequest: PauseContractRequest): PauseReason =
+        pauseContractRequest.reason.let {
+            PauseReason.valueOf(it.name)
+        }
+
+    private fun definePauseDuration(
+        startDate: LocalDate,
+        endDate: LocalDate,
+    ): DateRange =
+        DateRange(
+            start = LocalDate.parse(startDate.toString()),
+            end = LocalDate.parse(endDate.toString()),
+        )
 
     @PostMapping("/{contractId}/resume")
     override fun resumeContract(
         @PathVariable contractId: String,
     ): ResponseEntity<Unit> {
-        val subscriptionQuery =
-            queryGateway.subscriptionQuery(
-                FindAllProductContractsQuery(),
-                ResponseTypes.multipleInstancesOf(ProductContractView::class.java),
-                ResponseTypes.instanceOf(ProductContractUpdatedUpdate::class.java),
-            )
+        val resumeSubscriptionQuery = createResumeSubscriptionQuery()
 
         try {
-            commandGateway.sendAndWait<Any>(
-                ResumeProductContractCommand(
-                    contractId = ProductContractId.from(contractId),
-                ),
-            )
+            val productContractId = ProductContractId.from(contractId)
 
-            // Wait for projection update
-            waitForProjectionUpdate(subscriptionQuery)
+            val command = ResumeProductContractCommand(productContractId)
+
+            commandGateway.sendAndWait<Any>(command)
+
+            waitForProjectionUpdate(resumeSubscriptionQuery)
 
             return ResponseEntity.ok().build()
         } finally {
-            subscriptionQuery.close()
+            resumeSubscriptionQuery?.close()
         }
     }
+
+    private fun createResumeSubscriptionQuery(): SubscriptionQueryResult<MutableList<ProductContractView>, ProductContractUpdatedUpdate>? =
+        queryGateway.subscriptionQuery(
+            FindAllProductContractsQuery(),
+            ResponseTypes.multipleInstancesOf(ProductContractView::class.java),
+            ResponseTypes.instanceOf(ProductContractUpdatedUpdate::class.java),
+        )
 
     private fun waitForProjectionUpdate(
         subscriptionQuery: SubscriptionQueryResult<MutableList<ProductContractView>, ProductContractUpdatedUpdate>?,
     ) {
-        subscriptionQuery?.updates()?.blockFirst(Duration.ofSeconds(5))
+        subscriptionQuery
+            ?.updates()
+            ?.blockFirst(Duration.ofSeconds(5))
     }
 }
-
-private fun ProductContractView.toDto() =
-    ProductContractDetailDto(
-        contractId = contractId,
-        customerId = customerId,
-        productVariantId = productVariantId,
-        bookingId = bookingId,
-        status = status.name,
-        validity = validity?.let { DateRangeDto(it.start, it.end) },
-        sessionsTotal = sessionsTotal,
-        sessionsUsed = sessionsUsed,
-        pauseHistory =
-            pauseHistory.map {
-                PauseHistoryEntryDto(
-                    pauseRange = DateRangeDto(it.pauseRange.start, it.pauseRange.end),
-                    reason = it.reason.name,
-                )
-            },
-        canBePaused = status == ProductContractStatus.ACTIVE,
-    )

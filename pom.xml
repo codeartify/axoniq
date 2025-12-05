@@ -80,6 +80,11 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>org.axonframework</groupId>
             <artifactId>axon-spring-boot-starter</artifactId>
             <version>${axon.version}</version>
@@ -136,7 +141,63 @@
             <groupId>jakarta.validation</groupId>
             <artifactId>jakarta.validation-api</artifactId>
         </dependency>
+
+    <!-- PostgreSQL JDBC driver (runtime/test) -->
+    <dependency>
+      <groupId>org.postgresql</groupId>
+      <artifactId>postgresql</artifactId>
+      <scope>runtime</scope>
+    </dependency>
+
+    <!-- Testcontainers BOM to align versions -->
+    <dependency>
+      <groupId>org.testcontainers</groupId>
+      <artifactId>testcontainers-bom</artifactId>
+      <version>1.21.3</version>
+      <type>pom</type>
+      <scope>import</scope>
+    </dependency>
+
+    <!-- Testcontainers JUnit 5 integration -->
+    <dependency>
+      <groupId>org.testcontainers</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+    <!-- Testcontainers: PostgreSQL module -->
+    <dependency>
+      <groupId>org.testcontainers</groupId>
+      <artifactId>postgresql</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+    <!-- Spring Boot test starter (JUnit 5, AssertJ, MockMvc/WebTestClient, etc.) -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-test</artifactId>
+      <scope>test</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>org.junit.vintage</groupId>
+          <artifactId>junit-vintage-engine</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+  </dependencies>
+
+  <dependencyManagement>
+    <!-- Ensure the BOM is under dependencyManagement if not already -->
+    <dependencies>
+      <dependency>
+        <groupId>org.testcontainers</groupId>
+        <artifactId>testcontainers-bom</artifactId>
+        <version>1.20.3</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
     </dependencies>
+  </dependencyManagement>
     <build>
         <sourceDirectory>${project.basedir}/src/main/kotlin</sourceDirectory>
         <testSourceDirectory>${project.basedir}/src/test/kotlin</testSourceDirectory>
@@ -235,19 +296,6 @@
                 <groupId>com.github.gantsign.maven</groupId>
                 <artifactId>ktlint-maven-plugin</artifactId>
                 <version>3.5.0</version>
-                <configuration>
-                    <!-- Use Pinterest ktlint -->
-                    <ktlintVersion>1.4.1</ktlintVersion>
-                    <!-- Fail the build on style violations -->
-                    <failOnError>true</failOnError>
-                    <!-- Optionally restrict to certain folders -->
-                    <!--
-                    <includes>
-                      <include>src/main/kotlin/**/*.kt</include>
-                      <include>src/test/kotlin/**/*.kt</include>
-                    </includes>
-                    -->
-                </configuration>
                 <executions>
                     <!-- Run ktlint checks on verify -->
                     <execution>

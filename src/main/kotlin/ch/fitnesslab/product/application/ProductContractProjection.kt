@@ -84,8 +84,8 @@ class ProductContractProjection(
                     productVariantId = existing.productVariantId,
                     bookingId = existing.bookingId,
                     status = ProductContractStatus.ACTIVE,
-                    validityStart = event.extendedValidity?.start,
-                    validityEnd = event.extendedValidity?.end,
+                    validityStart = event.extendedValidity.start,
+                    validityEnd = event.extendedValidity.end,
                     sessionsTotal = existing.sessionsTotal,
                     sessionsUsed = existing.sessionsUsed,
                 )

@@ -1,0 +1,18 @@
+
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: https://auth.oliverzihler.ch/realms/fitnesslab
+          jwk-set-uri: https://auth.oliverzihler.ch/realms/fitnesslab/protocol/openid-connect/certs
+  axon:
+  serializer:
+    general: jackson
+    events: jackson
+    messages: jackson
+  axonserver:
+    enabled: false
