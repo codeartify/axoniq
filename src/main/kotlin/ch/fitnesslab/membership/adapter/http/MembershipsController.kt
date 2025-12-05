@@ -24,14 +24,13 @@ class MembershipsController(
     override fun signUp(
         @RequestBody membershipSignUpRequestDto: MembershipSignUpRequestDto,
     ): ResponseEntity<MembershipSignUpResultDto> {
-
         val result =
             membershipSignUpService.signUp(
                 MembershipSignUpRequest(
                     customerId = CustomerId.from(membershipSignUpRequestDto.customerId),
                     productVariantId = ProductVariantId.from(membershipSignUpRequestDto.productVariantId),
                     paymentMode = membershipSignUpRequestDto.paymentMode.let { PaymentMode.valueOf(it.name) },
-                    startDate = LocalDate.from(membershipSignUpRequestDto.startDate)
+                    startDate = LocalDate.from(membershipSignUpRequestDto.startDate),
                 ),
             )
 

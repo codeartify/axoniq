@@ -22,14 +22,25 @@ class JsonLoader {
             ),
         )
 
-    fun <T> loadObjectFromFile(path: String, type: Class<T>): T = objectMapper.readValue(loadJsonFromFile(path), type)
+    fun <T> loadObjectFromFile(
+        path: String,
+        type: Class<T>,
+    ): T = objectMapper.readValue(loadJsonFromFile(path), type)
 
-    fun <T> loadObjectFromFileAndReplace(path: String, type: Class<T>, keyToReplace: String, valueToReplace: String): T {
+    fun <T> loadObjectFromFileAndReplace(
+        path: String,
+        type: Class<T>,
+        keyToReplace: String,
+        valueToReplace: String,
+    ): T {
         val content = loadJsonAndReplace(path, keyToReplace, valueToReplace)
         return objectMapper.readValue(content, type)
     }
 
-    fun loadJsonAndReplaceId(filePathWithExtension: String, valueToAttach: String?): String {
+    fun loadJsonAndReplaceId(
+        filePathWithExtension: String,
+        valueToAttach: String?,
+    ): String {
         if (valueToAttach?.isEmpty()!!) {
             return loadJsonFromFile(filePathWithExtension)
         }
@@ -37,14 +48,22 @@ class JsonLoader {
         return loadJsonAndReplace(filePathWithExtension, "id", valueToAttach)
     }
 
-    private fun loadJsonAndReplace(filePathWithExtension: String, KeyOfValueToReplace: String, valueToReplace: String): String {
+    private fun loadJsonAndReplace(
+        filePathWithExtension: String,
+        KeyOfValueToReplace: String,
+        valueToReplace: String,
+    ): String {
         val mapper = jacksonObjectMapper()
         val jsonMap: MutableMap<String, Any> = mapper.readValue(loadJsonFromFile(filePathWithExtension))
         jsonMap[KeyOfValueToReplace] = valueToReplace
         return mapper.writeValueAsString(jsonMap)
     }
 
-    fun <T> loadObjectFromFileAndReplace(path: String, type: Class<T>, replacements: Map<String, String>): T {
+    fun <T> loadObjectFromFileAndReplace(
+        path: String,
+        type: Class<T>,
+        replacements: Map<String, String>,
+    ): T {
         val mapper = jacksonObjectMapper()
         val jsonMap: MutableMap<String, Any> = mapper.readValue(loadJsonFromFile(path))
 

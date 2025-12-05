@@ -45,6 +45,7 @@ class ProductContractController(
             ResponseEntity.ok(toDto(contract))
         }
     }
+
     @PostMapping("/{contractId}/pause")
     override fun pauseContract(
         @PathVariable contractId: String,
@@ -88,7 +89,7 @@ class ProductContractController(
 
     private fun pauseCommandFrom(
         contractId: String,
-        pauseContractRequest: PauseContractRequest
+        pauseContractRequest: PauseContractRequest,
     ): PauseProductContractCommand {
         val productContractId = ProductContractId.from(contractId)
 

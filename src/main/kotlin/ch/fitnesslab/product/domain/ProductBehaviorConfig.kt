@@ -6,6 +6,4 @@ data class ProductBehaviorConfig(
     val maxActivePerCustomer: Int?,
     val durationInMonths: Int?,
     val numberOfSessions: Int?,
-) {
-
-}
+)

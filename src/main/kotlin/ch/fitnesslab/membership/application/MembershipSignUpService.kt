@@ -129,10 +129,12 @@ class MembershipSignUpService(
         )
 
     private fun getProductVariant(productVariantId: ProductVariantId): ProductVariantEntity {
-        val productVariant = queryGateway.query(
-            FindProductByIdQuery(productId = productVariantId),
-            ProductVariantEntity::class.java
-        ).get()
+        val productVariant =
+            queryGateway
+                .query(
+                    FindProductByIdQuery(productId = productVariantId),
+                    ProductVariantEntity::class.java,
+                ).get()
 
         return when (productVariant) {
             null -> throw IllegalArgumentException("Product not found")
@@ -141,10 +143,12 @@ class MembershipSignUpService(
     }
 
     private fun ensureCustomerExists(customerId: CustomerId) {
-        val customer = queryGateway.query(
-            FindCustomerByIdQuery(customerId = customerId),
-            CustomerEntity::class.java
-        ).get()
+        val customer =
+            queryGateway
+                .query(
+                    FindCustomerByIdQuery(customerId = customerId),
+                    CustomerEntity::class.java,
+                ).get()
 
         when (customer) {
             null -> throw IllegalArgumentException("Customer not found")
@@ -152,14 +156,14 @@ class MembershipSignUpService(
         }
     }
 
-    private fun createValidity(startDate: LocalDate, durationInMonths: Int?): DateRange? {
+    private fun createValidity(
+        startDate: LocalDate,
+        durationInMonths: Int?,
+    ): DateRange? {
         val durationInMonths = durationInMonths
         return when {
             durationInMonths != null -> DateRange.toRange(startDate, durationInMonths)
             else -> null
         }
     }
-
-
 }
-

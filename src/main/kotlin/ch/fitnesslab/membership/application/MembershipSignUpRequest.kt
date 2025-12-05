@@ -9,5 +9,5 @@ data class MembershipSignUpRequest(
     val customerId: CustomerId,
     val productVariantId: ProductVariantId,
     val paymentMode: PaymentMode,
-    val startDate: LocalDate
+    val startDate: LocalDate,
 )

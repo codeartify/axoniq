@@ -19,7 +19,6 @@ import org.axonframework.queryhandling.SubscriptionQueryResult
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
-import java.time.Duration
 
 @RestController
 @RequestMapping("/api/customers")
@@ -77,8 +76,10 @@ class CustomerController(
     @GetMapping
     override fun getAllCustomers(): ResponseEntity<List<CustomerView>> =
         ResponseEntity.ok(
-            customerProjection.findAll()
-                .map { toViewModel(it) })
+            customerProjection
+                .findAll()
+                .map { toViewModel(it) },
+        )
 
     @PutMapping("/{customerId}")
     override fun updateCustomer(
@@ -107,65 +108,70 @@ class CustomerController(
 
     private fun toRegisterCommand(
         customerId: CustomerId,
-        registerCustomerRequest: RegisterCustomerRequest
-    ): RegisterCustomerCommand = RegisterCustomerCommand(
-        customerId = customerId,
-        salutation = registerCustomerRequest.salutation.let { Salutation.valueOf(it.name) },
-        firstName = registerCustomerRequest.firstName,
-        lastName = registerCustomerRequest.lastName,
-        dateOfBirth = registerCustomerRequest.dateOfBirth,
-        address =
-            Address(
-                street = registerCustomerRequest.address.street,
-                houseNumber = registerCustomerRequest.address.houseNumber,
-                postalCode = registerCustomerRequest.address.postalCode,
-                city = registerCustomerRequest.address.city,
-                country = registerCustomerRequest.address.country,
-            ),
-        email = registerCustomerRequest.email,
-        phoneNumber = registerCustomerRequest.phoneNumber,
-    )
+        registerCustomerRequest: RegisterCustomerRequest,
+    ): RegisterCustomerCommand =
+        RegisterCustomerCommand(
+            customerId = customerId,
+            salutation = registerCustomerRequest.salutation.let { Salutation.valueOf(it.name) },
+            firstName = registerCustomerRequest.firstName,
+            lastName = registerCustomerRequest.lastName,
+            dateOfBirth = registerCustomerRequest.dateOfBirth,
+            address =
+                Address(
+                    street = registerCustomerRequest.address.street,
+                    houseNumber = registerCustomerRequest.address.houseNumber,
+                    postalCode = registerCustomerRequest.address.postalCode,
+                    city = registerCustomerRequest.address.city,
+                    country = registerCustomerRequest.address.country,
+                ),
+            email = registerCustomerRequest.email,
+            phoneNumber = registerCustomerRequest.phoneNumber,
+        )
 
     private fun toUpdateCustomerCommand(
         customerId: String,
-        updateCustomerRequest: UpdateCustomerRequest
-    ): UpdateCustomerCommand = UpdateCustomerCommand(
-        customerId = CustomerId.from(customerId),
-        salutation = updateCustomerRequest.salutation.let { Salutation.valueOf(it.name) },
-        firstName = updateCustomerRequest.firstName,
-        lastName = updateCustomerRequest.lastName,
-        dateOfBirth = updateCustomerRequest.dateOfBirth,
-        address =
-            Address(
-                street = updateCustomerRequest.address.street,
-                houseNumber = updateCustomerRequest.address.houseNumber,
-                postalCode = updateCustomerRequest.address.postalCode,
-                city = updateCustomerRequest.address.city,
-                country = updateCustomerRequest.address.country,
-            ),
-        email = updateCustomerRequest.email,
-        phoneNumber = updateCustomerRequest.phoneNumber,
-    )
+        updateCustomerRequest: UpdateCustomerRequest,
+    ): UpdateCustomerCommand =
+        UpdateCustomerCommand(
+            customerId = CustomerId.from(customerId),
+            salutation = updateCustomerRequest.salutation.let { Salutation.valueOf(it.name) },
+            firstName = updateCustomerRequest.firstName,
+            lastName = updateCustomerRequest.lastName,
+            dateOfBirth = updateCustomerRequest.dateOfBirth,
+            address =
+                Address(
+                    street = updateCustomerRequest.address.street,
+                    houseNumber = updateCustomerRequest.address.houseNumber,
+                    postalCode = updateCustomerRequest.address.postalCode,
+                    city = updateCustomerRequest.address.city,
+                    country = updateCustomerRequest.address.country,
+                ),
+            email = updateCustomerRequest.email,
+            phoneNumber = updateCustomerRequest.phoneNumber,
+        )
 
     private fun waitFor(subscriptionQuery: SubscriptionQueryResult<MutableList<CustomerView>, CustomerUpdatedUpdate>) {
         waitForUpdateOf(subscriptionQuery)
     }
 
-    private fun toViewModel(entity: CustomerEntity): CustomerView = CustomerView(
-        customerId = entity.customerId.toString(),
-        salutation = ch.fitnesslab.generated.model.Salutation.forValue(entity.salutation.name),
-        firstName = entity.firstName,
-        lastName = entity.lastName,
-        dateOfBirth = entity.dateOfBirth,
-        address =
-            AddressDto(
-                street = entity.street,
-                houseNumber = entity.houseNumber,
-                postalCode = entity.postalCode,
-                city = entity.city,
-                country = entity.country,
-            ),
-        email = entity.email,
-        phoneNumber = entity.phoneNumber,
-    )
+    private fun toViewModel(entity: CustomerEntity): CustomerView =
+        CustomerView(
+            customerId = entity.customerId.toString(),
+            salutation =
+                ch.fitnesslab.generated.model.Salutation
+                    .forValue(entity.salutation.name),
+            firstName = entity.firstName,
+            lastName = entity.lastName,
+            dateOfBirth = entity.dateOfBirth,
+            address =
+                AddressDto(
+                    street = entity.street,
+                    houseNumber = entity.houseNumber,
+                    postalCode = entity.postalCode,
+                    city = entity.city,
+                    country = entity.country,
+                ),
+            email = entity.email,
+            phoneNumber = entity.phoneNumber,
+        )
 }

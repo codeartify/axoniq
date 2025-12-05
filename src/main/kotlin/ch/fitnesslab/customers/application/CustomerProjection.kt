@@ -83,5 +83,4 @@ class CustomerProjection(
             .orElse(null)
 
     fun findAll(): List<CustomerEntity> = customerRepository.findAll()
-
 }

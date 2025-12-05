@@ -56,7 +56,7 @@ class ProductController(
                             renewalLeadTimeDays = request.behavior.renewalLeadTimeDays,
                             maxActivePerCustomer = request.behavior.maxActivePerCustomer,
                             durationInMonths = request.behavior.durationInMonths,
-                            numberOfSessions = request.behavior.numberOfSessions
+                            numberOfSessions = request.behavior.numberOfSessions,
                         ),
                 )
             commandGateway.sendAndWait<Any>(command)
@@ -114,7 +114,7 @@ class ProductController(
                             renewalLeadTimeDays = request.behavior.renewalLeadTimeDays,
                             maxActivePerCustomer = request.behavior.maxActivePerCustomer,
                             durationInMonths = request.behavior.durationInMonths,
-                            numberOfSessions = request.behavior.numberOfSessions
+                            numberOfSessions = request.behavior.numberOfSessions,
                         ),
                 )
 
@@ -127,5 +127,4 @@ class ProductController(
             subscriptionQuery.close()
         }
     }
-
 }

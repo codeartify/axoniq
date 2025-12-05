@@ -4,8 +4,8 @@ import ch.fitnesslab.common.types.ProductVariantId
 import ch.fitnesslab.generated.model.ProductView
 import ch.fitnesslab.product.domain.events.ProductCreatedEvent
 import ch.fitnesslab.product.domain.events.ProductUpdatedEvent
-import ch.fitnesslab.product.infrastructure.ProductVariantEntity
 import ch.fitnesslab.product.infrastructure.ProductRepository
+import ch.fitnesslab.product.infrastructure.ProductVariantEntity
 import org.axonframework.config.ProcessingGroup
 import org.axonframework.eventhandling.EventHandler
 import org.axonframework.queryhandling.QueryHandler
@@ -33,7 +33,7 @@ class ProductProjection(
                 durationInMonths = event.behavior.durationInMonths,
                 renewalLeadTimeDays = event.behavior.renewalLeadTimeDays,
                 maxActivePerCustomer = event.behavior.maxActivePerCustomer,
-                numberOfSessions = event.behavior.numberOfSessions
+                numberOfSessions = event.behavior.numberOfSessions,
             )
         productRepository.save(entity)
 
@@ -108,7 +108,7 @@ class ProductProjection(
                     renewalLeadTimeDays = productVariantEntity.renewalLeadTimeDays,
                     maxActivePerCustomer = productVariantEntity.maxActivePerCustomer,
                     durationInMonths = productVariantEntity.durationInMonths,
-                    numberOfSessions = productVariantEntity.numberOfSessions
+                    numberOfSessions = productVariantEntity.numberOfSessions,
                 ),
         )
 }

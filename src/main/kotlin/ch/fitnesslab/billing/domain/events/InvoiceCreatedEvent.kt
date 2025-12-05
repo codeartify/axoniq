@@ -8,7 +8,6 @@ import ch.fitnesslab.common.types.ProductVariantId
 import ch.fitnesslab.membership.domain.DueDate
 import org.axonframework.serialization.Revision
 import java.math.BigDecimal
-import java.time.LocalDate
 
 @Revision("1.0")
 data class InvoiceCreatedEvent(

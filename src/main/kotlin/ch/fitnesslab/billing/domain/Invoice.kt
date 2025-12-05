@@ -20,7 +20,6 @@ import org.axonframework.modelling.command.AggregateLifecycle
 import org.axonframework.spring.stereotype.Aggregate
 import java.math.BigDecimal
 import java.time.Instant
-import java.time.LocalDate
 
 @Aggregate
 class Invoice() {

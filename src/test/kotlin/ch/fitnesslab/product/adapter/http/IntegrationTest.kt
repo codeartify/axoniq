@@ -22,7 +22,6 @@ import org.testcontainers.junit.jupiter.Testcontainers
 @Testcontainers
 @Import(TestSecurityConfig::class)
 abstract class IntegrationTest {
-
     @LocalServerPort
     protected var port: Int = 0
 
@@ -30,7 +29,6 @@ abstract class IntegrationTest {
 
     @Autowired
     protected lateinit var webTestClient: WebTestClient
-
 
     @Autowired
     protected lateinit var jsonLoader: JsonLoader
@@ -41,11 +39,12 @@ abstract class IntegrationTest {
         fun registerProperties(registry: DynamicPropertyRegistry) {
             val activeProfiles = System.getenv("SPRING_PROFILES_ACTIVE") ?: ""
             val isCiProfileActive = activeProfiles.contains("ci")
-            val isDockerAvailable = try {
-                DockerClientFactory.instance().isDockerAvailable
-            } catch (e: Exception) {
-                false
-            }
+            val isDockerAvailable =
+                try {
+                    DockerClientFactory.instance().isDockerAvailable
+                } catch (e: Exception) {
+                    false
+                }
 
             if (!isCiProfileActive && isDockerAvailable) {
                 val postgres =
@@ -63,5 +62,4 @@ abstract class IntegrationTest {
             // If Docker is not available, it will use the datasource from application-test.yml
         }
     }
-
 }
