@@ -26,23 +26,24 @@ class MembershipIT : IntegrationTest() {
                 RegisterCustomerRequest::class.java,
             )
 
+        val expectedCustomer = CustomerView(
+            customerId = "",
+            salutation = registerCustomerRequest.salutation,
+            firstName = registerCustomerRequest.firstName,
+            lastName = registerCustomerRequest.lastName,
+            dateOfBirth = registerCustomerRequest.dateOfBirth,
+            address = registerCustomerRequest.address,
+            email = registerCustomerRequest.email,
+            phoneNumber = registerCustomerRequest.phoneNumber
+        )
+
         val customerId = createCustomer(registerCustomerRequest)
         val customerFromGET = getCustomer(customerId)
 
         assertThat(customerFromGET)
-            .usingRecursiveComparison() 
-            .isEqualTo(
-                CustomerView(
-                    customerId = customerFromGET.customerId,
-                    salutation = registerCustomerRequest.salutation,
-                    firstName = registerCustomerRequest.firstName,
-                    lastName = registerCustomerRequest.lastName,
-                    dateOfBirth = registerCustomerRequest.dateOfBirth,
-                    address = registerCustomerRequest.address,
-                    email = registerCustomerRequest.email,
-                    phoneNumber = registerCustomerRequest.phoneNumber
-                )
-            )
+            .usingRecursiveComparison()
+            .ignoringFields("customerId")
+            .isEqualTo(expectedCustomer)
 
 
         // 2) Create Subscription via /api/products
