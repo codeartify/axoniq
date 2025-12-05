@@ -17,7 +17,7 @@ class MembershipIT : IntegrationTest() {
             )
 
         val expectedCustomer = CustomerView(
-            customerId = "",
+            customerId = "",//ignored
             salutation = registerCustomerRequest.salutation,
             firstName = registerCustomerRequest.firstName,
             lastName = registerCustomerRequest.lastName,
@@ -37,57 +37,39 @@ class MembershipIT : IntegrationTest() {
 
 
         // 2) Create Subscription via /api/products
-
         val createProductRequest = jsonLoader.loadObjectFromFile(
-            "http/products/product1.json",
+            "http/products/subscription1.json",
             CreateProductRequest::class.java,
         )
 
-        val productId = webTestClient.post()
-            .uri("/api/products")
-            .contentType(MediaType.APPLICATION_JSON)
-            .bodyValue(createProductRequest)
-            .exchange()
-            .expectStatus().isCreated
-            .expectBody(ProductCreationResponse::class.java)
-            .returnResult()
-            .responseBody!!
-            .productId
+        val expectedProductView = ProductView(
+            productId = "", // ignored
+            code = createProductRequest.code,
+            name = createProductRequest.name,
+            productType = createProductRequest.productType,
+            audience = createProductRequest.audience.name,
+            requiresMembership = createProductRequest.requiresMembership,
+            price = createProductRequest.price,
+            behavior = ProductBehaviorConfig(
+                isTimeBased = createProductRequest.behavior.isTimeBased,
+                isSessionBased = createProductRequest.behavior.isSessionBased,
+                canBePaused = createProductRequest.behavior.canBePaused,
+                autoRenew = createProductRequest.behavior.autoRenew,
+                renewalLeadTimeDays = createProductRequest.behavior.renewalLeadTimeDays,
+                contributesToMembershipStatus = createProductRequest.behavior.contributesToMembershipStatus,
+                maxActivePerCustomer = createProductRequest.behavior.maxActivePerCustomer,
+                exclusivityGroup = createProductRequest.behavior.exclusivityGroup,
+            )
 
-
-        val productViewFromGET = webTestClient.get()
-            .uri("/api/products/$productId")
-            .accept(MediaType.APPLICATION_JSON)
-            .exchange()
-            .expectStatus().isOk
-            .expectBody(ProductView::class.java)
-            .returnResult()
-            .responseBody!!
+        )
+        val productId = createProduct(createProductRequest)
+        val productViewFromGET = getProduct(productId)
 
         assertThat(productViewFromGET)
             .usingRecursiveComparison()
             .ignoringFields("productId")
             .isEqualTo(
-                ProductView(
-                    productId = productViewFromGET.productId,
-                    code = createProductRequest.code,
-                    name = createProductRequest.name,
-                    productType = createProductRequest.productType,
-                    audience = createProductRequest.audience.name,
-                    requiresMembership = createProductRequest.requiresMembership,
-                    price = createProductRequest.price,
-                    behavior = ProductBehaviorConfig(
-                        isTimeBased = createProductRequest.behavior.isTimeBased,
-                        isSessionBased = createProductRequest.behavior.isSessionBased,
-                        canBePaused = createProductRequest.behavior.canBePaused,
-                        autoRenew = createProductRequest.behavior.autoRenew,
-                        renewalLeadTimeDays = createProductRequest.behavior.renewalLeadTimeDays,
-                        contributesToMembershipStatus = createProductRequest.behavior.contributesToMembershipStatus,
-                        maxActivePerCustomer = createProductRequest.behavior.maxActivePerCustomer,
-                        exclusivityGroup = createProductRequest.behavior.exclusivityGroup,
-                    )
-
-                )
+                expectedProductView
             )
 
         /**
@@ -134,6 +116,32 @@ class MembershipIT : IntegrationTest() {
         assert(id == createdInvoiceId)
         }
          */
+    }
+
+    private fun getProduct(productId: String?): ProductView {
+        val productViewFromGET = webTestClient.get()
+            .uri("/api/products/$productId")
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus().isOk
+            .expectBody(ProductView::class.java)
+            .returnResult()
+            .responseBody!!
+        return productViewFromGET
+    }
+
+    private fun createProduct(createProductRequest: CreateProductRequest): String? {
+        val productId = webTestClient.post()
+            .uri("/api/products")
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(createProductRequest)
+            .exchange()
+            .expectStatus().isCreated
+            .expectBody(ProductCreationResponse::class.java)
+            .returnResult()
+            .responseBody!!
+            .productId
+        return productId
     }
 
     private fun getCustomer(customerId: String?): CustomerView = webTestClient.get()
