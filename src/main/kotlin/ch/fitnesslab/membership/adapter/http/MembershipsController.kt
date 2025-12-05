@@ -7,12 +7,13 @@ import ch.fitnesslab.generated.model.MembershipSignUpRequestDto
 import ch.fitnesslab.generated.model.MembershipSignUpResultDto
 import ch.fitnesslab.membership.application.MembershipSignUpRequest
 import ch.fitnesslab.membership.application.MembershipSignUpService
-import ch.fitnesslab.membership.application.PaymentMode
+import ch.fitnesslab.membership.domain.PaymentMode
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
+import java.time.LocalDate
 
 @RestController
 @RequestMapping("/api/memberships")
@@ -23,20 +24,15 @@ class MembershipsController(
     override fun signUp(
         @RequestBody membershipSignUpRequestDto: MembershipSignUpRequestDto,
     ): ResponseEntity<MembershipSignUpResultDto> {
-        val signUpRequest =
-            MembershipSignUpRequest(
-                customerId = CustomerId.from(membershipSignUpRequestDto.customerId),
-                customerName = membershipSignUpRequestDto.customerName,
-                customerEmail = membershipSignUpRequestDto.customerEmail,
-                productVariantId = ProductVariantId.from(membershipSignUpRequestDto.productVariantId),
-                price = membershipSignUpRequestDto.price,
-                durationMonths = membershipSignUpRequestDto.durationMonths,
-                paymentMode = membershipSignUpRequestDto.paymentMode.let { PaymentMode.valueOf(it.name) },
-            )
 
         val result =
             membershipSignUpService.signUp(
-                signUpRequest,
+                MembershipSignUpRequest(
+                    customerId = CustomerId.from(membershipSignUpRequestDto.customerId),
+                    productVariantId = ProductVariantId.from(membershipSignUpRequestDto.productVariantId),
+                    paymentMode = membershipSignUpRequestDto.paymentMode.let { PaymentMode.valueOf(it.name) },
+                    startDate = LocalDate.from(membershipSignUpRequestDto.startDate)
+                ),
             )
 
         return ResponseEntity.ok(

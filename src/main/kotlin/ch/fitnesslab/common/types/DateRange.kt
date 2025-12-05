@@ -6,6 +6,12 @@ data class DateRange(
     val start: LocalDate,
     val end: LocalDate,
 ) {
+    companion object {
+        fun toRange(startDate: LocalDate, durationInMonths: Int): DateRange = DateRange(
+            start = startDate,
+            end = startDate.plusMonths((durationInMonths.toLong()))
+        )
+    }
     init {
         require(!end.isBefore(start)) { "End date must not be before start date" }
     }

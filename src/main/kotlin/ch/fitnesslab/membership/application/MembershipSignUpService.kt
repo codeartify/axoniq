@@ -1,27 +1,32 @@
 package ch.fitnesslab.membership.application
 
 import ch.fitnesslab.billing.application.FindAllInvoicesQuery
-import ch.fitnesslab.billing.application.InvoiceUpdatedUpdate
+import ch.fitnesslab.billing.application.InvoiceUpdated
 import ch.fitnesslab.billing.application.InvoiceView
 import ch.fitnesslab.billing.domain.commands.CreateInvoiceCommand
 import ch.fitnesslab.billing.domain.commands.MarkInvoicePaidCommand
 import ch.fitnesslab.booking.application.BookingUpdatedUpdate
 import ch.fitnesslab.booking.application.BookingView
 import ch.fitnesslab.booking.application.FindAllBookingsQuery
-import ch.fitnesslab.booking.domain.Participant
 import ch.fitnesslab.booking.domain.PurchasedProduct
 import ch.fitnesslab.booking.domain.commands.PlaceBookingCommand
 import ch.fitnesslab.common.types.*
+import ch.fitnesslab.customers.application.FindCustomerByIdQuery
+import ch.fitnesslab.customers.infrastructure.CustomerEntity
+import ch.fitnesslab.membership.domain.DueDate
+import ch.fitnesslab.membership.domain.PaymentMode
 import ch.fitnesslab.product.application.FindAllProductContractsQuery
+import ch.fitnesslab.product.application.FindProductByIdQuery
 import ch.fitnesslab.product.application.ProductContractUpdatedUpdate
 import ch.fitnesslab.product.application.ProductContractView
 import ch.fitnesslab.product.domain.commands.CreateProductContractCommand
+import ch.fitnesslab.product.infrastructure.ProductVariantEntity
+import ch.fitnesslab.utils.waitForUpdateOf
 import org.axonframework.commandhandling.gateway.CommandGateway
 import org.axonframework.messaging.responsetypes.ResponseTypes
 import org.axonframework.queryhandling.QueryGateway
+import org.axonframework.queryhandling.SubscriptionQueryResult
 import org.springframework.stereotype.Service
-import java.math.BigDecimal
-import java.time.Duration
 import java.time.LocalDate
 
 @Service
@@ -30,100 +35,62 @@ class MembershipSignUpService(
     private val queryGateway: QueryGateway,
 ) {
     fun signUp(request: MembershipSignUpRequest): MembershipSignUpResult {
+        val customerId = request.customerId
+
+        ensureCustomerExists(customerId)
+
+        val bookingSubscription = createBookingSubscriptionQuery()
+        val contractSubscription = createContractSubscription()
+        val invoiceSubscription = createInvoiceSubscriptionQuery()
+
+        val productVariantId = request.productVariantId
+        val productVariantEntity = getProductVariant(productVariantId)
+
         val bookingId = BookingId.generate()
         val contractId = ProductContractId.generate()
         val invoiceId = InvoiceId.generate()
-
-        // Create subscription queries for all projections that will be updated
-        val bookingSubscription =
-            queryGateway.subscriptionQuery(
-                FindAllBookingsQuery(),
-                ResponseTypes.multipleInstancesOf(BookingView::class.java),
-                ResponseTypes.instanceOf(BookingUpdatedUpdate::class.java),
-            )
-
-        val contractSubscription =
-            queryGateway.subscriptionQuery(
-                FindAllProductContractsQuery(),
-                ResponseTypes.multipleInstancesOf(ProductContractView::class.java),
-                ResponseTypes.instanceOf(ProductContractUpdatedUpdate::class.java),
-            )
-
-        val invoiceSubscription =
-            queryGateway.subscriptionQuery(
-                FindAllInvoicesQuery(),
-                ResponseTypes.multipleInstancesOf(InvoiceView::class.java),
-                ResponseTypes.instanceOf(InvoiceUpdatedUpdate::class.java),
-            )
 
         try {
             // 1. Place booking
             commandGateway.sendAndWait<Any>(
                 PlaceBookingCommand(
                     bookingId = bookingId,
-                    payerCustomerId = request.customerId,
-                    purchasedProducts =
-                        listOf(
-                            PurchasedProduct(
-                                productVariantId = request.productVariantId,
-                                participants =
-                                    listOf(
-                                        Participant(
-                                            displayName = request.customerName,
-                                            email = request.customerEmail,
-                                        ),
-                                    ),
-                                totalPrice = request.price,
-                            ),
-                        ),
+                    payerCustomerId = customerId,
+                    purchasedProducts = listOf(PurchasedProduct(productVariantId = productVariantId)),
                 ),
             )
-            // Wait for booking projection update
-            bookingSubscription.updates().blockFirst(Duration.ofSeconds(5))
-
-            // 2. Create product contract (ACTIVE immediately for membership)
-            val validity =
-                DateRange(
-                    start = LocalDate.now(),
-                    end = LocalDate.now().plusMonths(request.durationMonths.toLong()),
-                )
+            waitForUpdateOf(bookingSubscription)
 
             commandGateway.sendAndWait<Any>(
                 CreateProductContractCommand(
                     contractId = contractId,
-                    customerId = request.customerId,
-                    productVariantId = request.productVariantId,
+                    customerId = customerId,
+                    productVariantId = productVariantId,
                     bookingId = bookingId,
-                    validity = validity,
+                    validity = createValidity(request.startDate, productVariantEntity.durationInMonths),
                     sessionsTotal = null,
                 ),
             )
-            // Wait for contract projection update
-            contractSubscription.updates().blockFirst(Duration.ofSeconds(5))
+            waitForUpdateOf(contractSubscription)
 
             // 3. Create invoice
             commandGateway.sendAndWait<Any>(
                 CreateInvoiceCommand(
                     invoiceId = invoiceId,
                     bookingId = bookingId,
-                    customerId = request.customerId,
-                    productVariantId = request.productVariantId,
-                    amount = request.price,
-                    dueDate = LocalDate.now().plusDays(30),
+                    customerId = customerId,
+                    productVariantId = productVariantId,
+                    amount = productVariantEntity.price,
+                    dueDate = DueDate.inDays(30),
                     isInstallment = false,
                     installmentNumber = null,
                 ),
             )
-            // Wait for invoice projection update
-            invoiceSubscription.updates().blockFirst(Duration.ofSeconds(5))
+            waitForUpdateOf(invoiceSubscription)
 
-            // 4. If PAY_ON_SITE, mark as paid immediately
-            if (request.paymentMode == PaymentMode.PAY_ON_SITE) {
-                commandGateway.sendAndWait<Any>(
-                    MarkInvoicePaidCommand(invoiceId = invoiceId),
-                )
-                // Wait for invoice paid update
-                invoiceSubscription.updates().blockFirst(Duration.ofSeconds(5))
+            if (paidOnSite(request.paymentMode)) {
+                commandGateway.sendAndWait<Any>(MarkInvoicePaidCommand(invoiceId = invoiceId))
+                waitForUpdateOf(invoiceSubscription)
             }
 
             return MembershipSignUpResult(
@@ -137,25 +104,62 @@ class MembershipSignUpService(
             invoiceSubscription.close()
         }
     }
+
+    private fun paidOnSite(mode: PaymentMode): Boolean = mode == PaymentMode.PAY_ON_SITE
+
+    private fun createInvoiceSubscriptionQuery(): SubscriptionQueryResult<MutableList<InvoiceView>, InvoiceUpdated> =
+        queryGateway.subscriptionQuery(
+            FindAllInvoicesQuery(),
+            ResponseTypes.multipleInstancesOf(InvoiceView::class.java),
+            ResponseTypes.instanceOf(InvoiceUpdated::class.java),
+        )
+
+    private fun createContractSubscription(): SubscriptionQueryResult<MutableList<ProductContractView>, ProductContractUpdatedUpdate> =
+        queryGateway.subscriptionQuery(
+            FindAllProductContractsQuery(),
+            ResponseTypes.multipleInstancesOf(ProductContractView::class.java),
+            ResponseTypes.instanceOf(ProductContractUpdatedUpdate::class.java),
+        )
+
+    private fun createBookingSubscriptionQuery(): SubscriptionQueryResult<MutableList<BookingView>, BookingUpdatedUpdate> =
+        queryGateway.subscriptionQuery(
+            FindAllBookingsQuery(),
+            ResponseTypes.multipleInstancesOf(BookingView::class.java),
+            ResponseTypes.instanceOf(BookingUpdatedUpdate::class.java),
+        )
+
+    private fun getProductVariant(productVariantId: ProductVariantId): ProductVariantEntity {
+        val productVariant = queryGateway.query(
+            FindProductByIdQuery(productId = productVariantId),
+            ProductVariantEntity::class.java
+        ).get()
+
+        return when (productVariant) {
+            null -> throw IllegalArgumentException("Product not found")
+            else -> productVariant
+        }
+    }
+
+    private fun ensureCustomerExists(customerId: CustomerId) {
+        val customer = queryGateway.query(
+            FindCustomerByIdQuery(customerId = customerId),
+            CustomerEntity::class.java
+        ).get()
+
+        when (customer) {
+            null -> throw IllegalArgumentException("Customer not found")
+            else -> customer
+        }
+    }
+
+    private fun createValidity(startDate: LocalDate, durationInMonths: Int?): DateRange? {
+        val durationInMonths = durationInMonths
+        return when {
+            durationInMonths != null -> DateRange.toRange(startDate, durationInMonths)
+            else -> null
+        }
+    }
+
+
 }
 
-data class MembershipSignUpRequest(
-    val customerId: CustomerId,
-    val customerName: String,
-    val customerEmail: String,
-    val productVariantId: ProductVariantId,
-    val price: BigDecimal,
-    val durationMonths: Int,
-    val paymentMode: PaymentMode,
-)
-
-enum class PaymentMode {
-    PAY_ON_SITE,
-    INVOICE_EMAIL,
-}
-
-data class MembershipSignUpResult(
-    val contractId: ProductContractId,
-    val bookingId: BookingId,
-    val invoiceId: InvoiceId,
-)

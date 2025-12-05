@@ -2,7 +2,7 @@ package ch.fitnesslab.billing.adapter.http
 
 import ch.fitnesslab.billing.application.FindAllInvoicesQuery
 import ch.fitnesslab.billing.application.InvoiceProjection
-import ch.fitnesslab.billing.application.InvoiceUpdatedUpdate
+import ch.fitnesslab.billing.application.InvoiceUpdated
 import ch.fitnesslab.billing.application.InvoiceView
 import ch.fitnesslab.billing.domain.InvoiceStatus
 import ch.fitnesslab.billing.domain.commands.CancelInvoiceCommand
@@ -12,6 +12,7 @@ import ch.fitnesslab.common.types.InvoiceId
 import ch.fitnesslab.generated.api.InvoicesApi
 import ch.fitnesslab.generated.model.CancelInvoiceRequest
 import ch.fitnesslab.generated.model.InvoiceDto
+import ch.fitnesslab.utils.waitForUpdateOf
 import org.axonframework.commandhandling.gateway.CommandGateway
 import org.axonframework.messaging.responsetypes.ResponseTypes
 import org.axonframework.queryhandling.QueryGateway
@@ -70,7 +71,7 @@ class InvoicesController(
             queryGateway.subscriptionQuery(
                 FindAllInvoicesQuery(),
                 ResponseTypes.multipleInstancesOf(InvoiceView::class.java),
-                ResponseTypes.instanceOf(InvoiceUpdatedUpdate::class.java),
+                ResponseTypes.instanceOf(InvoiceUpdated::class.java),
             )
 
         try {
@@ -81,8 +82,7 @@ class InvoicesController(
                 ),
             )
 
-            // Wait for projection update
-            subscriptionQuery.updates().blockFirst(Duration.ofSeconds(5))
+            waitForUpdateOf(subscriptionQuery)
 
             return ResponseEntity.ok().build()
         } finally {
@@ -98,7 +98,7 @@ class InvoicesController(
             queryGateway.subscriptionQuery(
                 FindAllInvoicesQuery(),
                 ResponseTypes.multipleInstancesOf(InvoiceView::class.java),
-                ResponseTypes.instanceOf(InvoiceUpdatedUpdate::class.java),
+                ResponseTypes.instanceOf(InvoiceUpdated::class.java),
             )
 
         try {
@@ -108,8 +108,7 @@ class InvoicesController(
                 ),
             )
 
-            // Wait for projection update
-            subscriptionQuery.updates().blockFirst(Duration.ofSeconds(5))
+            waitForUpdateOf(subscriptionQuery)
 
             return ResponseEntity.ok().build()
         } finally {
@@ -126,7 +125,7 @@ class InvoicesController(
             queryGateway.subscriptionQuery(
                 FindAllInvoicesQuery(),
                 ResponseTypes.multipleInstancesOf(InvoiceView::class.java),
-                ResponseTypes.instanceOf(InvoiceUpdatedUpdate::class.java),
+                ResponseTypes.instanceOf(InvoiceUpdated::class.java),
             )
 
         try {
@@ -137,8 +136,7 @@ class InvoicesController(
                 ),
             )
 
-            // Wait for projection update
-            subscriptionQuery.updates().blockFirst(Duration.ofSeconds(5))
+            waitForUpdateOf(subscriptionQuery)
 
             return ResponseEntity.ok().build()
         } finally {

@@ -4,9 +4,9 @@ import ch.fitnesslab.common.types.BookingId
 import ch.fitnesslab.common.types.CustomerId
 import ch.fitnesslab.common.types.InvoiceId
 import ch.fitnesslab.common.types.ProductVariantId
+import ch.fitnesslab.membership.domain.DueDate
 import org.axonframework.modelling.command.TargetAggregateIdentifier
 import java.math.BigDecimal
-import java.time.LocalDate
 
 data class CreateInvoiceCommand(
     @TargetAggregateIdentifier
@@ -15,7 +15,7 @@ data class CreateInvoiceCommand(
     val customerId: CustomerId,
     val productVariantId: ProductVariantId?,
     val amount: BigDecimal,
-    val dueDate: LocalDate,
+    val dueDate: DueDate,
     val isInstallment: Boolean = false,
     val installmentNumber: Int? = null,
 )

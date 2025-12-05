@@ -12,6 +12,7 @@ import ch.fitnesslab.common.types.BookingId
 import ch.fitnesslab.common.types.CustomerId
 import ch.fitnesslab.common.types.InvoiceId
 import ch.fitnesslab.common.types.ProductVariantId
+import ch.fitnesslab.membership.domain.DueDate
 import org.axonframework.commandhandling.CommandHandler
 import org.axonframework.eventsourcing.EventSourcingHandler
 import org.axonframework.modelling.command.AggregateIdentifier
@@ -29,7 +30,7 @@ class Invoice() {
     private lateinit var customerId: CustomerId
     private var productVariantId: ProductVariantId? = null
     private lateinit var amount: BigDecimal
-    private lateinit var dueDate: LocalDate
+    private lateinit var dueDate: DueDate
     private lateinit var status: InvoiceStatus
     private var isInstallment: Boolean = false
     private var installmentNumber: Int? = null

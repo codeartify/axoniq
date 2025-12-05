@@ -572,48 +572,33 @@ components:
     ProductBehaviorConfig:
       type: object
       required:
-        - isTimeBased
-        - isSessionBased
         - canBePaused
-        - autoRenew
-        - contributesToMembershipStatus
+        - renewalLeadTimeDays
+        - maxActivePerCustomer
+        - durationInMonths
+        - numberOfSessions
       properties:
-        isTimeBased:
-          type: boolean
-          description: Indicates if the product is time-based (has a validity period).
-        isSessionBased:
-          type: boolean
-          description: Indicates if the product is session-based (limited number of sessions).
         canBePaused:
           type: boolean
           description: Whether the contract for this product can be paused.
-        autoRenew:
-          type: boolean
-          description: Whether the contract auto-renews before expiry.
         renewalLeadTimeDays:
           type: integer
           nullable: true
           description: >
             Number of days before expiry when auto-renewal should be triggered.
             Null if auto-renewal is not time-based or not applicable.
-        contributesToMembershipStatus:
-          type: boolean
-          description: >
-            Whether an active contract of this product contributes to the customer's
-            overall membership status.
         maxActivePerCustomer:
           type: integer
           nullable: true
           description: >
             Maximum number of concurrently active contracts of this product (or group)
             allowed per customer. Null means no explicit limit.
-        exclusivityGroup:
-          type: string
+        durationInMonths:
+            type: integer
+            nullable: true
+        numberOfSessions:
+          type: integer
           nullable: true
-          description: >
-            Logical group name used to enforce exclusivity rules between products
-            (e.g. "FITNESS", "RUNNING_SCHOOL"). Null if no exclusivity group applies.
-
     ProductCreationResponse:
       type: object
       properties:
@@ -673,29 +658,20 @@ components:
       type: object
       required:
         - customerId
-        - customerName
-        - customerEmail
         - productVariantId
-        - price
-        - durationMonths
         - paymentMode
+        - startDate
       properties:
         customerId:
           type: string
-        customerName:
-          type: string
-        customerEmail:
-          type: string
         productVariantId:
           type: string
-        price:
-          type: number
-          format: decimal
-        durationMonths:
-          type: integer
         paymentMode:
           type: string
           enum: [ PAY_ON_SITE, INVOICE_EMAIL ]
+        startDate:
+          type: string
+          format: date
     MembershipSignUpResultDto:
       type: object
       required:

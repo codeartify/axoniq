@@ -1,9 +1,11 @@
 package ch.fitnesslab.product.adapter.http
 
 import ch.fitnesslab.generated.model.*
+import ch.fitnesslab.membership.domain.PaymentMode
 import org.assertj.core.api.AssertionsForClassTypes.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.http.MediaType
+import java.time.LocalDate
 
 class MembershipIT : IntegrationTest() {
 
@@ -27,8 +29,8 @@ class MembershipIT : IntegrationTest() {
             phoneNumber = registerCustomerRequest.phoneNumber
         )
 
-        val customerId = createCustomer(registerCustomerRequest)
-        val customerFromGET = getCustomer(customerId)
+        val customerIdWhoWantsToSignUpForMembership = createCustomer(registerCustomerRequest)
+        val customerFromGET = getCustomer(customerIdWhoWantsToSignUpForMembership)
 
         assertThat(customerFromGET)
             .usingRecursiveComparison()
@@ -51,19 +53,16 @@ class MembershipIT : IntegrationTest() {
             requiresMembership = createProductRequest.requiresMembership,
             price = createProductRequest.price,
             behavior = ProductBehaviorConfig(
-                isTimeBased = createProductRequest.behavior.isTimeBased,
-                isSessionBased = createProductRequest.behavior.isSessionBased,
                 canBePaused = createProductRequest.behavior.canBePaused,
-                autoRenew = createProductRequest.behavior.autoRenew,
                 renewalLeadTimeDays = createProductRequest.behavior.renewalLeadTimeDays,
-                contributesToMembershipStatus = createProductRequest.behavior.contributesToMembershipStatus,
                 maxActivePerCustomer = createProductRequest.behavior.maxActivePerCustomer,
-                exclusivityGroup = createProductRequest.behavior.exclusivityGroup,
+                durationInMonths = createProductRequest.behavior.durationInMonths,
+                numberOfSessions = createProductRequest.behavior.numberOfSessions
             )
 
         )
-        val productId = createProduct(createProductRequest)
-        val productViewFromGET = getProduct(productId)
+        val subscriptionId = createProduct(createProductRequest)
+        val productViewFromGET = getProduct(subscriptionId)
 
         assertThat(productViewFromGET)
             .usingRecursiveComparison()
@@ -72,21 +71,19 @@ class MembershipIT : IntegrationTest() {
                 expectedProductView
             )
 
-        /**
+        // 3) Sign up membership via /api/memberships/sign-up
+     /**
         webTestClient.post()
         .uri("/api/memberships/sign-up")
         .contentType(MediaType.APPLICATION_JSON)
         .bodyValue(
-        mapOf(
-        "customerId" to createdCustomerId,
-        "customerName" to "$firstName $lastName",
-        "customerEmail" to email,
-        "productVariantId" to productView.productId,
-        "price" to productView.productId,
-        "durationMonths" to 12,
-        "paymentMode" to "PAY_ON_SITE"
-        )
-        )
+            MembershipSignUpRequestDto(
+                customerId= customerIdWhoWantsToSignUpForMembership!!,
+                productVariantId = productViewFromGET.productId!!,
+                paymentMode = MembershipSignUpRequestDto.PaymentMode.PAY_ON_SITE,
+                startDate = LocalDate.parse("2023-01-01")
+
+        ))
         .exchange()
         .expectStatus().isOk
         .expectBody()
@@ -115,7 +112,7 @@ class MembershipIT : IntegrationTest() {
         // At least one invoice must match the invoice from the membership sign-up
         assert(id == createdInvoiceId)
         }
-         */
+        */
     }
 
     private fun getProduct(productId: String?): ProductView {

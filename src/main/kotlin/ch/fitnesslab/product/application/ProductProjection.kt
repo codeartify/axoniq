@@ -4,7 +4,7 @@ import ch.fitnesslab.common.types.ProductVariantId
 import ch.fitnesslab.generated.model.ProductView
 import ch.fitnesslab.product.domain.events.ProductCreatedEvent
 import ch.fitnesslab.product.domain.events.ProductUpdatedEvent
-import ch.fitnesslab.product.infrastructure.ProductEntity
+import ch.fitnesslab.product.infrastructure.ProductVariantEntity
 import ch.fitnesslab.product.infrastructure.ProductRepository
 import org.axonframework.config.ProcessingGroup
 import org.axonframework.eventhandling.EventHandler
@@ -21,7 +21,7 @@ class ProductProjection(
     @EventHandler
     fun on(event: ProductCreatedEvent) {
         val entity =
-            ProductEntity(
+            ProductVariantEntity(
                 productId = event.productId.value,
                 code = event.code,
                 name = event.name,
@@ -29,14 +29,11 @@ class ProductProjection(
                 audience = event.audience,
                 requiresMembership = event.requiresMembership,
                 price = event.price,
-                isTimeBased = event.behavior.isTimeBased,
-                isSessionBased = event.behavior.isSessionBased,
                 canBePaused = event.behavior.canBePaused,
-                autoRenew = event.behavior.autoRenew,
+                durationInMonths = event.behavior.durationInMonths,
                 renewalLeadTimeDays = event.behavior.renewalLeadTimeDays,
-                contributesToMembershipStatus = event.behavior.contributesToMembershipStatus,
                 maxActivePerCustomer = event.behavior.maxActivePerCustomer,
-                exclusivityGroup = event.behavior.exclusivityGroup,
+                numberOfSessions = event.behavior.numberOfSessions
             )
         productRepository.save(entity)
 
@@ -51,7 +48,7 @@ class ProductProjection(
     fun on(event: ProductUpdatedEvent) {
         productRepository.findById(event.productId.value).ifPresent { existing ->
             val updated =
-                ProductEntity(
+                ProductVariantEntity(
                     productId = existing.productId,
                     code = event.code,
                     name = event.name,
@@ -59,14 +56,9 @@ class ProductProjection(
                     audience = event.audience,
                     requiresMembership = event.requiresMembership,
                     price = event.price,
-                    isTimeBased = event.behavior.isTimeBased,
-                    isSessionBased = event.behavior.isSessionBased,
                     canBePaused = event.behavior.canBePaused,
-                    autoRenew = event.behavior.autoRenew,
                     renewalLeadTimeDays = event.behavior.renewalLeadTimeDays,
-                    contributesToMembershipStatus = event.behavior.contributesToMembershipStatus,
                     maxActivePerCustomer = event.behavior.maxActivePerCustomer,
-                    exclusivityGroup = event.behavior.exclusivityGroup,
                 )
             productRepository.save(updated)
 
@@ -101,25 +93,22 @@ class ProductProjection(
 
     fun findAll(): List<ProductView> = productRepository.findAll().map { toProductView(it) }
 
-    private fun toProductView(productEntity: ProductEntity) =
+    private fun toProductView(productVariantEntity: ProductVariantEntity) =
         ProductView(
-            productId = productEntity.productId.toString(),
-            code = productEntity.code,
-            name = productEntity.name,
-            productType = productEntity.productType,
-            audience = productEntity.audience.name,
-            requiresMembership = productEntity.requiresMembership,
-            price = productEntity.price,
+            productId = productVariantEntity.productId.toString(),
+            code = productVariantEntity.code,
+            name = productVariantEntity.name,
+            productType = productVariantEntity.productType,
+            audience = productVariantEntity.audience.name,
+            requiresMembership = productVariantEntity.requiresMembership,
+            price = productVariantEntity.price,
             behavior =
                 ch.fitnesslab.generated.model.ProductBehaviorConfig(
-                    isTimeBased = productEntity.isTimeBased,
-                    isSessionBased = productEntity.isSessionBased,
-                    canBePaused = productEntity.canBePaused,
-                    autoRenew = productEntity.autoRenew,
-                    renewalLeadTimeDays = productEntity.renewalLeadTimeDays,
-                    contributesToMembershipStatus = productEntity.contributesToMembershipStatus,
-                    maxActivePerCustomer = productEntity.maxActivePerCustomer,
-                    exclusivityGroup = productEntity.exclusivityGroup,
+                    canBePaused = productVariantEntity.canBePaused,
+                    renewalLeadTimeDays = productVariantEntity.renewalLeadTimeDays,
+                    maxActivePerCustomer = productVariantEntity.maxActivePerCustomer,
+                    durationInMonths = productVariantEntity.durationInMonths,
+                    numberOfSessions = productVariantEntity.numberOfSessions
                 ),
         )
 }

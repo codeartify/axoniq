@@ -12,14 +12,13 @@ import ch.fitnesslab.product.domain.ProductAudience
 import ch.fitnesslab.product.domain.ProductBehaviorConfig
 import ch.fitnesslab.product.domain.commands.CreateProductCommand
 import ch.fitnesslab.product.domain.commands.UpdateProductCommand
+import ch.fitnesslab.utils.waitForUpdateOf
 import org.axonframework.commandhandling.gateway.CommandGateway
 import org.axonframework.messaging.responsetypes.ResponseTypes
 import org.axonframework.queryhandling.QueryGateway
-import org.axonframework.queryhandling.SubscriptionQueryResult
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
-import java.time.Duration
 
 @RestController
 @RequestMapping("/api/products")
@@ -53,19 +52,16 @@ class ProductController(
                     price = request.price,
                     behavior =
                         ProductBehaviorConfig(
-                            isTimeBased = request.behavior.isTimeBased,
-                            isSessionBased = request.behavior.isSessionBased,
                             canBePaused = request.behavior.canBePaused,
-                            autoRenew = request.behavior.autoRenew,
                             renewalLeadTimeDays = request.behavior.renewalLeadTimeDays,
-                            contributesToMembershipStatus = request.behavior.contributesToMembershipStatus,
                             maxActivePerCustomer = request.behavior.maxActivePerCustomer,
-                            exclusivityGroup = request.behavior.exclusivityGroup,
+                            durationInMonths = request.behavior.durationInMonths,
+                            numberOfSessions = request.behavior.numberOfSessions
                         ),
                 )
             commandGateway.sendAndWait<Any>(command)
 
-            waitForProjectionUpdate(subscriptionQuery)
+            waitForUpdateOf(subscriptionQuery)
 
             return ResponseEntity
                 .status(HttpStatus.CREATED)
@@ -114,20 +110,17 @@ class ProductController(
                     price = request.price,
                     behavior =
                         ProductBehaviorConfig(
-                            isTimeBased = request.behavior.isTimeBased,
-                            isSessionBased = request.behavior.isSessionBased,
                             canBePaused = request.behavior.canBePaused,
-                            autoRenew = request.behavior.autoRenew,
                             renewalLeadTimeDays = request.behavior.renewalLeadTimeDays,
-                            contributesToMembershipStatus = request.behavior.contributesToMembershipStatus,
                             maxActivePerCustomer = request.behavior.maxActivePerCustomer,
-                            exclusivityGroup = request.behavior.exclusivityGroup,
+                            durationInMonths = request.behavior.durationInMonths,
+                            numberOfSessions = request.behavior.numberOfSessions
                         ),
                 )
 
             commandGateway.sendAndWait<Any>(command)
 
-            waitForProjectionUpdate(subscriptionQuery)
+            waitForUpdateOf(subscriptionQuery)
 
             return ResponseEntity.ok().build()
         } finally {
@@ -135,7 +128,4 @@ class ProductController(
         }
     }
 
-    private fun waitForProjectionUpdate(subscriptionQuery: SubscriptionQueryResult<MutableList<ProductView>, ProductUpdatedUpdate>?) {
-        subscriptionQuery?.updates()?.blockFirst(Duration.ofSeconds(5))
-    }
 }

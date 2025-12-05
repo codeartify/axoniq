@@ -15,34 +15,14 @@ import ch.fitnesslab.product.domain.ProductContractStatus
 import ch.fitnesslab.product.domain.commands.PauseProductContractCommand
 import ch.fitnesslab.product.domain.commands.PauseReason
 import ch.fitnesslab.product.domain.commands.ResumeProductContractCommand
+import ch.fitnesslab.utils.waitForUpdateOf
 import org.axonframework.commandhandling.gateway.CommandGateway
 import org.axonframework.messaging.responsetypes.ResponseTypes
 import org.axonframework.queryhandling.QueryGateway
 import org.axonframework.queryhandling.SubscriptionQueryResult
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
-import java.time.Duration
 import java.time.LocalDate
-
-private fun toDto(productContractView: ProductContractView) =
-    ProductContractDetailDto(
-        contractId = productContractView.contractId,
-        customerId = productContractView.customerId,
-        productVariantId = productContractView.productVariantId,
-        bookingId = productContractView.bookingId,
-        status = productContractView.status.name,
-        validity = productContractView.validity?.let { DateRangeDto(it.start, it.end) },
-        sessionsTotal = productContractView.sessionsTotal,
-        sessionsUsed = productContractView.sessionsUsed,
-        pauseHistory =
-            productContractView.pauseHistory.map {
-                PauseHistoryEntryDto(
-                    pauseRange = DateRangeDto(it.pauseRange.start, it.pauseRange.end),
-                    reason = it.reason.name,
-                )
-            },
-        canBePaused = productContractView.status == ProductContractStatus.ACTIVE,
-    )
 
 @RestController
 @RequestMapping("/api/product-contracts")
@@ -65,7 +45,6 @@ class ProductContractController(
             ResponseEntity.ok(toDto(contract))
         }
     }
-
     @PostMapping("/{contractId}/pause")
     override fun pauseContract(
         @PathVariable contractId: String,
@@ -78,11 +57,32 @@ class ProductContractController(
 
             commandGateway.sendAndWait<Any>(command)
 
-            waitForProjectionUpdate(subscriptionQuery)
+            waitForUpdateOf(subscriptionQuery)
 
             return ResponseEntity.ok().build()
         } finally {
-            subscriptionQuery?.close()
+            subscriptionQuery.close()
+        }
+    }
+
+    @PostMapping("/{contractId}/resume")
+    override fun resumeContract(
+        @PathVariable contractId: String,
+    ): ResponseEntity<Unit> {
+        val resumeSubscriptionQuery = createResumeSubscriptionQuery()
+
+        try {
+            val productContractId = ProductContractId.from(contractId)
+
+            val command = ResumeProductContractCommand(productContractId)
+
+            commandGateway.sendAndWait<Any>(command)
+
+            waitForUpdateOf(resumeSubscriptionQuery)
+
+            return ResponseEntity.ok().build()
+        } finally {
+            resumeSubscriptionQuery.close()
         }
     }
 
@@ -106,7 +106,7 @@ class ProductContractController(
         return command
     }
 
-    private fun createFindAllProductContractsQuery(): SubscriptionQueryResult<MutableList<ProductContractView>, ProductContractUpdatedUpdate>? =
+    private fun createFindAllProductContractsQuery(): SubscriptionQueryResult<MutableList<ProductContractView>, ProductContractUpdatedUpdate> =
         queryGateway.subscriptionQuery(
             FindAllProductContractsQuery(),
             ResponseTypes.multipleInstancesOf(ProductContractView::class.java),
@@ -127,39 +127,30 @@ class ProductContractController(
             end = LocalDate.parse(endDate.toString()),
         )
 
-    @PostMapping("/{contractId}/resume")
-    override fun resumeContract(
-        @PathVariable contractId: String,
-    ): ResponseEntity<Unit> {
-        val resumeSubscriptionQuery = createResumeSubscriptionQuery()
-
-        try {
-            val productContractId = ProductContractId.from(contractId)
-
-            val command = ResumeProductContractCommand(productContractId)
-
-            commandGateway.sendAndWait<Any>(command)
-
-            waitForProjectionUpdate(resumeSubscriptionQuery)
-
-            return ResponseEntity.ok().build()
-        } finally {
-            resumeSubscriptionQuery?.close()
-        }
-    }
-
-    private fun createResumeSubscriptionQuery(): SubscriptionQueryResult<MutableList<ProductContractView>, ProductContractUpdatedUpdate>? =
+    private fun createResumeSubscriptionQuery(): SubscriptionQueryResult<MutableList<ProductContractView>, ProductContractUpdatedUpdate> =
         queryGateway.subscriptionQuery(
             FindAllProductContractsQuery(),
             ResponseTypes.multipleInstancesOf(ProductContractView::class.java),
             ResponseTypes.instanceOf(ProductContractUpdatedUpdate::class.java),
         )
 
-    private fun waitForProjectionUpdate(
-        subscriptionQuery: SubscriptionQueryResult<MutableList<ProductContractView>, ProductContractUpdatedUpdate>?,
-    ) {
-        subscriptionQuery
-            ?.updates()
-            ?.blockFirst(Duration.ofSeconds(5))
-    }
+    private fun toDto(productContractView: ProductContractView) =
+        ProductContractDetailDto(
+            contractId = productContractView.contractId,
+            customerId = productContractView.customerId,
+            productVariantId = productContractView.productVariantId,
+            bookingId = productContractView.bookingId,
+            status = productContractView.status.name,
+            validity = productContractView.validity?.let { DateRangeDto(it.start, it.end) },
+            sessionsTotal = productContractView.sessionsTotal,
+            sessionsUsed = productContractView.sessionsUsed,
+            pauseHistory =
+                productContractView.pauseHistory.map {
+                    PauseHistoryEntryDto(
+                        pauseRange = DateRangeDto(it.pauseRange.start, it.pauseRange.end),
+                        reason = it.reason.name,
+                    )
+                },
+            canBePaused = productContractView.status == ProductContractStatus.ACTIVE,
+        )
 }

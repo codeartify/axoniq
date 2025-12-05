@@ -6,13 +6,10 @@
   "requiresMembership": true,
   "price": 999.00,
   "behavior": {
-    "isTimeBased": true,
-    "isSessionBased": false,
     "canBePaused": true,
-    "autoRenew": true,
-    "contributesToMembershipStatus": true,
     "renewalLeadTimeDays": 90.00,
     "maxActivePerCustomer": 1,
-    "exclusivityGroup": null
+    "durationInMonths": 12,
+    "numberOfSessions": null
   }
 }

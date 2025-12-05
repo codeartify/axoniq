@@ -5,8 +5,6 @@ import ch.fitnesslab.customers.domain.events.CustomerRegisteredEvent
 import ch.fitnesslab.customers.domain.events.CustomerUpdatedEvent
 import ch.fitnesslab.customers.infrastructure.CustomerEntity
 import ch.fitnesslab.customers.infrastructure.CustomerRepository
-import ch.fitnesslab.generated.model.AddressDto
-import ch.fitnesslab.generated.model.CustomerView
 import org.axonframework.config.ProcessingGroup
 import org.axonframework.eventhandling.EventHandler
 import org.axonframework.queryhandling.QueryHandler
@@ -74,39 +72,16 @@ class CustomerProjection(
     }
 
     @QueryHandler
-    fun handle(query: FindAllCustomersQuery): List<CustomerView> = findAll()
+    fun handle(query: FindAllCustomersQuery): List<CustomerEntity> = findAll()
 
     @QueryHandler
-    fun handle(query: FindCustomerByIdQuery): CustomerView? = findById(query.customerId)
+    fun handle(query: FindCustomerByIdQuery): CustomerEntity? = findById(query.customerId)
 
-    fun findById(customerId: CustomerId): CustomerView? =
+    fun findById(customerId: CustomerId): CustomerEntity? =
         customerRepository
             .findById(customerId.value)
-            .map { it.toCustomerView() }
             .orElse(null)
 
-    fun findAll(): List<CustomerView> = customerRepository.findAll().map { it.toCustomerView() }
+    fun findAll(): List<CustomerEntity> = customerRepository.findAll()
 
-    private fun CustomerEntity.toCustomerView() =
-        CustomerView(
-            customerId = this.customerId.toString(),
-            salutation =
-                this.salutation.let {
-                    ch.fitnesslab.generated.model.Salutation
-                        .forValue(it.name)
-                },
-            firstName = this.firstName,
-            lastName = this.lastName,
-            dateOfBirth = this.dateOfBirth,
-            address =
-                AddressDto(
-                    street = this.street,
-                    houseNumber = this.houseNumber,
-                    postalCode = this.postalCode,
-                    city = this.city,
-                    country = this.country,
-                ),
-            email = this.email,
-            phoneNumber = this.phoneNumber,
-        )
 }

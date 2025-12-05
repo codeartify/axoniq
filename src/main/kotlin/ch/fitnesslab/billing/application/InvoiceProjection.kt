@@ -38,7 +38,7 @@ class InvoiceProjection(
                 bookingId = event.bookingId.value,
                 productVariantId = event.productVariantId?.value,
                 amount = event.amount,
-                dueDate = event.dueDate,
+                dueDate = event.dueDate.value,
                 status = event.status,
                 isInstallment = event.isInstallment,
                 installmentNumber = event.installmentNumber,
@@ -61,7 +61,7 @@ class InvoiceProjection(
         queryUpdateEmitter.emit(
             FindAllInvoicesQuery::class.java,
             { true },
-            InvoiceUpdatedUpdate(event.invoiceId.value.toString()),
+            InvoiceUpdated(event.invoiceId.value.toString()),
         )
     }
 
@@ -86,7 +86,7 @@ class InvoiceProjection(
             queryUpdateEmitter.emit(
                 FindAllInvoicesQuery::class.java,
                 { true },
-                InvoiceUpdatedUpdate(event.invoiceId.value.toString()),
+                InvoiceUpdated(event.invoiceId.value.toString()),
             )
         }
     }
@@ -112,7 +112,7 @@ class InvoiceProjection(
             queryUpdateEmitter.emit(
                 FindAllInvoicesQuery::class.java,
                 { true },
-                InvoiceUpdatedUpdate(event.invoiceId.value.toString()),
+                InvoiceUpdated(event.invoiceId.value.toString()),
             )
         }
     }
@@ -138,7 +138,7 @@ class InvoiceProjection(
             queryUpdateEmitter.emit(
                 FindAllInvoicesQuery::class.java,
                 { true },
-                InvoiceUpdatedUpdate(event.invoiceId.value.toString()),
+                InvoiceUpdated(event.invoiceId.value.toString()),
             )
         }
     }
