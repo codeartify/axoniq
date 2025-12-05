@@ -1,8 +1,7 @@
 package ch.fitnesslab.product.application
 
 import ch.fitnesslab.common.types.ProductVariantId
-import ch.fitnesslab.product.domain.ProductAudience
-import ch.fitnesslab.product.domain.ProductBehaviorConfig
+import ch.fitnesslab.generated.model.ProductView
 import ch.fitnesslab.product.domain.events.ProductCreatedEvent
 import ch.fitnesslab.product.domain.events.ProductUpdatedEvent
 import ch.fitnesslab.product.infrastructure.ProductEntity
@@ -12,7 +11,6 @@ import org.axonframework.eventhandling.EventHandler
 import org.axonframework.queryhandling.QueryHandler
 import org.axonframework.queryhandling.QueryUpdateEmitter
 import org.springframework.stereotype.Component
-import java.math.BigDecimal
 
 @ProcessingGroup("products")
 @Component
@@ -89,50 +87,39 @@ class ProductProjection(
     fun handle(query: FindProductByIdQuery): ProductView? =
         productRepository
             .findById(query.productId.value)
-            .map { it.toProductView() }
+            .map { toProductView(it) }
             .orElse(null)
 
     @QueryHandler
-    fun handle(query: FindAllProductsQuery): List<ProductView> = productRepository.findAll().map { it.toProductView() }
+    fun handle(query: FindAllProductsQuery): List<ProductView> = productRepository.findAll().map { toProductView(it) }
 
     fun findById(productId: ProductVariantId): ProductView? =
         productRepository
             .findById(productId.value)
-            .map { it.toProductView() }
+            .map { toProductView(it) }
             .orElse(null)
 
-    fun findAll(): List<ProductView> = productRepository.findAll().map { it.toProductView() }
+    fun findAll(): List<ProductView> = productRepository.findAll().map { toProductView(it) }
 
-    private fun ProductEntity.toProductView() =
+    private fun toProductView(productEntity: ProductEntity) =
         ProductView(
-            productId = this.productId.toString(),
-            code = this.code,
-            name = this.name,
-            productType = this.productType,
-            audience = this.audience,
-            requiresMembership = this.requiresMembership,
-            price = this.price,
+            productId = productEntity.productId.toString(),
+            code = productEntity.code,
+            name = productEntity.name,
+            productType = productEntity.productType,
+            audience = productEntity.audience.name,
+            requiresMembership = productEntity.requiresMembership,
+            price = productEntity.price,
             behavior =
-                ProductBehaviorConfig(
-                    isTimeBased = this.isTimeBased,
-                    isSessionBased = this.isSessionBased,
-                    canBePaused = this.canBePaused,
-                    autoRenew = this.autoRenew,
-                    renewalLeadTimeDays = this.renewalLeadTimeDays,
-                    contributesToMembershipStatus = this.contributesToMembershipStatus,
-                    maxActivePerCustomer = this.maxActivePerCustomer,
-                    exclusivityGroup = this.exclusivityGroup,
+                ch.fitnesslab.generated.model.ProductBehaviorConfig(
+                    isTimeBased = productEntity.isTimeBased,
+                    isSessionBased = productEntity.isSessionBased,
+                    canBePaused = productEntity.canBePaused,
+                    autoRenew = productEntity.autoRenew,
+                    renewalLeadTimeDays = productEntity.renewalLeadTimeDays,
+                    contributesToMembershipStatus = productEntity.contributesToMembershipStatus,
+                    maxActivePerCustomer = productEntity.maxActivePerCustomer,
+                    exclusivityGroup = productEntity.exclusivityGroup,
                 ),
         )
 }
-
-data class ProductView(
-    val productId: String,
-    val code: String,
-    val name: String,
-    val productType: String,
-    val audience: ProductAudience,
-    val requiresMembership: Boolean,
-    val price: BigDecimal,
-    val behavior: ProductBehaviorConfig,
-)

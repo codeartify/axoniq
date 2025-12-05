@@ -1,18 +1,9 @@
 package ch.fitnesslab.product.adapter.http
 
-import ch.fitnesslab.generated.model.Audience
-import ch.fitnesslab.generated.model.CreateProductRequest
-import ch.fitnesslab.generated.model.CustomerRegistrationResponse
-import ch.fitnesslab.generated.model.CustomerView
-import ch.fitnesslab.generated.model.ProductCreationResponse
-import ch.fitnesslab.generated.model.RegisterCustomerRequest
-import ch.fitnesslab.product.application.ProductView
+import ch.fitnesslab.generated.model.*
 import org.assertj.core.api.AssertionsForClassTypes.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.http.MediaType
-import java.math.BigDecimal
-import java.util.*
-import kotlin.jvm.java
 
 class MembershipIT : IntegrationTest() {
 
@@ -47,23 +38,9 @@ class MembershipIT : IntegrationTest() {
 
         // 2) Create Subscription via /api/products
 
-        val createProductRequest = CreateProductRequest(
-            code = "ADDON",
-            name = "Locker Addon",
-            productType = "ADDON",
-            audience = Audience.BOTH,
-            requiresMembership = true,
-            price = BigDecimal.valueOf(49.90),
-            behavior = ch.fitnesslab.generated.model.ProductBehaviorConfig(
-                isTimeBased = false,
-                isSessionBased = false,
-                canBePaused = false,
-                autoRenew = false,
-                contributesToMembershipStatus = false,
-                renewalLeadTimeDays = null,
-                maxActivePerCustomer = null,
-                exclusivityGroup = null
-            )
+        val createProductRequest = jsonLoader.loadObjectFromFile(
+            "http/products/product1.json",
+            CreateProductRequest::class.java,
         )
 
         val productId = webTestClient.post()
@@ -87,8 +64,31 @@ class MembershipIT : IntegrationTest() {
             .returnResult()
             .responseBody!!
 
-        assertThat(productViewFromGET.productId)
-            .isEqualTo(productId)
+        assertThat(productViewFromGET)
+            .usingRecursiveComparison()
+            .ignoringFields("productId")
+            .isEqualTo(
+                ProductView(
+                    productId = productViewFromGET.productId,
+                    code = createProductRequest.code,
+                    name = createProductRequest.name,
+                    productType = createProductRequest.productType,
+                    audience = createProductRequest.audience.name,
+                    requiresMembership = createProductRequest.requiresMembership,
+                    price = createProductRequest.price,
+                    behavior = ProductBehaviorConfig(
+                        isTimeBased = createProductRequest.behavior.isTimeBased,
+                        isSessionBased = createProductRequest.behavior.isSessionBased,
+                        canBePaused = createProductRequest.behavior.canBePaused,
+                        autoRenew = createProductRequest.behavior.autoRenew,
+                        renewalLeadTimeDays = createProductRequest.behavior.renewalLeadTimeDays,
+                        contributesToMembershipStatus = createProductRequest.behavior.contributesToMembershipStatus,
+                        maxActivePerCustomer = createProductRequest.behavior.maxActivePerCustomer,
+                        exclusivityGroup = createProductRequest.behavior.exclusivityGroup,
+                    )
+
+                )
+            )
 
         /**
         webTestClient.post()

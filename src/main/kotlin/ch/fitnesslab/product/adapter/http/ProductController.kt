@@ -3,11 +3,11 @@ package ch.fitnesslab.product.adapter.http
 import ch.fitnesslab.common.types.ProductVariantId
 import ch.fitnesslab.generated.model.CreateProductRequest
 import ch.fitnesslab.generated.model.ProductCreationResponse
+import ch.fitnesslab.generated.model.ProductView
 import ch.fitnesslab.generated.model.UpdateProductRequest
 import ch.fitnesslab.product.application.FindAllProductsQuery
 import ch.fitnesslab.product.application.ProductProjection
 import ch.fitnesslab.product.application.ProductUpdatedUpdate
-import ch.fitnesslab.product.application.ProductView
 import ch.fitnesslab.product.domain.ProductAudience
 import ch.fitnesslab.product.domain.ProductBehaviorConfig
 import ch.fitnesslab.product.domain.commands.CreateProductCommand
