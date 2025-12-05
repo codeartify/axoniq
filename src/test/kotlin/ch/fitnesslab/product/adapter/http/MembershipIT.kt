@@ -1,19 +1,18 @@
 package ch.fitnesslab.product.adapter.http
 
-import ch.fitnesslab.generated.model.AddressDto
 import ch.fitnesslab.generated.model.Audience
 import ch.fitnesslab.generated.model.CreateProductRequest
 import ch.fitnesslab.generated.model.CustomerRegistrationResponse
 import ch.fitnesslab.generated.model.CustomerView
+import ch.fitnesslab.generated.model.ProductCreationResponse
 import ch.fitnesslab.generated.model.RegisterCustomerRequest
-import ch.fitnesslab.generated.model.Salutation
 import ch.fitnesslab.product.application.ProductView
 import org.assertj.core.api.AssertionsForClassTypes.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.http.MediaType
 import java.math.BigDecimal
-import java.time.LocalDate
 import java.util.*
+import kotlin.jvm.java
 
 class MembershipIT : IntegrationTest() {
 
@@ -47,7 +46,7 @@ class MembershipIT : IntegrationTest() {
 
 
         // 2) Create Subscription via /api/products
-        /**
+
         val createProductRequest = CreateProductRequest(
             code = "ADDON",
             name = "Locker Addon",
@@ -67,19 +66,20 @@ class MembershipIT : IntegrationTest() {
             )
         )
 
-        val productViewFromPost = webTestClient.post()
+        val productId = webTestClient.post()
             .uri("/api/products")
             .contentType(MediaType.APPLICATION_JSON)
             .bodyValue(createProductRequest)
             .exchange()
             .expectStatus().isCreated
-            .expectBody(ProductView::class.java)
+            .expectBody(ProductCreationResponse::class.java)
             .returnResult()
             .responseBody!!
+            .productId
 
 
         val productViewFromGET = webTestClient.get()
-            .uri("/api/products/${productViewFromPost.productId}")
+            .uri("/api/products/$productId")
             .accept(MediaType.APPLICATION_JSON)
             .exchange()
             .expectStatus().isOk
@@ -87,9 +87,10 @@ class MembershipIT : IntegrationTest() {
             .returnResult()
             .responseBody!!
 
-        assertThat(productViewFromGET)
-            .isEqualTo(productViewFromPost)
+        assertThat(productViewFromGET.productId)
+            .isEqualTo(productId)
 
+        /**
         webTestClient.post()
         .uri("/api/memberships/sign-up")
         .contentType(MediaType.APPLICATION_JSON)
