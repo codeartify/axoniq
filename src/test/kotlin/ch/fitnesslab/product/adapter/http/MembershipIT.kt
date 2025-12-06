@@ -5,15 +5,18 @@ import ch.fitnesslab.billing.domain.InvoiceStatus
 import ch.fitnesslab.billing.infrastructure.InvoiceEmailService
 import ch.fitnesslab.billing.infrastructure.InvoicePdfGenerator
 import ch.fitnesslab.generated.model.*
+import com.itextpdf.kernel.pdf.PdfDocument
+import com.itextpdf.kernel.pdf.PdfReader
+import com.itextpdf.kernel.pdf.canvas.parser.PdfTextExtractor
 import jakarta.mail.BodyPart
 import jakarta.mail.Multipart
+import jakarta.mail.Part
 import jakarta.mail.internet.MimeMessage
 import jakarta.mail.internet.MimeMultipart
 import org.assertj.core.api.AssertionsForClassTypes.assertThat
 import org.junit.jupiter.api.Test
 import org.mockito.ArgumentCaptor
 import org.mockito.Mockito.`when`
-import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.verify
 import org.springframework.http.MediaType
@@ -21,15 +24,16 @@ import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.mail.javamail.JavaMailSenderImpl
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
+import java.io.ByteArrayInputStream
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 class MembershipIT : IntegrationTest() {
-
-    @MockitoBean
-    lateinit var invoicePdfGenerator: InvoicePdfGenerator
-
     @MockitoBean
     lateinit var mailSender: JavaMailSender
+
+    @MockitoSpyBean
+    lateinit var invoicePdfGenerator: InvoicePdfGenerator
 
     @MockitoSpyBean
     lateinit var invoiceEmailService: InvoiceEmailService
@@ -39,9 +43,6 @@ class MembershipIT : IntegrationTest() {
         val realMailSender = JavaMailSenderImpl()
         val mimeMessage: MimeMessage = realMailSender.createMimeMessage()
         `when`(mailSender.createMimeMessage()).thenReturn(mimeMessage)
-
-        `when`(invoicePdfGenerator.generateInvoicePdf(any(), any(), any()))
-            .thenReturn("dummy-pdf".toByteArray())
 
         // 1) Register a customer via /api/customers
         val registerCustomerRequest: RegisterCustomerRequest =
@@ -65,10 +66,7 @@ class MembershipIT : IntegrationTest() {
         val customerIdWhoWantsToSignUpForMembership = createCustomer(registerCustomerRequest)
         val customerFromGET = getCustomer(customerIdWhoWantsToSignUpForMembership)
 
-        assertThat(customerFromGET)
-            .usingRecursiveComparison()
-            .ignoringFields("customerId")
-            .isEqualTo(expectedCustomer)
+        assertThat(customerFromGET).usingRecursiveComparison().ignoringFields("customerId").isEqualTo(expectedCustomer)
 
         // 2) Create Subscription via /api/products
         val createProductRequest =
@@ -77,7 +75,8 @@ class MembershipIT : IntegrationTest() {
                 CreateProductRequest::class.java,
             )
 
-        val expectedProductView = ProductView(
+        val expectedProductView =
+            ProductView(
                 productId = "", // ignored
                 code = createProductRequest.code,
                 name = createProductRequest.name,
@@ -123,31 +122,30 @@ class MembershipIT : IntegrationTest() {
         val sentCustomerName = customerNameCaptor.firstValue
         val sentCustomerEmail = customerEmailCaptor.firstValue
 
-        assertThat(sentCustomerEmail)
-            .isEqualTo(registerCustomerRequest.email)
+        assertThat(sentCustomerEmail).isEqualTo(registerCustomerRequest.email)
 
-        assertThat(sentCustomerName)
-            .contains(registerCustomerRequest.firstName)
+        assertThat(sentCustomerName).contains(registerCustomerRequest.firstName)
 
-        val expectedInvoice = InvoiceView(
-            invoiceId = "",
-            bookingId = "",
-            customerId = customerIdWhoWantsToSignUpForMembership!!,
-            amount = productViewFromGET.price!!,
-            dueDate = LocalDate.now().plusDays(30),
-            status = InvoiceStatus.OPEN,
-            paidAt = null,
-            isInstallment = false,
-            installmentNumber = null,
-            customerName = customerFromGET.firstName + " " + customerFromGET.lastName,
-        )
+        val expectedInvoice =
+            InvoiceView(
+                invoiceId = "",
+                bookingId = "",
+                customerId = customerIdWhoWantsToSignUpForMembership!!,
+                amount = productViewFromGET.price!!,
+                dueDate = LocalDate.now().plusDays(30),
+                status = InvoiceStatus.OPEN,
+                paidAt = null,
+                isInstallment = false,
+                installmentNumber = null,
+                customerName = customerFromGET.firstName + " " + customerFromGET.lastName,
+            )
 
-        assertThat(sentInvoice).usingRecursiveComparison()
+        assertThat(sentInvoice)
+            .usingRecursiveComparison()
             .ignoringFields("invoiceId", "bookingId")
             .isEqualTo(expectedInvoice)
 
-        val messageCaptor: ArgumentCaptor<MimeMessage> =
-            ArgumentCaptor.forClass(MimeMessage::class.java)
+        val messageCaptor: ArgumentCaptor<MimeMessage> = ArgumentCaptor.forClass(MimeMessage::class.java)
 
         verify(mailSender).send(messageCaptor.capture())
 
@@ -158,21 +156,73 @@ class MembershipIT : IntegrationTest() {
         assertThat(sentMessage.subject).startsWith("Your Invoice from FitnessLab - ")
 
         val sentEmailBody = extractTextBody(sentMessage)
-        val expectedEmailPattern = Regex(
-            "(?s)^Dear .*," +
-                    ".*Thank you for your business with FitnessLab!" +
-                    ".*Please find attached your invoice details:" +
-                    ".*Invoice Number: .*" +          // <-- ignore concrete invoice number
-                    ".*Amount: .*" +
-                    ".*Due Date: .*" +
-                    ".*Status: .*" +
-                    ".*Please ensure payment is made by the due date\\." +
-                    ".*If you have any questions, please don't hesitate to contact us\\." +
-                    ".*Best regards," +
-                    ".*FitnessLab Team\\s*$"
+        val expectedEmailPattern =
+         Regex(
+            """(?s)Dear\s+${Regex.escape(sentCustomerName)},\s*
+.*Thank you for your business with FitnessLab!
+.*Please find attached your invoice details:
+.*Invoice Number:\s*${Regex.escape(sentInvoice.invoiceId)}
+.*Amount:\s*\$${Regex.escape(sentInvoice.amount.toPlainString())}
+.*Due Date:\s*${Regex.escape(sentInvoice.dueDate.format(DateTimeFormatter.ISO_DATE))}
+.*Status:\s*${sentInvoice.status}
+.*Please ensure payment is made by the due date\.
+.*If you have any questions, please don't hesitate to contact us\.
+.*Best regards,
+.*FitnessLab Team\s*""".trimIndent()
         )
 
         assertThat(sentEmailBody).matches { expectedEmailPattern.matches(it) }
+
+        val pdfText = getPDFContent(sentMessage)
+        val invoiceDate = sentInvoice.dueDate.minusDays(30).format(DateTimeFormatter.ISO_DATE)
+        val dueDate = sentInvoice.dueDate.format(DateTimeFormatter.ISO_DATE)
+        val amountStr = sentInvoice.amount.toPlainString() // "999.00"
+        val statusStr = sentInvoice.status.name // "OPEN"
+        val description =
+            if (sentInvoice.isInstallment) {
+                "Installment ${sentInvoice.installmentNumber ?: 1} - Membership Fee"
+            } else {
+                "Membership Fee"
+            }
+
+        val expectedPdfRegex =
+            Regex(
+                "(?s)" +
+                    ".*INVOICE.*" +
+                    "FitnessLab.*" +
+                    "Fitness Center.*" +
+                    "Invoice Number: ${sentInvoice.invoiceId}.*" +
+                    "Invoice Date:\\s+${Regex.escape(invoiceDate)}.*" +
+                    "Due Date:\\s+${Regex.escape(dueDate)}.*" +
+                    "Status:\\s+${Regex.escape(statusStr)}.*" +
+                    "Bill To:.*" +
+                    Regex.escape(sentCustomerName) + ".*" +
+                    Regex.escape(sentCustomerEmail) + ".*" +
+                    "Description\\s+Amount.*" +
+                    Regex.escape(description) + "\\s+\\$${Regex.escape(amountStr)}.*" +
+                    "Total Amount Due:\\s+\\$${Regex.escape(amountStr)}.*" +
+                    "Thank you for your business!.*" +
+                    "Please pay by the due date\\..*",
+            )
+
+        assertThat(pdfText).matches {
+            expectedPdfRegex.matches(it)
+        }
+    }
+
+    private fun getPDFContent(sentMessage: MimeMessage): String {
+        val pdfBytes = extractPdfAttachmentBytes(sentMessage)
+
+        val pdfDoc = PdfDocument(PdfReader(ByteArrayInputStream(pdfBytes)))
+        val pdfText =
+            buildString {
+                (1..pdfDoc.numberOfPages).forEach { page ->
+                    append(PdfTextExtractor.getTextFromPage(pdfDoc.getPage(page)))
+                    append('\n')
+                }
+            }
+        pdfDoc.close()
+        return pdfText
     }
 
     private fun extractTextBody(message: MimeMessage): String {
@@ -203,49 +253,54 @@ class MembershipIT : IntegrationTest() {
 
     private fun signUpForMemberShip(
         customerId: String?,
-        memberShipId: String?
+        memberShipId: String?,
     ): ByteArray? {
-        val signupRequest = MembershipSignUpRequestDto(
-            customerId = customerId!!,
-            productVariantId = memberShipId!!,
-            paymentMode = MembershipSignUpRequestDto.PaymentMode.PAY_ON_SITE,
-            startDate = LocalDate.parse("2023-01-01"),
-        )
+        val signupRequest =
+            MembershipSignUpRequestDto(
+                customerId = customerId!!,
+                productVariantId = memberShipId!!,
+                paymentMode = MembershipSignUpRequestDto.PaymentMode.PAY_ON_SITE,
+                startDate = LocalDate.parse("2023-01-01"),
+            )
 
-        return webTestClient.post()
+        return webTestClient
+            .post()
             .uri("/api/memberships/sign-up")
             .contentType(MediaType.APPLICATION_JSON)
             .bodyValue(signupRequest)
             .exchange()
-            .expectStatus().isOk
+            .expectStatus()
+            .isOk
             .expectBody()
             .returnResult()
             .responseBody
     }
 
-    private fun getProduct(productId: String?): ProductView = webTestClient
-        .get()
-        .uri("/api/products/$productId")
-        .accept(MediaType.APPLICATION_JSON)
-        .exchange()
-        .expectStatus()
-        .isOk
-        .expectBody(ProductView::class.java)
-        .returnResult()
-        .responseBody!!
+    private fun getProduct(productId: String?): ProductView =
+        webTestClient
+            .get()
+            .uri("/api/products/$productId")
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isOk
+            .expectBody(ProductView::class.java)
+            .returnResult()
+            .responseBody!!
 
-    private fun createProduct(createProductRequest: CreateProductRequest): String? = webTestClient
-        .post()
-        .uri("/api/products")
-        .contentType(MediaType.APPLICATION_JSON)
-        .bodyValue(createProductRequest)
-        .exchange()
-        .expectStatus()
-        .isCreated
-        .expectBody(ProductCreationResponse::class.java)
-        .returnResult()
-        .responseBody!!
-        .productId
+    private fun createProduct(createProductRequest: CreateProductRequest): String? =
+        webTestClient
+            .post()
+            .uri("/api/products")
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(createProductRequest)
+            .exchange()
+            .expectStatus()
+            .isCreated
+            .expectBody(ProductCreationResponse::class.java)
+            .returnResult()
+            .responseBody!!
+            .productId
 
     private fun getCustomer(customerId: String?): CustomerView =
         webTestClient
@@ -268,8 +323,28 @@ class MembershipIT : IntegrationTest() {
             .exchange()
             .expectStatus()
             .isCreated
-            .expectBody(CustomerRegistrationResponse::class.java)
-            .returnResult()
+            .expectBody(
+                CustomerRegistrationResponse::class.java,
+            ).returnResult()
             .responseBody!!
             .customerId
+
+    private fun extractPdfAttachmentBytes(message: MimeMessage): ByteArray {
+        val content = message.content
+        require(content is Multipart) { "Expected multipart message, got ${content?.javaClass}" }
+
+        for (i in 0 until content.count) {
+            val part: BodyPart = content.getBodyPart(i)
+            // Skip the text body, look for an attachment with PDF mime type
+            if (Part.ATTACHMENT.equals(part.disposition, ignoreCase = true) ||
+                part.contentType
+                    .lowercase()
+                    .contains("application/pdf")
+            ) {
+                val dataHandler = part.dataHandler
+                return dataHandler.inputStream.readAllBytes()
+            }
+        }
+        error("No PDF attachment found")
+    }
 }

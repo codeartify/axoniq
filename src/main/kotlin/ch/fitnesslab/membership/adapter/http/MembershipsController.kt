@@ -21,7 +21,9 @@ class MembershipsController(
     private val membershipSignUpService: MembershipSignUpService,
 ) : MembershipsApi {
     @PostMapping("/sign-up")
-    override fun signUp(@RequestBody request: MembershipSignUpRequestDto): ResponseEntity<MembershipSignUpResultDto> {
+    override fun signUp(
+        @RequestBody request: MembershipSignUpRequestDto,
+    ): ResponseEntity<MembershipSignUpResultDto> {
         val result =
             membershipSignUpService.signUp(
                 MembershipSignUpRequest(
