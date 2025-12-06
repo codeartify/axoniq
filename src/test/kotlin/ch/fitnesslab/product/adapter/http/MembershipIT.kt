@@ -4,6 +4,7 @@ import ch.fitnesslab.billing.application.InvoiceView
 import ch.fitnesslab.billing.domain.InvoiceStatus
 import ch.fitnesslab.billing.infrastructure.InvoiceEmailService
 import ch.fitnesslab.generated.model.*
+import ch.fitnesslab.product.domain.commands.PauseReason
 import com.itextpdf.kernel.pdf.PdfDocument
 import com.itextpdf.kernel.pdf.PdfReader
 import com.itextpdf.kernel.pdf.canvas.parser.PdfTextExtractor
@@ -26,6 +27,8 @@ import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 import java.io.ByteArrayInputStream
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoUnit
+import java.time.temporal.ChronoUnit.DAYS
 
 class MembershipIT : IntegrationTest() {
     @MockitoBean
@@ -98,7 +101,7 @@ class MembershipIT : IntegrationTest() {
             .isEqualTo(expectedProductView)
 
         // 3) Sign up membership via /api/memberships/sign-up
-        signUpForMemberShip(
+        val memberShip = signUpForMemberShip(
             customerId = customerIdWhoWantsToSignUpForMembership,
             memberShipId = productViewFromGET.productId,
         )
@@ -204,7 +207,110 @@ class MembershipIT : IntegrationTest() {
         assertThat(pdfText).matches {
             expectedPdfRegex.matches(it)
         }
+
+
+        // 5) Pause membership contract via /api/product-contracts/{contractId}/pause
+        val pauseRequest =
+            PauseContractRequest(
+                startDate = LocalDate.parse("2023-06-01"),
+                endDate = LocalDate.parse("2023-06-30"), // 30 days (within 21–56)
+                reason = PauseContractRequest.Reason.MEDICAL,
+            )
+
+        // Verify contract is initially ACTIVE
+        val contractId = memberShip.contractId
+        val initialContract =
+            webTestClient
+                .get()
+                .uri("/api/product-contracts/$contractId")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isOk
+                .expectBody(ProductContractDetailDto::class.java)
+                .returnResult()
+                .responseBody!!
+
+        assertThat(initialContract.status).isEqualTo("ACTIVE")
+
+        // Pause
+        pauseContract(contractId, pauseRequest)
+
+        val pausedContract = getContract(contractId)
+
+        val expectedPausedContract = initialContract.copy(
+            status = "PAUSED",
+            pauseHistory = listOf(
+                PauseHistoryEntryDto(
+                    pauseRange = DateRangeDto(
+                        pauseRequest.startDate,
+                        pauseRequest.endDate
+                    ),
+                    reason = PauseReason.MEDICAL.toString()
+                )
+            ),
+            canBePaused = false,
+        )
+        assertThat(pausedContract).usingRecursiveComparison()
+            .isEqualTo(expectedPausedContract)
+
+        // 6) Resume membership contract via /api/product-contracts/{contractId}/resume
+        resume(contractId)
+
+        val actualResumedContract = getContract(contractId)
+
+        val pausedContractValidity = pausedContract.validity!!
+
+        val expectedResumedContract = pausedContract.copy(
+            status = "ACTIVE",
+            canBePaused = true,
+            validity = DateRangeDto(
+                pausedContractValidity.start,
+                pausedContractValidity.end.plusDays(
+                    DAYS.between(
+                        pauseRequest.startDate,
+                        pauseRequest.endDate
+                    )
+                )
+            )
+        )
+
+        assertThat(actualResumedContract)
+            .usingRecursiveComparison()
+            .isEqualTo(expectedResumedContract)
     }
+
+    private fun resume(contractId: String) {
+        webTestClient
+            .post()
+            .uri("/api/product-contracts/$contractId/resume")
+            .exchange()
+            .expectStatus()
+            .isOk
+    }
+
+    private fun getContract(contractId: String): ProductContractDetailDto = webTestClient
+        .get()
+        .uri("/api/product-contracts/$contractId")
+        .accept(MediaType.APPLICATION_JSON)
+        .exchange()
+        .expectStatus()
+        .isOk
+        .expectBody(ProductContractDetailDto::class.java)
+        .returnResult()
+        .responseBody!!
+
+    private fun pauseContract(contractId: String, pauseRequest: PauseContractRequest) {
+        webTestClient
+            .post()
+            .uri("/api/product-contracts/$contractId/pause")
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(pauseRequest)
+            .exchange()
+            .expectStatus()
+            .isOk
+    }
+
 
     private fun getPDFContent(sentMessage: MimeMessage): String {
         val pdfBytes = extractPdfAttachmentBytes(sentMessage)
@@ -247,10 +353,7 @@ class MembershipIT : IntegrationTest() {
         error("No text body found in multipart message")
     }
 
-    private fun signUpForMemberShip(
-        customerId: String?,
-        memberShipId: String?,
-    ): ByteArray? {
+    private fun signUpForMemberShip(customerId: String?, memberShipId: String?): MembershipSignUpResultDto {
         val signupRequest =
             MembershipSignUpRequestDto(
                 customerId = customerId!!,
@@ -267,9 +370,9 @@ class MembershipIT : IntegrationTest() {
             .exchange()
             .expectStatus()
             .isOk
-            .expectBody()
+            .expectBody(MembershipSignUpResultDto::class.java)
             .returnResult()
-            .responseBody
+            .responseBody!!
     }
 
     private fun getProduct(productId: String?): ProductView =

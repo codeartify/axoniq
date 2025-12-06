@@ -1,13 +1,9 @@
 package ch.fitnesslab.product.domain
 
-import ch.fitnesslab.common.types.BookingId
-import ch.fitnesslab.common.types.CustomerId
-import ch.fitnesslab.common.types.DateRange
-import ch.fitnesslab.common.types.ProductContractId
-import ch.fitnesslab.common.types.ProductVariantId
+import ch.fitnesslab.common.types.*
+import ch.fitnesslab.product.domain.ProductContractStatus.*
 import ch.fitnesslab.product.domain.commands.CreateProductContractCommand
 import ch.fitnesslab.product.domain.commands.PauseProductContractCommand
-import ch.fitnesslab.product.domain.commands.PauseReason
 import ch.fitnesslab.product.domain.commands.ResumeProductContractCommand
 import ch.fitnesslab.product.domain.events.ProductContractPausedEvent
 import ch.fitnesslab.product.domain.events.ProductContractResumedEvent
@@ -17,7 +13,7 @@ import org.axonframework.eventsourcing.EventSourcingHandler
 import org.axonframework.modelling.command.AggregateIdentifier
 import org.axonframework.modelling.command.AggregateLifecycle
 import org.axonframework.spring.stereotype.Aggregate
-import java.time.temporal.ChronoUnit
+import java.time.temporal.ChronoUnit.DAYS
 
 @Aggregate
 class ProductContract() {
@@ -34,22 +30,12 @@ class ProductContract() {
 
     @CommandHandler
     constructor(command: CreateProductContractCommand) : this() {
-        // For memberships, activate immediately
-        // For session-based products, wait for payment
-        val initialStatus =
-            if (command.sessionsTotal == null) {
-                ProductContractStatus.ACTIVE
-            } else {
-                ProductContractStatus.PENDING_ACTIVATION
-            }
-
         AggregateLifecycle.apply(
             ProductContractSignedEvent(
                 contractId = command.contractId,
                 customerId = command.customerId,
                 productVariantId = command.productVariantId,
                 bookingId = command.bookingId,
-                status = initialStatus,
                 validity = command.validity,
                 sessionsTotal = command.sessionsTotal,
             ),
@@ -58,33 +44,34 @@ class ProductContract() {
 
     @CommandHandler
     fun handle(command: PauseProductContractCommand) {
-        require(status == ProductContractStatus.ACTIVE) {
+        require(status == ACTIVE) {
             "Contract must be ACTIVE to be paused"
         }
 
-        val pauseDays = ChronoUnit.DAYS.between(command.pauseRange.start, command.pauseRange.end)
-        require(pauseDays in 21..56) {
+        val pauseRange = command.pauseRange
+        val pauseDays = DAYS.between(pauseRange.start, pauseRange.end)
+        require(isValidPauseDuration(pauseDays)) {
             "Pause duration must be between 3 and 8 weeks (21-56 days)"
         }
 
         AggregateLifecycle.apply(
             ProductContractPausedEvent(
                 contractId = command.contractId,
-                pauseRange = command.pauseRange,
+                pauseRange = pauseRange,
                 reason = command.reason,
             ),
         )
     }
 
+    private fun isValidPauseDuration(pauseDays: Long): Boolean = pauseDays in 21..56
+
     @CommandHandler
     fun handle(command: ResumeProductContractCommand) {
-        require(status == ProductContractStatus.PAUSED) {
+        require(status == PAUSED) {
             "Contract must be PAUSED to be resumed"
         }
 
-        val lastPause = pauseHistory.last()
-        val pauseDays = ChronoUnit.DAYS.between(lastPause.pauseRange.start, lastPause.pauseRange.end)
-        val extendedValidity = validity!!.extendBy(pauseDays)
+        val extendedValidity = extendValidityByPause()
 
         AggregateLifecycle.apply(
             ProductContractResumedEvent(
@@ -94,13 +81,21 @@ class ProductContract() {
         )
     }
 
+    private fun extendValidityByPause(): DateRange = validity!!.extendBy(lastPauseDurationInDays())
+
+    private fun lastPauseDurationInDays(): Long {
+        val lastPause = pauseHistory.last()
+        val pauseRange = lastPause.pauseRange
+        return DAYS.between(pauseRange.start, pauseRange.end)
+    }
+
     @EventSourcingHandler
     fun on(event: ProductContractSignedEvent) {
         this.contractId = event.contractId
         this.customerId = event.customerId
         this.productVariantId = event.productVariantId
         this.bookingId = event.bookingId
-        this.status = event.status
+        this.status = ACTIVE
         this.validity = event.validity
         this.sessionsTotal = event.sessionsTotal
         this.sessionsUsed = 0
@@ -108,18 +103,13 @@ class ProductContract() {
 
     @EventSourcingHandler
     fun on(event: ProductContractPausedEvent) {
-        this.status = ProductContractStatus.PAUSED
+        this.status = PAUSED
         this.pauseHistory.add(PauseEntry(event.pauseRange, event.reason))
     }
 
     @EventSourcingHandler
     fun on(event: ProductContractResumedEvent) {
-        this.status = ProductContractStatus.ACTIVE
+        this.status = ACTIVE
         this.validity = event.extendedValidity
     }
 }
-
-data class PauseEntry(
-    val pauseRange: DateRange,
-    val reason: PauseReason,
-)

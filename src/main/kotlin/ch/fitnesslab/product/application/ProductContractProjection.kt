@@ -29,7 +29,7 @@ class ProductContractProjection(
                 customerId = event.customerId.value,
                 productVariantId = event.productVariantId.value,
                 bookingId = event.bookingId.value,
-                status = event.status,
+                status = ProductContractStatus.ACTIVE,
                 validityStart = event.validity?.start,
                 validityEnd = event.validity?.end,
                 sessionsTotal = event.sessionsTotal,
@@ -58,6 +58,7 @@ class ProductContractProjection(
                     validityEnd = existing.validityEnd,
                     sessionsTotal = existing.sessionsTotal,
                     sessionsUsed = existing.sessionsUsed,
+                    pauseHistory = existing.pauseHistory + PauseHistoryEntry(event.pauseRange, event.reason),
                 )
             productContractRepository.save(updated)
 
@@ -88,6 +89,7 @@ class ProductContractProjection(
                     validityEnd = event.extendedValidity.end,
                     sessionsTotal = existing.sessionsTotal,
                     sessionsUsed = existing.sessionsUsed,
+                    pauseHistory = existing.pauseHistory,
                 )
             productContractRepository.save(updated)
 
@@ -106,35 +108,35 @@ class ProductContractProjection(
 
     @QueryHandler
     fun handle(query: FindProductContractByIdQuery): ProductContractView? =
-        productContractRepository.findById(query.contractId.value).map { it.toProductContractView() }.orElse(null)
+        productContractRepository.findById(query.contractId.value).map { toProductContractView(it) }.orElse(null)
 
     @QueryHandler
     fun handle(query: FindAllProductContractsQuery): List<ProductContractView> =
-        productContractRepository.findAll().map { it.toProductContractView() }
+        productContractRepository.findAll().map { toProductContractView(it) }
 
     fun findById(contractId: ProductContractId): ProductContractView? =
-        productContractRepository.findById(contractId.value).map { it.toProductContractView() }.orElse(null)
+        productContractRepository.findById(contractId.value).map { toProductContractView(it) }.orElse(null)
 
-    fun findAll(): List<ProductContractView> = productContractRepository.findAll().map { it.toProductContractView() }
+    fun findAll(): List<ProductContractView> = productContractRepository.findAll().map { toProductContractView(it) }
 
     fun findByCustomerId(customerId: String): List<ProductContractView> =
-        productContractRepository.findByCustomerId(UUID.fromString(customerId)).map { it.toProductContractView() }
+        productContractRepository.findByCustomerId(UUID.fromString(customerId)).map { toProductContractView(it) }
 
-    private fun ProductContractEntity.toProductContractView() =
+    private fun toProductContractView(entity: ProductContractEntity) =
         ProductContractView(
-            contractId = this.contractId.toString(),
-            customerId = this.customerId.toString(),
-            productVariantId = this.productVariantId.toString(),
-            bookingId = this.bookingId.toString(),
-            status = this.status,
+            contractId = entity.contractId.toString(),
+            customerId = entity.customerId.toString(),
+            productVariantId = entity.productVariantId.toString(),
+            bookingId = entity.bookingId.toString(),
+            status = entity.status,
             validity =
-                if (this.validityStart != null && this.validityEnd != null) {
-                    DateRange(this.validityStart!!, this.validityEnd!!)
+                if (entity.validityStart != null && entity.validityEnd != null) {
+                    DateRange(entity.validityStart!!, entity.validityEnd!!)
                 } else {
                     null
                 },
-            sessionsTotal = this.sessionsTotal,
-            sessionsUsed = this.sessionsUsed,
-            pauseHistory = emptyList(), // Pause history not stored in entity for simplicity
+            sessionsTotal = entity.sessionsTotal,
+            sessionsUsed = entity.sessionsUsed,
+            pauseHistory = entity.pauseHistory,
         )
 }

@@ -10,7 +10,6 @@ data class ProductContractSignedEvent(
     val customerId: CustomerId,
     val productVariantId: ProductVariantId,
     val bookingId: BookingId,
-    val status: ProductContractStatus,
     val validity: DateRange?,
     val sessionsTotal: Int?,
 )
