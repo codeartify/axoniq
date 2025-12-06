@@ -3,7 +3,6 @@ package ch.fitnesslab.product.adapter.http
 import ch.fitnesslab.billing.application.InvoiceView
 import ch.fitnesslab.billing.domain.InvoiceStatus
 import ch.fitnesslab.billing.infrastructure.InvoiceEmailService
-import ch.fitnesslab.billing.infrastructure.InvoicePdfGenerator
 import ch.fitnesslab.generated.model.*
 import com.itextpdf.kernel.pdf.PdfDocument
 import com.itextpdf.kernel.pdf.PdfReader
@@ -31,9 +30,6 @@ import java.time.format.DateTimeFormatter
 class MembershipIT : IntegrationTest() {
     @MockitoBean
     lateinit var mailSender: JavaMailSender
-
-    @MockitoSpyBean
-    lateinit var invoicePdfGenerator: InvoicePdfGenerator
 
     @MockitoSpyBean
     lateinit var invoiceEmailService: InvoiceEmailService
