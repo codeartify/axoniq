@@ -1,13 +1,48 @@
 package ch.fitnesslab.product.adapter.http
 
+import ch.fitnesslab.billing.application.InvoiceView
+import ch.fitnesslab.billing.domain.InvoiceStatus
+import ch.fitnesslab.billing.infrastructure.InvoiceEmailService
+import ch.fitnesslab.billing.infrastructure.InvoicePdfGenerator
 import ch.fitnesslab.generated.model.*
+import jakarta.mail.BodyPart
+import jakarta.mail.Multipart
+import jakarta.mail.internet.MimeMessage
+import jakarta.mail.internet.MimeMultipart
 import org.assertj.core.api.AssertionsForClassTypes.assertThat
 import org.junit.jupiter.api.Test
+import org.mockito.ArgumentCaptor
+import org.mockito.Mockito.`when`
+import org.mockito.kotlin.any
+import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.verify
 import org.springframework.http.MediaType
+import org.springframework.mail.javamail.JavaMailSender
+import org.springframework.mail.javamail.JavaMailSenderImpl
+import org.springframework.test.context.bean.override.mockito.MockitoBean
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
+import java.time.LocalDate
 
 class MembershipIT : IntegrationTest() {
+
+    @MockitoBean
+    lateinit var invoicePdfGenerator: InvoicePdfGenerator
+
+    @MockitoBean
+    lateinit var mailSender: JavaMailSender
+
+    @MockitoSpyBean
+    lateinit var invoiceEmailService: InvoiceEmailService
+
     @Test
-    fun `should register customer, create product and sign up membership using HTTP endpoints only`() {
+    fun `should register customer, create product, sign up membership and send invoice mail`() {
+        val realMailSender = JavaMailSenderImpl()
+        val mimeMessage: MimeMessage = realMailSender.createMimeMessage()
+        `when`(mailSender.createMimeMessage()).thenReturn(mimeMessage)
+
+        `when`(invoicePdfGenerator.generateInvoicePdf(any(), any(), any()))
+            .thenReturn("dummy-pdf".toByteArray())
+
         // 1) Register a customer via /api/customers
         val registerCustomerRequest: RegisterCustomerRequest =
             jsonLoader.loadObjectFromFile(
@@ -42,8 +77,7 @@ class MembershipIT : IntegrationTest() {
                 CreateProductRequest::class.java,
             )
 
-        val expectedProductView =
-            ProductView(
+        val expectedProductView = ProductView(
                 productId = "", // ignored
                 code = createProductRequest.code,
                 name = createProductRequest.name,
@@ -66,84 +100,152 @@ class MembershipIT : IntegrationTest() {
         assertThat(productViewFromGET)
             .usingRecursiveComparison()
             .ignoringFields("productId")
-            .isEqualTo(
-                expectedProductView,
-            )
+            .isEqualTo(expectedProductView)
 
         // 3) Sign up membership via /api/memberships/sign-up
-        /**
-         webTestClient.post()
-         .uri("/api/memberships/sign-up")
-         .contentType(MediaType.APPLICATION_JSON)
-         .bodyValue(
-         MembershipSignUpRequestDto(
-         customerId= customerIdWhoWantsToSignUpForMembership!!,
-         productVariantId = productViewFromGET.productId!!,
-         paymentMode = MembershipSignUpRequestDto.PaymentMode.PAY_ON_SITE,
-         startDate = LocalDate.parse("2023-01-01")
+        signUpForMemberShip(
+            customerId = customerIdWhoWantsToSignUpForMembership,
+            memberShipId = productViewFromGET.productId,
+        )
 
-         ))
-         .exchange()
-         .expectStatus().isOk
-         .expectBody()
+        // 4) Verify InvoiceEmailService was called with correct InvoiceView and recipient
+        val invoiceCaptor = argumentCaptor<InvoiceView>()
+        val customerNameCaptor = argumentCaptor<String>()
+        val customerEmailCaptor = argumentCaptor<String>()
 
-         // 5) Verify the created product contract via /api/product-contracts/{contractId}
-         webTestClient.get()
-         .uri("/api/product-contracts/{contractId}", createdContractId)
-         .accept(MediaType.APPLICATION_JSON)
-         .exchange()
-         .expectStatus().isOk
-         .expectBody()
-         .jsonPath("$.contractId").isEqualTo(createdContractId)
-         .jsonPath("$.customerId").isEqualTo(createdCustomerId)
-         .jsonPath("$.productVariantId").isEqualTo(selectedVariantId)
-         .jsonPath("$.bookingId").isEqualTo(createdBookingId)
+        verify(invoiceEmailService).sendInvoiceEmail(
+            invoiceCaptor.capture(),
+            customerNameCaptor.capture(),
+            customerEmailCaptor.capture(),
+        )
 
-         // 6) Verify that the corresponding invoice exists via /api/invoices/customer/{customerId}
-         webTestClient.get()
-         .uri("/api/invoices/customer/{customerId}", createdCustomerId)
-         .accept(MediaType.APPLICATION_JSON)
-         .exchange()
-         .expectStatus().isOk
-         .expectBody()
-         .jsonPath("$[0].invoiceId").value<String> { id ->
-         // At least one invoice must match the invoice from the membership sign-up
-         assert(id == createdInvoiceId)
-         }
-         */
+        val sentInvoice = invoiceCaptor.firstValue
+        val sentCustomerName = customerNameCaptor.firstValue
+        val sentCustomerEmail = customerEmailCaptor.firstValue
+
+        assertThat(sentCustomerEmail)
+            .isEqualTo(registerCustomerRequest.email)
+
+        assertThat(sentCustomerName)
+            .contains(registerCustomerRequest.firstName)
+
+        val expectedInvoice = InvoiceView(
+            invoiceId = "",
+            bookingId = "",
+            customerId = customerIdWhoWantsToSignUpForMembership!!,
+            amount = productViewFromGET.price!!,
+            dueDate = LocalDate.now().plusDays(30),
+            status = InvoiceStatus.OPEN,
+            paidAt = null,
+            isInstallment = false,
+            installmentNumber = null,
+            customerName = customerFromGET.firstName + " " + customerFromGET.lastName,
+        )
+
+        assertThat(sentInvoice).usingRecursiveComparison()
+            .ignoringFields("invoiceId", "bookingId")
+            .isEqualTo(expectedInvoice)
+
+        val messageCaptor: ArgumentCaptor<MimeMessage> =
+            ArgumentCaptor.forClass(MimeMessage::class.java)
+
+        verify(mailSender).send(messageCaptor.capture())
+
+        val sentMessage = messageCaptor.value
+
+        assertThat(sentMessage.from[0].toString()).isEqualTo("noreply@fitnesslab.com")
+        assertThat(sentMessage.allRecipients[0].toString()).isEqualTo(sentCustomerEmail)
+        assertThat(sentMessage.subject).startsWith("Your Invoice from FitnessLab - ")
+
+        val sentEmailBody = extractTextBody(sentMessage)
+        val expectedEmailPattern = Regex(
+            "(?s)^Dear .*," +
+                    ".*Thank you for your business with FitnessLab!" +
+                    ".*Please find attached your invoice details:" +
+                    ".*Invoice Number: .*" +          // <-- ignore concrete invoice number
+                    ".*Amount: .*" +
+                    ".*Due Date: .*" +
+                    ".*Status: .*" +
+                    ".*Please ensure payment is made by the due date\\." +
+                    ".*If you have any questions, please don't hesitate to contact us\\." +
+                    ".*Best regards," +
+                    ".*FitnessLab Team\\s*$"
+        )
+
+        assertThat(sentEmailBody).matches { expectedEmailPattern.matches(it) }
     }
 
-    private fun getProduct(productId: String?): ProductView {
-        val productViewFromGET =
-            webTestClient
-                .get()
-                .uri("/api/products/$productId")
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus()
-                .isOk
-                .expectBody(ProductView::class.java)
-                .returnResult()
-                .responseBody!!
-        return productViewFromGET
+    private fun extractTextBody(message: MimeMessage): String {
+        val content = message.content
+        return when (content) {
+            is String -> content
+            is MimeMultipart -> extractTextFromMultipart(content)
+            is Multipart -> extractTextFromMultipart(content)
+            else -> error("Unsupported message content type: ${content?.javaClass}")
+        }
     }
 
-    private fun createProduct(createProductRequest: CreateProductRequest): String? {
-        val productId =
-            webTestClient
-                .post()
-                .uri("/api/products")
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(createProductRequest)
-                .exchange()
-                .expectStatus()
-                .isCreated
-                .expectBody(ProductCreationResponse::class.java)
-                .returnResult()
-                .responseBody!!
-                .productId
-        return productId
+    private fun extractTextFromMultipart(multipart: Multipart): String {
+        for (i in 0 until multipart.count) {
+            val part: BodyPart = multipart.getBodyPart(i)
+            val partContent = part.content
+
+            if (partContent is String) {
+                return partContent
+            }
+
+            if (partContent is Multipart) {
+                return extractTextFromMultipart(partContent)
+            }
+        }
+        error("No text body found in multipart message")
     }
+
+    private fun signUpForMemberShip(
+        customerId: String?,
+        memberShipId: String?
+    ): ByteArray? {
+        val signupRequest = MembershipSignUpRequestDto(
+            customerId = customerId!!,
+            productVariantId = memberShipId!!,
+            paymentMode = MembershipSignUpRequestDto.PaymentMode.PAY_ON_SITE,
+            startDate = LocalDate.parse("2023-01-01"),
+        )
+
+        return webTestClient.post()
+            .uri("/api/memberships/sign-up")
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(signupRequest)
+            .exchange()
+            .expectStatus().isOk
+            .expectBody()
+            .returnResult()
+            .responseBody
+    }
+
+    private fun getProduct(productId: String?): ProductView = webTestClient
+        .get()
+        .uri("/api/products/$productId")
+        .accept(MediaType.APPLICATION_JSON)
+        .exchange()
+        .expectStatus()
+        .isOk
+        .expectBody(ProductView::class.java)
+        .returnResult()
+        .responseBody!!
+
+    private fun createProduct(createProductRequest: CreateProductRequest): String? = webTestClient
+        .post()
+        .uri("/api/products")
+        .contentType(MediaType.APPLICATION_JSON)
+        .bodyValue(createProductRequest)
+        .exchange()
+        .expectStatus()
+        .isCreated
+        .expectBody(ProductCreationResponse::class.java)
+        .returnResult()
+        .responseBody!!
+        .productId
 
     private fun getCustomer(customerId: String?): CustomerView =
         webTestClient

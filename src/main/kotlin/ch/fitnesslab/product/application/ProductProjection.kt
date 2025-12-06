@@ -76,10 +76,9 @@ class ProductProjection(
     }
 
     @QueryHandler
-    fun handle(query: FindProductByIdQuery): ProductView? =
+    fun handle(query: FindProductByIdQuery): ProductVariantEntity? =
         productRepository
             .findById(query.productId.value)
-            .map { toProductView(it) }
             .orElse(null)
 
     @QueryHandler

@@ -21,16 +21,14 @@ class MembershipsController(
     private val membershipSignUpService: MembershipSignUpService,
 ) : MembershipsApi {
     @PostMapping("/sign-up")
-    override fun signUp(
-        @RequestBody membershipSignUpRequestDto: MembershipSignUpRequestDto,
-    ): ResponseEntity<MembershipSignUpResultDto> {
+    override fun signUp(@RequestBody request: MembershipSignUpRequestDto): ResponseEntity<MembershipSignUpResultDto> {
         val result =
             membershipSignUpService.signUp(
                 MembershipSignUpRequest(
-                    customerId = CustomerId.from(membershipSignUpRequestDto.customerId),
-                    productVariantId = ProductVariantId.from(membershipSignUpRequestDto.productVariantId),
-                    paymentMode = membershipSignUpRequestDto.paymentMode.let { PaymentMode.valueOf(it.name) },
-                    startDate = LocalDate.from(membershipSignUpRequestDto.startDate),
+                    customerId = CustomerId.from(request.customerId),
+                    productVariantId = ProductVariantId.from(request.productVariantId),
+                    paymentMode = request.paymentMode.let { PaymentMode.valueOf(it.name) },
+                    startDate = LocalDate.from(request.startDate),
                 ),
             )
 
