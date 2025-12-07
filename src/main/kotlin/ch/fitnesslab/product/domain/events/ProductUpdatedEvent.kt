@@ -1,6 +1,7 @@
 package ch.fitnesslab.product.domain.events
 
 import ch.fitnesslab.common.types.ProductVariantId
+import ch.fitnesslab.product.domain.LinkedPlatformSync
 import ch.fitnesslab.product.domain.ProductAudience
 import ch.fitnesslab.product.domain.ProductBehaviorConfig
 import ch.fitnesslab.product.domain.PricingVariantConfig
@@ -23,4 +24,5 @@ data class ProductUpdatedEvent(
     val buyable: Boolean = true,
     val buyerCanCancel: Boolean = true,
     val perks: List<String>? = null,
+    val linkedPlatforms: List<LinkedPlatformSync>? = null,
 )

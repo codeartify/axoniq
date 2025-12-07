@@ -28,6 +28,7 @@ class Product() {
     private var buyable: Boolean = true
     private var buyerCanCancel: Boolean = true
     private var perks: List<String>? = null
+    private var linkedPlatforms: List<LinkedPlatformSync>? = null
 
     @CommandHandler
     constructor(command: CreateProductCommand) : this() {
@@ -47,6 +48,7 @@ class Product() {
                 buyable = command.buyable,
                 buyerCanCancel = command.buyerCanCancel,
                 perks = command.perks,
+                linkedPlatforms = command.linkedPlatforms,
             ),
         )
     }
@@ -69,6 +71,7 @@ class Product() {
                 buyable = command.buyable,
                 buyerCanCancel = command.buyerCanCancel,
                 perks = command.perks,
+                linkedPlatforms = command.linkedPlatforms,
             ),
         )
     }
@@ -89,6 +92,7 @@ class Product() {
         this.buyable = event.buyable
         this.buyerCanCancel = event.buyerCanCancel
         this.perks = event.perks
+        this.linkedPlatforms = event.linkedPlatforms
     }
 
     @EventSourcingHandler
@@ -106,5 +110,6 @@ class Product() {
         this.buyable = event.buyable
         this.buyerCanCancel = event.buyerCanCancel
         this.perks = event.perks
+        this.linkedPlatforms = event.linkedPlatforms
     }
 }

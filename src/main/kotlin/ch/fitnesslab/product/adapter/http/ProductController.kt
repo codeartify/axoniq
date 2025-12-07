@@ -12,6 +12,7 @@ import ch.fitnesslab.product.domain.ProductAudience
 import ch.fitnesslab.product.domain.ProductBehaviorConfig
 import ch.fitnesslab.product.domain.commands.CreateProductCommand
 import ch.fitnesslab.product.domain.commands.UpdateProductCommand
+import ch.fitnesslab.product.infrastructure.wix.WixSyncService
 import ch.fitnesslab.utils.waitForUpdateOf
 import org.axonframework.commandhandling.gateway.CommandGateway
 import org.axonframework.messaging.responsetypes.ResponseTypes
@@ -26,6 +27,7 @@ class ProductController(
     private val commandGateway: CommandGateway,
     private val queryGateway: QueryGateway,
     private val productProjection: ProductProjection,
+    private val wixSyncService: WixSyncService,
 ) {
     @PostMapping
     fun createProduct(
@@ -130,7 +132,11 @@ class ProductController(
     }
 
     @GetMapping
-    fun getAllProducts(): ResponseEntity<List<ProductView>> = ResponseEntity.ok(productProjection.findAll())
+    fun getAllProducts(): ResponseEntity<List<ProductView>> {
+        // Sync with Wix before fetching products
+        wixSyncService.syncWixProducts()
+        return ResponseEntity.ok(productProjection.findAll())
+    }
 
     @PutMapping("/{productId}")
     fun updateProduct(

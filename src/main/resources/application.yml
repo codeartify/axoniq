@@ -31,3 +31,7 @@ spring:
 axon:
   serializer:
     events: jackson
+wix:
+  token: ${WIX_TOKEN:}
+  site:
+    id: ${WIX_SITE_ID:}

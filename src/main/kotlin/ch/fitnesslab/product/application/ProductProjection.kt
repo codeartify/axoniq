@@ -53,6 +53,7 @@ class ProductProjection(
                 buyable = event.buyable,
                 buyerCanCancel = event.buyerCanCancel,
                 perks = event.perks,
+                linkedPlatforms = event.linkedPlatforms,
             )
         productRepository.save(entity)
 
@@ -99,6 +100,7 @@ class ProductProjection(
                     buyable = event.buyable,
                     buyerCanCancel = event.buyerCanCancel,
                     perks = event.perks,
+                    linkedPlatforms = event.linkedPlatforms,
                 )
             productRepository.save(updated)
 
@@ -210,6 +212,24 @@ class ProductProjection(
             buyable = productVariantEntity.buyable,
             buyerCanCancel = productVariantEntity.buyerCanCancel,
             perks = productVariantEntity.perks,
+            linkedPlatforms = productVariantEntity.linkedPlatforms?.map { toLinkedPlatformSyncView(it) },
+        )
+    }
+
+    private fun toLinkedPlatformSyncView(
+        domain: ch.fitnesslab.product.domain.LinkedPlatformSync
+    ): ch.fitnesslab.generated.model.LinkedPlatformSync {
+        return ch.fitnesslab.generated.model.LinkedPlatformSync(
+            platformName = domain.platformName,
+            idOnPlatform = domain.idOnPlatform,
+            revision = domain.revision,
+            visibilityOnPlatform = domain.visibilityOnPlatform?.let {
+                ch.fitnesslab.generated.model.LinkedPlatformSync.VisibilityOnPlatform.valueOf(it.name)
+            },
+            isSynced = domain.isSynced,
+            isSourceOfTruth = domain.isSourceOfTruth,
+            lastSyncedAt = domain.lastSyncedAt?.atOffset(java.time.ZoneOffset.UTC),
+            syncError = domain.syncError
         )
     }
 }

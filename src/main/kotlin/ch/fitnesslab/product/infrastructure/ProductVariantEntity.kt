@@ -1,6 +1,7 @@
 package ch.fitnesslab.product.infrastructure
 
 import ch.fitnesslab.product.domain.BillingInterval
+import ch.fitnesslab.product.domain.LinkedPlatformSync
 import ch.fitnesslab.product.domain.PricingModel
 import ch.fitnesslab.product.domain.ProductAudience
 import ch.fitnesslab.product.domain.ProductVisibility
@@ -37,7 +38,7 @@ class ProductVariantEntity(
     // ProductBehaviorConfig fields (flattened)
     val canBePaused: Boolean = false,
     val renewalLeadTimeDays: Int? = null,
-    val maxActivePerCustomer: Int? = null,
+    val maxActivePerCustomer: Int? = null, // TODO: remove, use maxPurchasesPerBuyer
     val maxPurchasesPerBuyer: Int? = null,
     val numberOfSessions: Int? = null,
 
@@ -54,4 +55,6 @@ class ProductVariantEntity(
     @CollectionTable(name = "product_perks", joinColumns = [JoinColumn(name = "product_id")])
     @Column(name = "perk")
     val perks: List<String>? = null,
+    @Transient
+    val linkedPlatforms: List<LinkedPlatformSync>? = null,
 )
