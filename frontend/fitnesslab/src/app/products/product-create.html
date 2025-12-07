@@ -8,16 +8,17 @@
   }
 
   <form (ngSubmit)="onSubmit()" class="bg-white shadow-md rounded-lg p-6">
+    <!-- Basic Information Section -->
     <div class="mb-6">
       <h3 class="text-xl font-semibold text-gray-700 mb-4">{{ 'product.create.basicInformation' | translate }}</h3>
 
       <div class="mb-4">
-        <label for="code" class="block text-sm font-medium text-gray-700 mb-1">{{ 'product.fields.productCode' | translate }} *</label>
+        <label for="slug" class="block text-sm font-medium text-gray-700 mb-1">{{ 'product.fields.slug' | translate }} *</label>
         <input
           type="text"
-          id="code"
-          [(ngModel)]="product.code"
-          name="code"
+          id="slug"
+          [(ngModel)]="product.slug"
+          name="slug"
           required
           class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
@@ -43,20 +44,6 @@
           [(ngModel)]="product.productType"
           name="productType"
           required
-          class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-      </div>
-
-      <div class="mb-4">
-        <label for="price" class="block text-sm font-medium text-gray-700 mb-1">{{ 'product.fields.price' | translate }} *</label>
-        <input
-          type="number"
-          id="price"
-          [(ngModel)]="product.price"
-          name="price"
-          required
-          min="0"
-          step="0.01"
           class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
       </div>
@@ -89,6 +76,175 @@
       </div>
     </div>
 
+    <!-- Pricing Configuration Section -->
+    <div class="mb-6">
+      <h3 class="text-xl font-semibold text-gray-700 mb-4">{{ 'product.create.pricingConfiguration' | translate }}</h3>
+
+      <div class="mb-4">
+        <label for="pricingModel" class="block text-sm font-medium text-gray-700 mb-1">{{ 'product.fields.pricingModel' | translate }}</label>
+        <select
+          id="pricingModel"
+          [(ngModel)]="product.pricingVariant.pricingModel"
+          name="pricingModel"
+          class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          <option value="SUBSCRIPTION">SUBSCRIPTION</option>
+          <option value="SINGLE_PAYMENT_FOR_DURATION">SINGLE_PAYMENT_FOR_DURATION</option>
+          <option value="SINGLE_PAYMENT_UNLIMITED">SINGLE_PAYMENT_UNLIMITED</option>
+        </select>
+      </div>
+
+      <div class="mb-4">
+        <label for="flatRate" class="block text-sm font-medium text-gray-700 mb-1">{{ 'product.fields.flatRate' | translate }} *</label>
+        <input
+          type="number"
+          id="flatRate"
+          [(ngModel)]="product.pricingVariant.flatRate"
+          name="flatRate"
+          required
+          min="0"
+          step="0.01"
+          class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+      </div>
+
+      <!-- Billing Cycle -->
+      <div class="mb-4">
+        <div class="flex items-center mb-2">
+          <label class="flex items-center cursor-pointer">
+            <input
+              type="checkbox"
+              [checked]="!!product.pricingVariant.billingCycle"
+              (change)="toggleBillingCycle()"
+              name="hasBillingCycle"
+              class="mr-2 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+            />
+            <span class="text-sm font-medium text-gray-700">{{ 'product.fields.billingCycle' | translate }}</span>
+          </label>
+        </div>
+        @if (product.pricingVariant.billingCycle) {
+          <div class="ml-6 grid grid-cols-2 gap-4">
+            <div>
+              <label for="billingCycleInterval" class="block text-sm font-medium text-gray-700 mb-1">{{ 'product.fields.interval' | translate }}</label>
+              <select
+                id="billingCycleInterval"
+                [(ngModel)]="product.pricingVariant.billingCycle!.interval"
+                name="billingCycleInterval"
+                class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="DAY">DAY</option>
+                <option value="WEEK">WEEK</option>
+                <option value="MONTH">MONTH</option>
+                <option value="YEAR">YEAR</option>
+              </select>
+            </div>
+            <div>
+              <label for="billingCycleCount" class="block text-sm font-medium text-gray-700 mb-1">{{ 'product.fields.count' | translate }}</label>
+              <input
+                type="number"
+                id="billingCycleCount"
+                [(ngModel)]="product.pricingVariant.billingCycle!.count"
+                name="billingCycleCount"
+                min="1"
+                class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+          </div>
+        }
+      </div>
+
+      <!-- Duration -->
+      <div class="mb-4">
+        <div class="flex items-center mb-2">
+          <label class="flex items-center cursor-pointer">
+            <input
+              type="checkbox"
+              [checked]="!!product.pricingVariant.duration"
+              (change)="toggleDuration()"
+              name="hasDuration"
+              class="mr-2 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+            />
+            <span class="text-sm font-medium text-gray-700">{{ 'product.fields.duration' | translate }}</span>
+          </label>
+        </div>
+        @if (product.pricingVariant.duration) {
+          <div class="ml-6 grid grid-cols-2 gap-4">
+            <div>
+              <label for="durationInterval" class="block text-sm font-medium text-gray-700 mb-1">{{ 'product.fields.interval' | translate }}</label>
+              <select
+                id="durationInterval"
+                [(ngModel)]="product.pricingVariant.duration!.interval"
+                name="durationInterval"
+                class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="DAY">DAY</option>
+                <option value="WEEK">WEEK</option>
+                <option value="MONTH">MONTH</option>
+                <option value="YEAR">YEAR</option>
+              </select>
+            </div>
+            <div>
+              <label for="durationCount" class="block text-sm font-medium text-gray-700 mb-1">{{ 'product.fields.count' | translate }}</label>
+              <input
+                type="number"
+                id="durationCount"
+                [(ngModel)]="product.pricingVariant.duration!.count"
+                name="durationCount"
+                min="1"
+                class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+          </div>
+        }
+      </div>
+
+      <!-- Free Trial -->
+      <div class="mb-4">
+        <div class="flex items-center mb-2">
+          <label class="flex items-center cursor-pointer">
+            <input
+              type="checkbox"
+              [checked]="!!product.pricingVariant.freeTrial"
+              (change)="toggleFreeTrial()"
+              name="hasFreeTrial"
+              class="mr-2 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+            />
+            <span class="text-sm font-medium text-gray-700">{{ 'product.fields.freeTrial' | translate }}</span>
+          </label>
+        </div>
+        @if (product.pricingVariant.freeTrial) {
+          <div class="ml-6 grid grid-cols-2 gap-4">
+            <div>
+              <label for="freeTrialInterval" class="block text-sm font-medium text-gray-700 mb-1">{{ 'product.fields.interval' | translate }}</label>
+              <select
+                id="freeTrialInterval"
+                [(ngModel)]="product.pricingVariant.freeTrial!.interval"
+                name="freeTrialInterval"
+                class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="DAY">DAY</option>
+                <option value="WEEK">WEEK</option>
+                <option value="MONTH">MONTH</option>
+                <option value="YEAR">YEAR</option>
+              </select>
+            </div>
+            <div>
+              <label for="freeTrialCount" class="block text-sm font-medium text-gray-700 mb-1">{{ 'product.fields.count' | translate }}</label>
+              <input
+                type="number"
+                id="freeTrialCount"
+                [(ngModel)]="product.pricingVariant.freeTrial!.count"
+                name="freeTrialCount"
+                min="1"
+                class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Behavior Configuration Section -->
     <div class="mb-6">
       <h3 class="text-xl font-semibold text-gray-700 mb-4">{{ 'product.create.behaviorConfiguration' | translate }}</h3>
 
@@ -102,30 +258,6 @@
           />
           <span class="text-sm font-medium text-gray-700">{{ 'product.fields.canBePaused' | translate }}</span>
         </label>
-      </div>
-
-      <div class="mb-4">
-        <label for="durationInMonths" class="block text-sm font-medium text-gray-700 mb-1">{{ 'product.fields.durationInMonths' | translate }}</label>
-        <input
-          type="number"
-          id="durationInMonths"
-          [(ngModel)]="product.behavior.durationInMonths"
-          name="durationInMonths"
-          min="0"
-          class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-      </div>
-
-      <div class="mb-4">
-        <label for="numberOfSessions" class="block text-sm font-medium text-gray-700 mb-1">{{ 'product.fields.numberOfSessions' | translate }}</label>
-        <input
-          type="number"
-          id="numberOfSessions"
-          [(ngModel)]="product.behavior.numberOfSessions"
-          name="numberOfSessions"
-          min="0"
-          class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
       </div>
 
       <div class="mb-4">
@@ -150,6 +282,132 @@
           min="0"
           class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
+      </div>
+
+      <div class="mb-4">
+        <label for="maxPurchasesPerBuyer" class="block text-sm font-medium text-gray-700 mb-1">{{ 'product.fields.maxPurchasesPerBuyer' | translate }}</label>
+        <input
+          type="number"
+          id="maxPurchasesPerBuyer"
+          [(ngModel)]="product.behavior.maxPurchasesPerBuyer"
+          name="maxPurchasesPerBuyer"
+          min="0"
+          class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+      </div>
+
+      <div class="mb-4">
+        <label for="numberOfSessions" class="block text-sm font-medium text-gray-700 mb-1">{{ 'product.fields.numberOfSessions' | translate }}</label>
+        <input
+          type="number"
+          id="numberOfSessions"
+          [(ngModel)]="product.behavior.numberOfSessions"
+          name="numberOfSessions"
+          min="0"
+          class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+      </div>
+    </div>
+
+    <!-- Additional Settings Section -->
+    <div class="mb-6">
+      <h3 class="text-xl font-semibold text-gray-700 mb-4">{{ 'product.create.additionalSettings' | translate }}</h3>
+
+      <div class="mb-4">
+        <label for="description" class="block text-sm font-medium text-gray-700 mb-1">{{ 'product.fields.description' | translate }}</label>
+        <textarea
+          id="description"
+          [(ngModel)]="product.description"
+          name="description"
+          rows="3"
+          class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+        ></textarea>
+      </div>
+
+      <div class="mb-4">
+        <label for="termsAndConditions" class="block text-sm font-medium text-gray-700 mb-1">{{ 'product.fields.termsAndConditions' | translate }}</label>
+        <textarea
+          id="termsAndConditions"
+          [(ngModel)]="product.termsAndConditions"
+          name="termsAndConditions"
+          rows="3"
+          class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+        ></textarea>
+      </div>
+
+      <div class="mb-4">
+        <label for="visibility" class="block text-sm font-medium text-gray-700 mb-1">{{ 'product.fields.visibility' | translate }}</label>
+        <select
+          id="visibility"
+          [(ngModel)]="product.visibility"
+          name="visibility"
+          class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          <option value="PUBLIC">PUBLIC</option>
+          <option value="HIDDEN">HIDDEN</option>
+          <option value="ARCHIVED">ARCHIVED</option>
+        </select>
+      </div>
+
+      <div class="mb-4 flex items-center">
+        <label class="flex items-center cursor-pointer">
+          <input
+            type="checkbox"
+            [(ngModel)]="product.buyable"
+            name="buyable"
+            class="mr-2 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+          />
+          <span class="text-sm font-medium text-gray-700">{{ 'product.fields.buyable' | translate }}</span>
+        </label>
+      </div>
+
+      <div class="mb-4 flex items-center">
+        <label class="flex items-center cursor-pointer">
+          <input
+            type="checkbox"
+            [(ngModel)]="product.buyerCanCancel"
+            name="buyerCanCancel"
+            class="mr-2 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+          />
+          <span class="text-sm font-medium text-gray-700">{{ 'product.fields.buyerCanCancel' | translate }}</span>
+        </label>
+      </div>
+
+      <!-- Perks -->
+      <div class="mb-4">
+        <label class="block text-sm font-medium text-gray-700 mb-2">{{ 'product.fields.perks' | translate }}</label>
+        <div class="flex gap-2 mb-2">
+          <input
+            type="text"
+            [(ngModel)]="perksInput"
+            name="perksInput"
+            placeholder="{{ 'product.fields.addPerk' | translate }}"
+            class="flex-1 px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          <button
+            type="button"
+            (click)="addPerk()"
+            class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-colors"
+          >
+            {{ 'button.add' | translate }}
+          </button>
+        </div>
+        @if (product.perks && product.perks.length > 0) {
+          <div class="flex flex-wrap gap-2">
+            @for (perk of product.perks; track perk; let i = $index) {
+              <div class="flex items-center gap-1 px-3 py-1 bg-blue-100 text-blue-800 rounded-full">
+                <span>{{ perk }}</span>
+                <button
+                  type="button"
+                  (click)="removePerk(i)"
+                  class="ml-1 text-blue-600 hover:text-blue-800 font-bold"
+                >
+                  &times;
+                </button>
+              </div>
+            }
+          </div>
+        }
       </div>
     </div>
 

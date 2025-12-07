@@ -298,9 +298,9 @@
                 <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow" [class.opacity-50]="isAssigningProduct()">
                   <h4 class="text-lg font-semibold text-gray-800 mb-3">{{ product.name }}</h4>
                   <div class="space-y-2 mb-4 text-sm">
-                    <div><strong class="text-gray-600">{{ 'product.fields.productCode' | translate }}</strong> <span class="text-gray-800">{{ product.code }}</span></div>
+                    <div><strong class="text-gray-600">{{ 'product.fields.slug' | translate }}</strong> <span class="text-gray-800">{{ product.slug }}</span></div>
                     <div><strong class="text-gray-600">{{ 'product.fields.productType' | translate }}</strong> <span class="text-gray-800">{{ product.productType }}</span></div>
-                    <div><strong class="text-gray-600">{{ 'product.fields.price' | translate }}</strong> <span class="text-gray-800">{{ product.price | currency }}</span></div>
+                    <div><strong class="text-gray-600">{{ 'product.fields.flatRate' | translate }}</strong> <span class="text-gray-800">{{ product.pricingVariant?.flatRate | currency }}</span></div>
                     <div><strong class="text-gray-600">{{ 'product.fields.audience' | translate }}</strong> <span class="text-gray-800">{{ product.audience }}</span></div>
                   </div>
                   <button

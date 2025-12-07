@@ -67,7 +67,7 @@ class MembershipSignUpService(
                     customerId = customerId,
                     productVariantId = productVariantId,
                     bookingId = bookingId,
-                    validity = createValidity(request.startDate, productVariantEntity.durationInMonths),
+                    validity = createValidity(request.startDate, (productVariantEntity.durationCount)),
                     sessionsTotal = null,
                 ),
             )
@@ -80,7 +80,7 @@ class MembershipSignUpService(
                     bookingId = bookingId,
                     customerId = customerId,
                     productVariantId = productVariantId,
-                    amount = productVariantEntity.price,
+                    amount = productVariantEntity.flatRate,
                     dueDate = DueDate.inDays(30),
                     isInstallment = false,
                     installmentNumber = null,
@@ -104,6 +104,7 @@ class MembershipSignUpService(
             invoiceSubscription.close()
         }
     }
+
 
     private fun paidOnSite(mode: PaymentMode): Boolean = mode == PaymentMode.PAY_ON_SITE
 

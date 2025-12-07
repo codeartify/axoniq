@@ -4,26 +4,24 @@ info:
   description: API for FitnessLab management system
   version: 1.0.0
 servers:
-  - url: http://localhost:8080
-    description: Local development server
-
+- url: http://localhost:8080
+  description: Local development server
 tags:
-  - name: Customers
-    description: Customer management operations
-  - name: Products
-    description: Product management operations
-  - name: Memberships
-    description: Membership operations
-  - name: Product Contracts
-    description: Product contract management
-  - name: Invoices
-    description: Invoice management operations
-
+- name: Customers
+  description: Customer management operations
+- name: Products
+  description: Product management operations
+- name: Memberships
+  description: Membership operations
+- name: Product Contracts
+  description: Product contract management
+- name: Invoices
+  description: Invoice management operations
 paths:
   /api/customers:
     post:
       tags:
-        - Customers
+      - Customers
       operationId: registerCustomer
       summary: Register a new customer
       requestBody:
@@ -41,7 +39,7 @@ paths:
                 $ref: '#/components/schemas/CustomerRegistrationResponse'
     get:
       tags:
-        - Customers
+      - Customers
       operationId: getAllCustomers
       summary: Get all customers
       responses:
@@ -53,19 +51,18 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/CustomerView'
-
   /api/customers/{customerId}:
     get:
       tags:
-        - Customers
+      - Customers
       operationId: getCustomer
       summary: Get customer by ID
       parameters:
-        - name: customerId
-          in: path
-          required: true
-          schema:
-            type: string
+      - name: customerId
+        in: path
+        required: true
+        schema:
+          type: string
       responses:
         '200':
           description: Customer found
@@ -77,15 +74,15 @@ paths:
           description: Customer not found
     put:
       tags:
-        - Customers
+      - Customers
       operationId: updateCustomer
       summary: Update customer information
       parameters:
-        - name: customerId
-          in: path
-          required: true
-          schema:
-            type: string
+      - name: customerId
+        in: path
+        required: true
+        schema:
+          type: string
       requestBody:
         required: true
         content:
@@ -95,11 +92,10 @@ paths:
       responses:
         '200':
           description: Customer updated successfully
-
   /api/products:
     post:
       tags:
-        - Products
+      - Products
       operationId: createProduct
       summary: Create a new product
       requestBody:
@@ -117,7 +113,7 @@ paths:
                 $ref: '#/components/schemas/ProductCreationResponse'
     get:
       tags:
-        - Products
+      - Products
       operationId: getAllProducts
       summary: Get all products
       responses:
@@ -129,19 +125,18 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/ProductView'
-
   /api/products/{productId}:
     get:
       tags:
-        - Products
+      - Products
       operationId: getProduct
       summary: Get product by ID
       parameters:
-        - name: productId
-          in: path
-          required: true
-          schema:
-            type: string
+      - name: productId
+        in: path
+        required: true
+        schema:
+          type: string
       responses:
         '200':
           description: Product found
@@ -153,15 +148,15 @@ paths:
           description: Product not found
     put:
       tags:
-        - Products
+      - Products
       operationId: updateProduct
       summary: Update product information
       parameters:
-        - name: productId
-          in: path
-          required: true
-          schema:
-            type: string
+      - name: productId
+        in: path
+        required: true
+        schema:
+          type: string
       requestBody:
         required: true
         content:
@@ -171,11 +166,10 @@ paths:
       responses:
         '200':
           description: Product updated successfully
-
   /api/products/memberships:
     get:
       tags:
-        - Products
+      - Products
       operationId: getMembershipVariants
       summary: Get all membership variants
       responses:
@@ -187,11 +181,10 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/ProductVariantDto'
-
   /api/memberships/sign-up:
     post:
       tags:
-        - Memberships
+      - Memberships
       operationId: signUp
       summary: Sign up for a membership
       requestBody:
@@ -207,19 +200,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/MembershipSignUpResultDto'
-
   /api/product-contracts/{contractId}:
     get:
       tags:
-        - Product Contracts
+      - Product Contracts
       operationId: getContractById
       summary: Get product contract by ID
       parameters:
-        - name: contractId
-          in: path
-          required: true
-          schema:
-            type: string
+      - name: contractId
+        in: path
+        required: true
+        schema:
+          type: string
       responses:
         '200':
           description: Contract found
@@ -229,19 +221,18 @@ paths:
                 $ref: '#/components/schemas/ProductContractDetailDto'
         '404':
           description: Contract not found
-
   /api/product-contracts/{contractId}/pause:
     post:
       tags:
-        - Product Contracts
+      - Product Contracts
       operationId: pauseContract
       summary: Pause a product contract
       parameters:
-        - name: contractId
-          in: path
-          required: true
-          schema:
-            type: string
+      - name: contractId
+        in: path
+        required: true
+        schema:
+          type: string
       requestBody:
         required: true
         content:
@@ -251,36 +242,38 @@ paths:
       responses:
         '200':
           description: Contract paused successfully
-
   /api/product-contracts/{contractId}/resume:
     post:
       tags:
-        - Product Contracts
+      - Product Contracts
       operationId: resumeContract
       summary: Resume a paused product contract
       parameters:
-        - name: contractId
-          in: path
-          required: true
-          schema:
-            type: string
+      - name: contractId
+        in: path
+        required: true
+        schema:
+          type: string
       responses:
         '200':
           description: Contract resumed successfully
-
   /api/invoices:
     get:
       tags:
-        - Invoices
+      - Invoices
       operationId: getInvoices
       summary: Get all invoices, optionally filtered by status
       parameters:
-        - name: status
-          in: query
-          required: false
-          schema:
-            type: string
-            enum: [OPEN, PAID, OVERDUE, CANCELLED]
+      - name: status
+        in: query
+        required: false
+        schema:
+          type: string
+          enum:
+          - OPEN
+          - PAID
+          - OVERDUE
+          - CANCELLED
       responses:
         '200':
           description: List of invoices
@@ -290,19 +283,18 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/InvoiceDto'
-
   /api/invoices/customer/{customerId}:
     get:
       tags:
-        - Invoices
+      - Invoices
       operationId: getInvoicesByCustomerId
       summary: Get all invoices for a customer
       parameters:
-        - name: customerId
-          in: path
-          required: true
-          schema:
-            type: string
+      - name: customerId
+        in: path
+        required: true
+        schema:
+          type: string
       responses:
         '200':
           description: List of customer invoices
@@ -312,19 +304,18 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/InvoiceDto'
-
   /api/invoices/{invoiceId}:
     get:
       tags:
-        - Invoices
+      - Invoices
       operationId: getInvoiceById
       summary: Get invoice by ID
       parameters:
-        - name: invoiceId
-          in: path
-          required: true
-          schema:
-            type: string
+      - name: invoiceId
+        in: path
+        required: true
+        schema:
+          type: string
       responses:
         '200':
           description: Invoice found
@@ -334,51 +325,48 @@ paths:
                 $ref: '#/components/schemas/InvoiceDto'
         '404':
           description: Invoice not found
-
   /api/invoices/{invoiceId}/pay:
     post:
       tags:
-        - Invoices
+      - Invoices
       operationId: markAsPaid
       summary: Mark an invoice as paid
       parameters:
-        - name: invoiceId
-          in: path
-          required: true
-          schema:
-            type: string
+      - name: invoiceId
+        in: path
+        required: true
+        schema:
+          type: string
       responses:
         '200':
           description: Invoice marked as paid
-
   /api/invoices/{invoiceId}/mark-overdue:
     post:
       tags:
-        - Invoices
+      - Invoices
       operationId: markAsOverdue
       summary: Mark an invoice as overdue
       parameters:
-        - name: invoiceId
-          in: path
-          required: true
-          schema:
-            type: string
+      - name: invoiceId
+        in: path
+        required: true
+        schema:
+          type: string
       responses:
         '200':
           description: Invoice marked as overdue
-
   /api/invoices/{invoiceId}/cancel:
     post:
       tags:
-        - Invoices
+      - Invoices
       operationId: cancelInvoice
       summary: Cancel an invoice
       parameters:
-        - name: invoiceId
-          in: path
-          required: true
-          schema:
-            type: string
+      - name: invoiceId
+        in: path
+        required: true
+        schema:
+          type: string
       requestBody:
         required: true
         content:
@@ -388,18 +376,17 @@ paths:
       responses:
         '200':
           description: Invoice cancelled successfully
-
 components:
   schemas:
     RegisterCustomerRequest:
       type: object
       required:
-        - salutation
-        - firstName
-        - lastName
-        - dateOfBirth
-        - address
-        - email
+      - salutation
+      - firstName
+      - lastName
+      - dateOfBirth
+      - address
+      - email
       properties:
         salutation:
           $ref: '#/components/schemas/Salutation'
@@ -418,19 +405,23 @@ components:
         phoneNumber:
           type: string
           nullable: true
-
     Salutation:
       type: string
-      enum: [ MR, MS, MRS, MX, DR ]
+      enum:
+      - MR
+      - MS
+      - MRS
+      - MX
+      - DR
     UpdateCustomerRequest:
       type: object
       required:
-        - salutation
-        - firstName
-        - lastName
-        - dateOfBirth
-        - address
-        - email
+      - salutation
+      - firstName
+      - lastName
+      - dateOfBirth
+      - address
+      - email
       properties:
         salutation:
           $ref: '#/components/schemas/Salutation'
@@ -449,15 +440,14 @@ components:
         phoneNumber:
           type: string
           nullable: true
-
     AddressDto:
       type: object
       required:
-        - street
-        - houseNumber
-        - postalCode
-        - city
-        - country
+      - street
+      - houseNumber
+      - postalCode
+      - city
+      - country
       properties:
         street:
           type: string
@@ -469,7 +459,6 @@ components:
           type: string
         country:
           type: string
-
     CustomerRegistrationResponse:
       type: object
       properties:
@@ -479,18 +468,17 @@ components:
         error:
           type: string
           nullable: true
-
     CustomerView:
       type: object
       required:
-        - customerId
-        - salutation
-        - firstName
-        - lastName
-        - dateOfBirth
-        - address
-        - email
-        - phoneNumber
+      - customerId
+      - salutation
+      - firstName
+      - lastName
+      - dateOfBirth
+      - address
+      - email
+      - phoneNumber
       properties:
         customerId:
           type: string
@@ -510,73 +498,111 @@ components:
         phoneNumber:
           type: string
           nullable: true
-
     CreateProductRequest:
       type: object
       required:
-        - code
-        - name
-        - productType
-        - audience
-        - requiresMembership
-        - price
-        - behavior
+      - slug
+      - name
+      - productType
+      - audience
+      - requiresMembership
+      - pricingVariant
+      - behavior
       properties:
-        code:
+        slug:
           type: string
         name:
           type: string
         productType:
           type: string
-        audience:
+        audience: &id001
           $ref: '#/components/schemas/Audience'
         requiresMembership:
           type: boolean
-        price:
-          type: number
-          format: decimal
+        pricingVariant:
+          $ref: '#/components/schemas/PricingVariantConfig'
         behavior:
           $ref: '#/components/schemas/ProductBehaviorConfig'
-
+        description:
+          type: string
+          nullable: true
+        termsAndConditions:
+          type: string
+          nullable: true
+        visibility:
+          type: string
+          enum:
+          - PUBLIC
+          - HIDDEN
+          - ARCHIVED
+          default: PUBLIC
+        buyable:
+          type: boolean
+          default: true
+        buyerCanCancel:
+          type: boolean
+          default: true
+        perks:
+          type: array
+          nullable: true
+          items:
+            type: string
     UpdateProductRequest:
       type: object
       required:
-        - code
-        - name
-        - productType
-        - audience
-        - requiresMembership
-        - price
-        - behavior
+      - slug
+      - name
+      - productType
+      - audience
+      - requiresMembership
+      - pricingVariant
+      - behavior
       properties:
-        code:
+        slug:
           type: string
         name:
           type: string
         productType:
           type: string
-        audience:
-          $ref: '#/components/schemas/Audience'
+        audience: *id001
         requiresMembership:
           type: boolean
-        price:
-          type: number
-          format: decimal
+        pricingVariant:
+          $ref: '#/components/schemas/PricingVariantConfig'
         behavior:
           $ref: '#/components/schemas/ProductBehaviorConfig'
-
+        description:
+          type: string
+          nullable: true
+        termsAndConditions:
+          type: string
+          nullable: true
+        visibility:
+          type: string
+          enum:
+          - PUBLIC
+          - HIDDEN
+          - ARCHIVED
+        buyable:
+          type: boolean
+        buyerCanCancel:
+          type: boolean
+        perks:
+          type: array
+          nullable: true
+          items:
+            type: string
     Audience:
       type: string
-      enum: [ INTERNAL, EXTERNAL, BOTH ]
-
+      enum:
+      - INTERNAL
+      - EXTERNAL
+      - BOTH
     ProductBehaviorConfig:
       type: object
+      description: Behavior and business rules applied to product contracts.
       required:
-        - canBePaused
-        - renewalLeadTimeDays
-        - maxActivePerCustomer
-        - durationInMonths
-        - numberOfSessions
+      - canBePaused
       properties:
         canBePaused:
           type: boolean
@@ -584,21 +610,24 @@ components:
         renewalLeadTimeDays:
           type: integer
           nullable: true
-          description: >
-            Number of days before expiry when auto-renewal should be triggered.
-            Null if auto-renewal is not time-based or not applicable.
+          description: Number of days before expiry when auto-renewal should be triggered
+            in your own logic. Null if not time-based or not applicable.
         maxActivePerCustomer:
           type: integer
           nullable: true
-          description: >
-            Maximum number of concurrently active contracts of this product (or group)
-            allowed per customer. Null means no explicit limit.
-        durationInMonths:
-            type: integer
-            nullable: true
+          description: Maximum number of concurrently active contracts of this product
+            (or group) allowed per customer. Null means no explicit limit.
+        maxPurchasesPerBuyer:
+          type: integer
+          nullable: true
+          minimum: 0
+          maximum: 10
+          description: Mirrors Wix Plan.maxPurchasesPerBuyer semantics. 0 = unlimited
+            purchases, 1 = a customer can only purchase once, up to 10.
         numberOfSessions:
           type: integer
           nullable: true
+          description: Total number of sessions associated with this product, if applicable.
     ProductCreationResponse:
       type: object
       properties:
@@ -608,13 +637,12 @@ components:
         error:
           type: string
           nullable: true
-
     ProductView:
       type: object
       properties:
         productId:
           type: string
-        code:
+        slug:
           type: string
         name:
           type: string
@@ -624,43 +652,65 @@ components:
           type: string
         requiresMembership:
           type: boolean
-        price:
-          type: number
-          format: decimal
+        pricingVariant:
+          $ref: '#/components/schemas/PricingVariantConfig'
         behavior:
           $ref: '#/components/schemas/ProductBehaviorConfig'
-
+        description:
+          type: string
+          nullable: true
+        termsAndConditions:
+          type: string
+          nullable: true
+        visibility:
+          type: string
+          enum:
+          - PUBLIC
+          - HIDDEN
+          - ARCHIVED
+          nullable: true
+        buyable:
+          type: boolean
+          nullable: true
+        buyerCanCancel:
+          type: boolean
+          nullable: true
+        perks:
+          type: array
+          nullable: true
+          items:
+            type: string
+        linkedPlatforms:
+          type: array
+          description: External platforms where this product is linked/published.
+          items:
+            $ref: '#/components/schemas/LinkedPlatformSync'
     ProductVariantDto:
       type: object
       required:
-        - id
-        - code
-        - name
-        - productType
-        - price
-        - durationMonths
+      - id
+      - slug
+      - name
+      - productType
+      - pricingVariant
       properties:
         id:
           type: string
-        code:
+        slug:
           type: string
         name:
           type: string
         productType:
           type: string
-        price:
-          type: number
-          format: decimal
-        durationMonths:
-          type: integer
-
+        pricingVariant:
+          $ref: '#/components/schemas/PricingVariantConfig'
     MembershipSignUpRequestDto:
       type: object
       required:
-        - customerId
-        - productVariantId
-        - paymentMode
-        - startDate
+      - customerId
+      - productVariantId
+      - paymentMode
+      - startDate
       properties:
         customerId:
           type: string
@@ -668,16 +718,18 @@ components:
           type: string
         paymentMode:
           type: string
-          enum: [ PAY_ON_SITE, INVOICE_EMAIL ]
+          enum:
+          - PAY_ON_SITE
+          - INVOICE_EMAIL
         startDate:
           type: string
           format: date
     MembershipSignUpResultDto:
       type: object
       required:
-        - contractId
-        - bookingId
-        - invoiceId
+      - contractId
+      - bookingId
+      - invoiceId
       properties:
         contractId:
           type: string
@@ -685,18 +737,17 @@ components:
           type: string
         invoiceId:
           type: string
-
     ProductContractDetailDto:
       type: object
       required:
-        - contractId
-        - customerId
-        - productVariantId
-        - bookingId
-        - status
-        - sessionsUsed
-        - pauseHistory
-        - canBePaused
+      - contractId
+      - customerId
+      - productVariantId
+      - bookingId
+      - status
+      - sessionsUsed
+      - pauseHistory
+      - canBePaused
       properties:
         contractId:
           type: string
@@ -722,12 +773,11 @@ components:
             $ref: '#/components/schemas/PauseHistoryEntryDto'
         canBePaused:
           type: boolean
-
     DateRangeDto:
       type: object
       required:
-        - start
-        - end
+      - start
+      - end
       properties:
         start:
           type: string
@@ -735,24 +785,22 @@ components:
         end:
           type: string
           format: date
-
     PauseHistoryEntryDto:
       type: object
       required:
-        - pauseRange
-        - reason
+      - pauseRange
+      - reason
       properties:
         pauseRange:
           $ref: '#/components/schemas/DateRangeDto'
         reason:
           type: string
-
     PauseContractRequest:
       type: object
       required:
-        - startDate
-        - endDate
-        - reason
+      - startDate
+      - endDate
+      - reason
       properties:
         startDate:
           type: string
@@ -762,19 +810,21 @@ components:
           format: date
         reason:
           type: string
-          enum: [MEDICAL, VACATION, OTHER]
-
+          enum:
+          - MEDICAL
+          - VACATION
+          - OTHER
     InvoiceDto:
       type: object
       required:
-        - invoiceId
-        - customerId
-        - customerName
-        - bookingId
-        - amount
-        - dueDate
-        - status
-        - isInstallment
+      - invoiceId
+      - customerId
+      - customerName
+      - bookingId
+      - amount
+      - dueDate
+      - status
+      - isInstallment
       properties:
         invoiceId:
           type: string
@@ -801,11 +851,110 @@ components:
           type: string
           format: date-time
           nullable: true
-
     CancelInvoiceRequest:
       type: object
       required:
-        - reason
+      - reason
       properties:
         reason:
           type: string
+    BillingInterval:
+      type: string
+      description: Unit used for billing, duration and free trial.
+      enum:
+      - DAY
+      - WEEK
+      - MONTH
+      - YEAR
+    PricingModel:
+      type: string
+      description: Pricing model, aligned with Wix Plan.pricingVariants[].pricingModel.
+      enum:
+      - SUBSCRIPTION
+      - SINGLE_PAYMENT_FOR_DURATION
+      - SINGLE_PAYMENT_UNLIMITED
+    PricingDuration:
+      type: object
+      description: Generic duration structure used for billingCycle, duration and
+        freeTrial.
+      required:
+      - interval
+      - count
+      properties:
+        interval:
+          $ref: '#/components/schemas/BillingInterval'
+        count:
+          type: integer
+          minimum: 1
+    PricingVariantConfig:
+      type: object
+      description: Pricing configuration for the product, conceptually matching Wix
+        Plan.pricingVariants[0].
+      required:
+      - pricingModel
+      - flatRate
+      properties:
+        pricingModel:
+          $ref: '#/components/schemas/PricingModel'
+        flatRate:
+          type: number
+          format: decimal
+        billingCycle:
+          $ref: '#/components/schemas/PricingDuration'
+          nullable: true
+        duration:
+          $ref: '#/components/schemas/PricingDuration'
+          nullable: true
+        freeTrial:
+          $ref: '#/components/schemas/PricingDuration'
+          nullable: true
+    LinkedPlatformSync:
+      type: object
+      description: Synchronization state of this product on an external platform.
+      required:
+      - platformName
+      - isSynced
+      properties:
+        platformName:
+          type: string
+          description: Name of the external platform (e.g. "wix", "shopify", "webflow").
+          example: wix
+        idOnPlatform:
+          type: string
+          nullable: true
+          description: Identifier of the product/plan on the external platform. Null
+            if it has not been created there yet.
+        revision:
+          type: string
+          nullable: true
+          description: Revision or version identifier as used by the platform (e.g.
+            Wix plan.revision).
+        visibilityOnPlatform:
+          type: string
+          nullable: true
+          description: Visibility/status of the product on that platform.
+          enum:
+          - DRAFT
+          - PUBLISHED
+          - ARCHIVED
+          - HIDDEN
+          - NOT_PUBLISHED
+        isSynced:
+          type: boolean
+          description: True if the last local change has been successfully pushed
+            to this platform.
+        isSourceOfTruth:
+          type: boolean
+          default: false
+          description: If true, this platform is considered the authoritative source
+            for product data; sync direction is primarily platform -> local.
+        lastSyncedAt:
+          type: string
+          format: date-time
+          nullable: true
+          description: Timestamp of the last successful sync to this platform.
+        syncError:
+          type: string
+          nullable: true
+          description: Last error message when attempting to sync with this platform,
+            if any.

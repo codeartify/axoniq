@@ -25,6 +25,10 @@ export class ProductDetail implements OnInit {
 
   editedProduct: UpdateProductRequest | null = null;
   audiences = ['INTERNAL', 'EXTERNAL', 'BOTH'];
+  pricingModels = ['SUBSCRIPTION', 'SINGLE_PAYMENT_FOR_DURATION', 'SINGLE_PAYMENT_UNLIMITED'];
+  visibilityOptions = ['PUBLIC', 'HIDDEN', 'ARCHIVED'];
+  billingIntervals = ['DAY', 'WEEK', 'MONTH', 'YEAR'];
+  perksInput: string = '';
 
   ngOnInit(): void {
     const productId = this.route.snapshot.paramMap.get('id');
@@ -51,22 +55,34 @@ export class ProductDetail implements OnInit {
 
   startEdit(): void {
     const prod = this.product();
-    if (prod && prod.code && prod.name && prod.productType && prod.audience &&
-        prod.requiresMembership !== undefined && prod.price !== undefined && prod.behavior) {
+    if (prod && prod.slug && prod.name && prod.productType && prod.audience &&
+        prod.requiresMembership !== undefined && prod.pricingVariant && prod.behavior) {
       this.editedProduct = {
-        code: prod.code,
+        slug: prod.slug,
         name: prod.name,
         productType: prod.productType,
         audience: prod.audience as any,
         requiresMembership: prod.requiresMembership,
-        price: prod.price,
+        pricingVariant: {
+          pricingModel: prod.pricingVariant.pricingModel,
+          flatRate: prod.pricingVariant.flatRate,
+          billingCycle: prod.pricingVariant.billingCycle || undefined,
+          duration: prod.pricingVariant.duration || undefined,
+          freeTrial: prod.pricingVariant.freeTrial || undefined
+        },
         behavior: {
           canBePaused: prod.behavior.canBePaused,
-          renewalLeadTimeDays: prod.behavior.renewalLeadTimeDays,
-          maxActivePerCustomer: prod.behavior.maxActivePerCustomer,
-          durationInMonths: prod.behavior.durationInMonths,
-          numberOfSessions: prod.behavior.numberOfSessions
-        }
+          renewalLeadTimeDays: prod.behavior.renewalLeadTimeDays || null,
+          maxActivePerCustomer: prod.behavior.maxActivePerCustomer || null,
+          maxPurchasesPerBuyer: prod.behavior.maxPurchasesPerBuyer || null,
+          numberOfSessions: prod.behavior.numberOfSessions || null
+        },
+        description: prod.description || null,
+        termsAndConditions: prod.termsAndConditions || null,
+        visibility: prod.visibility || 'PUBLIC',
+        buyable: prod.buyable ?? true,
+        buyerCanCancel: prod.buyerCanCancel ?? true,
+        perks: prod.perks ? [...prod.perks] : null
       };
       this.isEditing.set(true);
       this.successMessage.set(null);
@@ -104,5 +120,51 @@ export class ProductDetail implements OnInit {
 
   goBack(): void {
     this.router.navigate(['/products']);
+  }
+
+  addPerk(): void {
+    if (this.perksInput.trim() && this.editedProduct) {
+      if (!this.editedProduct.perks) {
+        this.editedProduct.perks = [];
+      }
+      this.editedProduct.perks.push(this.perksInput.trim());
+      this.perksInput = '';
+    }
+  }
+
+  removePerk(index: number): void {
+    if (this.editedProduct?.perks) {
+      this.editedProduct.perks.splice(index, 1);
+    }
+  }
+
+  toggleBillingCycle(): void {
+    if (this.editedProduct) {
+      if (this.editedProduct.pricingVariant.billingCycle) {
+        this.editedProduct.pricingVariant.billingCycle = undefined;
+      } else {
+        this.editedProduct.pricingVariant.billingCycle = { interval: 'MONTH' as any, count: 1 };
+      }
+    }
+  }
+
+  toggleDuration(): void {
+    if (this.editedProduct) {
+      if (this.editedProduct.pricingVariant.duration) {
+        this.editedProduct.pricingVariant.duration = undefined;
+      } else {
+        this.editedProduct.pricingVariant.duration = { interval: 'MONTH' as any, count: 12 };
+      }
+    }
+  }
+
+  toggleFreeTrial(): void {
+    if (this.editedProduct) {
+      if (this.editedProduct.pricingVariant.freeTrial) {
+        this.editedProduct.pricingVariant.freeTrial = undefined;
+      } else {
+        this.editedProduct.pricingVariant.freeTrial = { interval: 'DAY' as any, count: 7 };
+      }
+    }
   }
 }

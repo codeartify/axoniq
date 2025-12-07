@@ -44,20 +44,66 @@ class ProductController(
             val command =
                 CreateProductCommand(
                     productId = productId,
-                    code = request.code,
+                    slug = request.slug,
                     name = request.name,
                     productType = request.productType,
                     audience = request.audience.let { ProductAudience.valueOf(it.name) },
                     requiresMembership = request.requiresMembership,
-                    price = request.price,
+                    pricingVariant =
+                        ch.fitnesslab.product.domain.PricingVariantConfig(
+                            pricingModel =
+                                ch.fitnesslab.product.domain.PricingModel.valueOf(
+                                    request.pricingVariant.pricingModel.name,
+                                ),
+                            flatRate = request.pricingVariant.flatRate,
+                            billingCycle =
+                                request.pricingVariant.billingCycle?.let {
+                                    ch.fitnesslab.product.domain.PricingDuration(
+                                        interval =
+                                            ch.fitnesslab.product.domain.BillingInterval.valueOf(
+                                                it.interval.name,
+                                            ),
+                                        count = it.count,
+                                    )
+                                },
+                            duration =
+                                request.pricingVariant.duration?.let {
+                                    ch.fitnesslab.product.domain.PricingDuration(
+                                        interval =
+                                            ch.fitnesslab.product.domain.BillingInterval.valueOf(
+                                                it.interval.name,
+                                            ),
+                                        count = it.count,
+                                    )
+                                },
+                            freeTrial =
+                                request.pricingVariant.freeTrial?.let {
+                                    ch.fitnesslab.product.domain.PricingDuration(
+                                        interval =
+                                            ch.fitnesslab.product.domain.BillingInterval.valueOf(
+                                                it.interval.name,
+                                            ),
+                                        count = it.count,
+                                    )
+                                },
+                        ),
                     behavior =
                         ProductBehaviorConfig(
                             canBePaused = request.behavior.canBePaused,
                             renewalLeadTimeDays = request.behavior.renewalLeadTimeDays,
                             maxActivePerCustomer = request.behavior.maxActivePerCustomer,
-                            durationInMonths = request.behavior.durationInMonths,
+                            maxPurchasesPerBuyer = request.behavior.maxPurchasesPerBuyer,
                             numberOfSessions = request.behavior.numberOfSessions,
                         ),
+                    description = request.description,
+                    termsAndConditions = request.termsAndConditions,
+                    visibility =
+                        request.visibility?.let {
+                            ch.fitnesslab.product.domain.ProductVisibility.valueOf(it.name)
+                        } ?: ch.fitnesslab.product.domain.ProductVisibility.PUBLIC,
+                    buyable = request.buyable ?: true,
+                    buyerCanCancel = request.buyerCanCancel ?: true,
+                    perks = request.perks,
                 )
             commandGateway.sendAndWait<Any>(command)
 
@@ -102,20 +148,66 @@ class ProductController(
             val command =
                 UpdateProductCommand(
                     productId = ProductVariantId.from(productId),
-                    code = request.code,
+                    slug = request.slug,
                     name = request.name,
                     productType = request.productType,
                     audience = request.audience.let { ProductAudience.valueOf(it.name) },
                     requiresMembership = request.requiresMembership,
-                    price = request.price,
+                    pricingVariant =
+                        ch.fitnesslab.product.domain.PricingVariantConfig(
+                            pricingModel =
+                                ch.fitnesslab.product.domain.PricingModel.valueOf(
+                                    request.pricingVariant.pricingModel.name,
+                                ),
+                            flatRate = request.pricingVariant.flatRate,
+                            billingCycle =
+                                request.pricingVariant.billingCycle?.let {
+                                    ch.fitnesslab.product.domain.PricingDuration(
+                                        interval =
+                                            ch.fitnesslab.product.domain.BillingInterval.valueOf(
+                                                it.interval.name,
+                                            ),
+                                        count = it.count,
+                                    )
+                                },
+                            duration =
+                                request.pricingVariant.duration?.let {
+                                    ch.fitnesslab.product.domain.PricingDuration(
+                                        interval =
+                                            ch.fitnesslab.product.domain.BillingInterval.valueOf(
+                                                it.interval.name,
+                                            ),
+                                        count = it.count,
+                                    )
+                                },
+                            freeTrial =
+                                request.pricingVariant.freeTrial?.let {
+                                    ch.fitnesslab.product.domain.PricingDuration(
+                                        interval =
+                                            ch.fitnesslab.product.domain.BillingInterval.valueOf(
+                                                it.interval.name,
+                                            ),
+                                        count = it.count,
+                                    )
+                                },
+                        ),
                     behavior =
                         ProductBehaviorConfig(
                             canBePaused = request.behavior.canBePaused,
                             renewalLeadTimeDays = request.behavior.renewalLeadTimeDays,
                             maxActivePerCustomer = request.behavior.maxActivePerCustomer,
-                            durationInMonths = request.behavior.durationInMonths,
+                            maxPurchasesPerBuyer = request.behavior.maxPurchasesPerBuyer,
                             numberOfSessions = request.behavior.numberOfSessions,
                         ),
+                    description = request.description,
+                    termsAndConditions = request.termsAndConditions,
+                    visibility =
+                        request.visibility?.let {
+                            ch.fitnesslab.product.domain.ProductVisibility.valueOf(it.name)
+                        } ?: ch.fitnesslab.product.domain.ProductVisibility.PUBLIC,
+                    buyable = request.buyable ?: true,
+                    buyerCanCancel = request.buyerCanCancel ?: true,
+                    perks = request.perks,
                 )
 
             commandGateway.sendAndWait<Any>(command)

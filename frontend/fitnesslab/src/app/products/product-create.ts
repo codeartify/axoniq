@@ -16,24 +16,40 @@ export class ProductCreate {
   private router = inject(Router);
 
   product: CreateProductRequest = {
-    code: '',
+    slug: '',
     name: '',
     productType: '',
     audience: 'BOTH' as any,
     requiresMembership: false,
-    price: 0,
+    pricingVariant: {
+      pricingModel: 'SUBSCRIPTION' as any,
+      flatRate: 0,
+      billingCycle: undefined,
+      duration: undefined,
+      freeTrial: undefined
+    },
     behavior: {
       canBePaused: false,
       renewalLeadTimeDays: null,
       maxActivePerCustomer: null,
-      durationInMonths: null,
+      maxPurchasesPerBuyer: null,
       numberOfSessions: null
-    }
+    },
+    description: null,
+    termsAndConditions: null,
+    visibility: 'PUBLIC' as any,
+    buyable: true,
+    buyerCanCancel: true,
+    perks: null
   };
 
   audiences = ['INTERNAL', 'EXTERNAL', 'BOTH'];
+  pricingModels = ['SUBSCRIPTION', 'SINGLE_PAYMENT_FOR_DURATION', 'SINGLE_PAYMENT_UNLIMITED'];
+  visibilityOptions = ['PUBLIC', 'HIDDEN', 'ARCHIVED'];
+  billingIntervals = ['DAY', 'WEEK', 'MONTH', 'YEAR'];
   isSubmitting = false;
   errorMessage: string | null = null;
+  perksInput: string = '';
 
   onSubmit(): void {
     if (!this.isFormValid()) {
@@ -65,11 +81,51 @@ export class ProductCreate {
 
   isFormValid(): boolean {
     return !!(
-      this.product.code &&
+      this.product.slug &&
       this.product.name &&
       this.product.productType &&
       this.product.audience &&
-      this.product.price >= 0
+      this.product.pricingVariant.flatRate >= 0
     );
+  }
+
+  addPerk(): void {
+    if (this.perksInput.trim()) {
+      if (!this.product.perks) {
+        this.product.perks = [];
+      }
+      this.product.perks.push(this.perksInput.trim());
+      this.perksInput = '';
+    }
+  }
+
+  removePerk(index: number): void {
+    if (this.product.perks) {
+      this.product.perks.splice(index, 1);
+    }
+  }
+
+  toggleBillingCycle(): void {
+    if (this.product.pricingVariant.billingCycle) {
+      this.product.pricingVariant.billingCycle = undefined;
+    } else {
+      this.product.pricingVariant.billingCycle = { interval: 'MONTH' as any, count: 1 };
+    }
+  }
+
+  toggleDuration(): void {
+    if (this.product.pricingVariant.duration) {
+      this.product.pricingVariant.duration = undefined;
+    } else {
+      this.product.pricingVariant.duration = { interval: 'MONTH' as any, count: 12 };
+    }
+  }
+
+  toggleFreeTrial(): void {
+    if (this.product.pricingVariant.freeTrial) {
+      this.product.pricingVariant.freeTrial = undefined;
+    } else {
+      this.product.pricingVariant.freeTrial = { interval: 'DAY' as any, count: 7 };
+    }
   }
 }

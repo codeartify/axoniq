@@ -6,7 +6,7 @@ import {GenericListComponent, ColumnDefinition, RowAction, CollectionAction} fro
 import {CommonModule} from '@angular/common';
 import {TranslateModule} from '@ngx-translate/core';
 
-type SortColumn = 'name' | 'code' | 'productType' | 'price' | 'audience';
+type SortColumn = 'name' | 'slug' | 'productType' | 'price' | 'audience' | 'visibility';
 
 @Component({
   selector: 'app-product-list',
@@ -57,8 +57,8 @@ export class ProductList implements OnInit {
 
   columns: ColumnDefinition<ProductView>[] = [
     {
-      key: 'code',
-      headerKey: 'product.table.code',
+      key: 'slug',
+      headerKey: 'product.table.slug',
       sortable: true
     },
     {
@@ -75,18 +75,17 @@ export class ProductList implements OnInit {
       key: 'price',
       headerKey: 'product.table.price',
       sortable: true,
-      getValue: (product) => product.price
+      getValue: (product) => product.pricingVariant?.flatRate ?? 0
+    },
+    {
+      key: 'visibility',
+      headerKey: 'product.table.visibility',
+      sortable: true
     },
     {
       key: 'audience',
       headerKey: 'product.table.audience',
       sortable: true
-    },
-    {
-      key: 'requiresMembership',
-      headerKey: 'product.table.requiresMembership',
-      sortable: false,
-      getValue: (product) => product.requiresMembership ? 'Yes' : 'No'
     }
   ];
 
@@ -114,7 +113,7 @@ export class ProductList implements OnInit {
     if (term) {
       filtered = filtered.filter(product =>
         product.name?.toLowerCase().includes(term) ||
-        product.code?.toLowerCase().includes(term)
+        product.slug?.toLowerCase().includes(term)
       );
     }
 
@@ -126,14 +125,17 @@ export class ProductList implements OnInit {
         case 'name':
           comparison = (a.name || '').localeCompare(b.name || '');
           break;
-        case 'code':
-          comparison = (a.code || '').localeCompare(b.code || '');
+        case 'slug':
+          comparison = (a.slug || '').localeCompare(b.slug || '');
           break;
         case 'productType':
           comparison = (a.productType || '').localeCompare(b.productType || '');
           break;
         case 'price':
-          comparison = (a.price || 0) - (b.price || 0);
+          comparison = (a.pricingVariant?.flatRate || 0) - (b.pricingVariant?.flatRate || 0);
+          break;
+        case 'visibility':
+          comparison = (a.visibility || '').localeCompare(b.visibility || '');
           break;
         case 'audience':
           comparison = (a.audience || '').localeCompare(b.audience || '');
