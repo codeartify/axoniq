@@ -1,10 +1,10 @@
-import {Component, computed, effect, signal, inject, TemplateRef, ViewChild} from '@angular/core';
-import {InvoiceView, Invoices} from './invoices';
+import {AfterViewInit, Component, computed, effect, inject, signal, TemplateRef, ViewChild} from '@angular/core';
+import {Invoices, InvoiceView} from './invoices';
 import {CommonModule} from '@angular/common';
 import {FormsModule} from '@angular/forms';
 import {Router} from '@angular/router';
 import {TranslateModule} from '@ngx-translate/core';
-import {GenericListComponent, ColumnDefinition, RowAction} from '../shared/generic-list/generic-list.component';
+import {ColumnDefinition, GenericListComponent, RowAction} from '../shared/generic-list/generic-list.component';
 
 type SortColumn = 'invoiceId' | 'customerName' | 'amount' | 'dueDate' | 'status';
 
@@ -110,7 +110,7 @@ type SortColumn = 'invoiceId' | 'customerName' | 'amount' | 'dueDate' | 'status'
     </ng-template>
   `
 })
-export class InvoiceList {
+export class InvoiceList implements AfterViewInit {
   private invoiceService = inject(Invoices);
   private router = inject(Router);
 
@@ -132,44 +132,46 @@ export class InvoiceList {
   columns: ColumnDefinition<InvoiceView>[] = [];
 
   ngAfterViewInit(): void {
-    this.columns = [
-      {
-        key: 'invoiceId',
-        headerKey: 'invoice.table.invoiceId',
-        sortable: true,
-        template: this.invoiceIdTemplate
-      },
-      {
-        key: 'customerName',
-        headerKey: 'invoice.table.customerName',
-        sortable: true,
-        template: this.customerNameTemplate
-      },
-      {
-        key: 'amount',
-        headerKey: 'invoice.table.amount',
-        sortable: true,
-        template: this.amountTemplate
-      },
-      {
-        key: 'dueDate',
-        headerKey: 'invoice.table.dueDate',
-        sortable: true,
-        template: this.dueDateTemplate
-      },
-      {
-        key: 'status',
-        headerKey: 'invoice.table.status',
-        sortable: true,
-        template: this.statusTemplate
-      },
-      {
-        key: 'isInstallment',
-        headerKey: 'invoice.table.installment',
-        sortable: false,
-        template: this.installmentTemplate
-      }
-    ];
+    setTimeout(() => {
+      this.columns = [
+        {
+          key: 'invoiceId',
+          headerKey: 'invoice.table.invoiceId',
+          sortable: true,
+          template: this.invoiceIdTemplate
+        },
+        {
+          key: 'customerName',
+          headerKey: 'invoice.table.customerName',
+          sortable: true,
+          template: this.customerNameTemplate
+        },
+        {
+          key: 'amount',
+          headerKey: 'invoice.table.amount',
+          sortable: true,
+          template: this.amountTemplate
+        },
+        {
+          key: 'dueDate',
+          headerKey: 'invoice.table.dueDate',
+          sortable: true,
+          template: this.dueDateTemplate
+        },
+        {
+          key: 'status',
+          headerKey: 'invoice.table.status',
+          sortable: true,
+          template: this.statusTemplate
+        },
+        {
+          key: 'isInstallment',
+          headerKey: 'invoice.table.installment',
+          sortable: false,
+          template: this.installmentTemplate
+        }
+      ];
+    });
   }
 
   getRowActions(): RowAction<InvoiceView>[] {

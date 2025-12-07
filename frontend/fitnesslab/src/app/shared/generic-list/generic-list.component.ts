@@ -1,4 +1,14 @@
-import {Component, ContentChild, EventEmitter, HostListener, Input, Output, signal, TemplateRef} from '@angular/core';
+import {
+  Component,
+  ContentChild,
+  EventEmitter,
+  HostListener,
+  Input,
+  Output,
+  signal,
+  TemplateRef,
+  input
+} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {FormsModule} from '@angular/forms';
 import {TranslateModule} from '@ngx-translate/core';
@@ -31,26 +41,26 @@ export interface CollectionAction {
   templateUrl: './generic-list.component.html'
 })
 export class GenericListComponent<T> {
-  @Input() titleKey!: string;
-  @Input() searchPlaceholderKey!: string;
-  @Input() noItemsFoundKey!: string;
-  @Input() loadingKey?: string;
-  @Input() createFirstItemKey?: string;
+  titleKey = input.required<string>();
+  searchPlaceholderKey = input.required<string>();
+  noItemsFoundKey = input.required<string>();
+  loadingKey = input<string | undefined>(undefined);
+  createFirstItemKey = input<string | undefined>(undefined);
 
-  @Input() items: T[] = [];
-  @Input() columns: ColumnDefinition<T>[] = [];
-  @Input() rowActions: RowAction<T>[] = [];
-  @Input() collectionActions: CollectionAction[] = [];
+  items = input<T[]>([]);
+  columns = input<ColumnDefinition<T>[]>([]);
+  rowActions = input<RowAction<T>[]>([]);
+  collectionActions = input<CollectionAction[]>([]);
 
-  @Input() isLoading = false;
-  @Input() errorMessage: string | null = null;
+  isLoading = input<boolean>(false);
+  errorMessage = input<string | null>(null);
 
-  @Input() searchTerm = '';
-  @Input() sortColumn: string | null = null;
-  @Input() sortDirection: 'asc' | 'desc' = 'asc';
+  searchTerm = input<string>('');
+  sortColumn = input<string | null>(null);
+  sortDirection = input<'asc' | 'desc'>('asc');
 
-  @Input() trackByFn!: (index: number, item: T) => any;
-  @Input() onRowClick?: (item: T) => void;
+  trackByFn = input.required<(index: number, item: T) => any>();
+  onRowClick = input<((item: T) => void) | undefined>(undefined);
 
   @Output() searchTermChange = new EventEmitter<string>();
   @Output() sortChange = new EventEmitter<{ column: string, direction: 'asc' | 'desc' }>();
@@ -70,22 +80,23 @@ export class GenericListComponent<T> {
   }
 
   sortBy(columnKey: string): void {
-    const column = this.columns.find(c => c.key === columnKey);
+    const column = this.columns().find(c => c.key === columnKey);
     if (!column?.sortable) return;
 
-    if (this.sortColumn === columnKey) {
-      this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
-    } else {
-      this.sortColumn = columnKey;
-      this.sortDirection = 'asc';
+    const currentSortColumn = this.sortColumn();
+    const currentSortDirection = this.sortDirection();
+    let nextDirection: 'asc' | 'desc' = 'asc';
+
+    if (currentSortColumn === columnKey) {
+      nextDirection = currentSortDirection === 'asc' ? 'desc' : 'asc';
     }
 
-    this.sortChange.emit({ column: columnKey, direction: this.sortDirection });
+    this.sortChange.emit({ column: columnKey, direction: nextDirection });
   }
 
   getSortIcon(columnKey: string): string {
-    if (this.sortColumn !== columnKey) return '↕';
-    return this.sortDirection === 'asc' ? '↑' : '↓';
+    if (this.sortColumn() !== columnKey) return '↕';
+    return this.sortDirection() === 'asc' ? '↑' : '↓';
   }
 
   toggleDropdown(itemId: any, event: Event): void {
@@ -102,8 +113,9 @@ export class GenericListComponent<T> {
   }
 
   handleRowClick(item: T, event: Event): void {
-    if (this.onRowClick) {
-      this.onRowClick(item);
+    const handler = this.onRowClick();
+    if (handler) {
+      handler(item);
     }
   }
 
