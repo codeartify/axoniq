@@ -93,7 +93,9 @@ class WixSyncService(
             visibility = mapWixVisibilityToProductVisibility(wixPlan.visibility),
             buyable = wixPlan.buyable,
             buyerCanCancel = wixPlan.buyerCanCancel,
-            perks = wixPlan.perks?.map { it.title },
+            perks = wixPlan.perks?.values
+                ?.map { it.title }
+                ?.takeIf { it.isNotEmpty() },
             linkedPlatforms = listOf(linkedPlatformSync)
         )
     }

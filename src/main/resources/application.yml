@@ -32,6 +32,6 @@ axon:
   serializer:
     events: jackson
 wix:
-  token: ${WIX_TOKEN:}
+  token: ${WIX_TOKEN:default-token-here}
   site:
-    id: ${WIX_SITE_ID:}
+    id: ${WIX_SITE_ID:default-site-id-here}

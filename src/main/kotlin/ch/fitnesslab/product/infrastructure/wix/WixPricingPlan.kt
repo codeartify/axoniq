@@ -18,8 +18,8 @@ data class WixPlan(
     val image: WixImage?,
     val termsAndConditions: String?,
     val maxPurchasesPerBuyer: Int?,
-    val perks: List<WixPerk>?,
-    val visibility: String?, // "PUBLIC", "HIDDEN", "ARCHIVED"
+    val perks: WixPerks?,                // <── changed from List<WixPerk>? to WixPerks?
+    val visibility: String?,             // PUBLIC, HIDDEN, ARCHIVED
     val buyable: Boolean,
     val buyerCanCancel: Boolean,
     val formId: String?,
@@ -55,4 +55,20 @@ data class WixImage(
 data class WixPerk(
     val title: String,
     val description: String?
+)
+
+/**
+ * Wrapper for perks as returned by Wix.
+ *
+ * Runtime JSON looks like:
+ * "perks": {
+ *   "values": [
+ *     { "title": "...", "description": "..." },
+ *     ...
+ *   ]
+ * }
+ */
+@JsonIgnoreProperties(ignoreUnknown = true)
+data class WixPerks(
+    val values: List<WixPerk>?
 )

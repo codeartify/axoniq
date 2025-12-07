@@ -10,12 +10,12 @@ import org.springframework.web.client.RestTemplate
 
 @Component
 class WixClient(
-    @Value("\${wix.token:}") private val wixToken: String,
+    @Value("\${wix.token}") private val wixToken: String,
     @Value("\${wix.site.id:}") private val wixSiteId: String,
     private val restTemplate: RestTemplate = RestTemplate()
 ) {
     private val logger = LoggerFactory.getLogger(WixClient::class.java)
-    private val wixApiUrl = "https://www.wixapis.com/pricing-plans/v3/plans"
+    private val wixApiUrl = "https://www.wixapis.com/pricing-plans/v2/plans"
 
     fun fetchPricingPlans(): List<WixPlan> {
         if (wixToken.isBlank() || wixSiteId.isBlank()) {
