@@ -19,7 +19,7 @@ type SortColumn = 'invoiceId' | 'customerName' | 'amount' | 'dueDate' | 'status'
       [noItemsFoundKey]="'invoice.list.noInvoicesFound'"
       [items]="filteredAndSortedInvoices()"
       [columns]="columns"
-      [rowActions]="getRowActions()"
+      [rowActions]="rowActions"
       [searchTerm]="searchTerm()"
       [sortColumn]="sortColumn()"
       [sortDirection]="sortDirection()"
@@ -174,28 +174,26 @@ export class InvoiceList implements AfterViewInit {
     });
   }
 
-  getRowActions(): RowAction<InvoiceView>[] {
-    return [
-      {
-        labelKey: 'button.markPaid',
-        onClick: (invoice) => this.markAsPaid(invoice.invoiceId),
-        isDisabled: (invoice) => invoice.status !== 'OPEN' && invoice.status !== 'OVERDUE',
-        stopPropagation: true
-      },
-      {
-        labelKey: 'button.markOverdue',
-        onClick: (invoice) => this.markAsOverdue(invoice.invoiceId),
-        isDisabled: (invoice) => invoice.status !== 'OPEN',
-        stopPropagation: true
-      },
-      {
-        labelKey: 'common.cancel',
-        onClick: (invoice) => this.openCancelModal(invoice.invoiceId),
-        isDisabled: (invoice) => invoice.status === 'PAID' || invoice.status === 'CANCELLED',
-        stopPropagation: true
-      }
-    ];
-  }
+  rowActions: RowAction<InvoiceView>[] = [
+    {
+      labelKey: 'button.markPaid',
+      onClick: (invoice) => this.markAsPaid(invoice.invoiceId),
+      isDisabled: (invoice) => invoice.status !== 'OPEN' && invoice.status !== 'OVERDUE',
+      stopPropagation: true
+    },
+    {
+      labelKey: 'button.markOverdue',
+      onClick: (invoice) => this.markAsOverdue(invoice.invoiceId),
+      isDisabled: (invoice) => invoice.status !== 'OPEN',
+      stopPropagation: true
+    },
+    {
+      labelKey: 'common.cancel',
+      onClick: (invoice) => this.openCancelModal(invoice.invoiceId),
+      isDisabled: (invoice) => invoice.status === 'PAID' || invoice.status === 'CANCELLED',
+      stopPropagation: true
+    }
+  ];
 
   filteredAndSortedInvoices = computed(() => {
     let result = this.invoices();

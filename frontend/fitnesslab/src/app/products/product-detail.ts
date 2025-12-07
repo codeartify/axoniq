@@ -51,15 +51,22 @@ export class ProductDetail implements OnInit {
 
   startEdit(): void {
     const prod = this.product();
-    if (prod) {
+    if (prod && prod.code && prod.name && prod.productType && prod.audience &&
+        prod.requiresMembership !== undefined && prod.price !== undefined && prod.behavior) {
       this.editedProduct = {
         code: prod.code,
         name: prod.name,
         productType: prod.productType,
-        audience: prod.audience,
+        audience: prod.audience as any,
         requiresMembership: prod.requiresMembership,
         price: prod.price,
-        behavior: { ...prod.behavior }
+        behavior: {
+          canBePaused: prod.behavior.canBePaused,
+          renewalLeadTimeDays: prod.behavior.renewalLeadTimeDays,
+          maxActivePerCustomer: prod.behavior.maxActivePerCustomer,
+          durationInMonths: prod.behavior.durationInMonths,
+          numberOfSessions: prod.behavior.numberOfSessions
+        }
       };
       this.isEditing.set(true);
       this.successMessage.set(null);
@@ -74,7 +81,7 @@ export class ProductDetail implements OnInit {
 
   saveProduct(): void {
     const prod = this.product();
-    if (!prod || !this.editedProduct) return;
+    if (!prod || !prod.productId || !this.editedProduct) return;
 
     this.isSaving.set(true);
     this.errorMessage.set(null);
@@ -85,7 +92,7 @@ export class ProductDetail implements OnInit {
         this.isSaving.set(false);
         this.isEditing.set(false);
         this.successMessage.set('Product updated successfully');
-        this.loadProduct(prod.productId);
+        this.loadProduct(prod.productId!);
       },
       error: (err) => {
         this.isSaving.set(false);

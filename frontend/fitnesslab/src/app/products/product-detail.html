@@ -63,41 +63,31 @@
             <h3 class="text-xl font-semibold text-gray-700 mb-4">{{ 'product.detail.behaviorConfiguration' | translate }}</h3>
             <div class="grid grid-cols-2 gap-4">
               <div>
-                <span class="block text-sm font-medium text-gray-600 mb-1">{{ 'product.fields.timeBased' | translate }}:</span>
-                <span class="text-gray-800">{{ product()!.behavior.isTimeBased ? ('common.yes' | translate) : ('common.no' | translate) }}</span>
-              </div>
-              <div>
-                <span class="block text-sm font-medium text-gray-600 mb-1">{{ 'product.fields.sessionBased' | translate }}:</span>
-                <span class="text-gray-800">{{ product()!.behavior.isSessionBased ? ('common.yes' | translate) : ('common.no' | translate) }}</span>
-              </div>
-              <div>
                 <span class="block text-sm font-medium text-gray-600 mb-1">{{ 'product.fields.canBePaused' | translate }}:</span>
-                <span class="text-gray-800">{{ product()!.behavior.canBePaused ? ('common.yes' | translate) : ('common.no' | translate) }}</span>
+                <span class="text-gray-800">{{ product()!.behavior?.canBePaused ? ('common.yes' | translate) : ('common.no' | translate) }}</span>
               </div>
-              <div>
-                <span class="block text-sm font-medium text-gray-600 mb-1">{{ 'product.fields.autoRenew' | translate }}:</span>
-                <span class="text-gray-800">{{ product()!.behavior.autoRenew ? ('common.yes' | translate) : ('common.no' | translate) }}</span>
-              </div>
-              @if (product()!.behavior.renewalLeadTimeDays) {
+              @if (product()!.behavior?.durationInMonths) {
+                <div>
+                  <span class="block text-sm font-medium text-gray-600 mb-1">{{ 'product.fields.durationInMonths' | translate }}:</span>
+                  <span class="text-gray-800">{{ product()!.behavior?.durationInMonths }} months</span>
+                </div>
+              }
+              @if (product()!.behavior?.numberOfSessions) {
+                <div>
+                  <span class="block text-sm font-medium text-gray-600 mb-1">{{ 'product.fields.numberOfSessions' | translate }}:</span>
+                  <span class="text-gray-800">{{ product()!.behavior?.numberOfSessions }}</span>
+                </div>
+              }
+              @if (product()!.behavior?.renewalLeadTimeDays) {
                 <div>
                   <span class="block text-sm font-medium text-gray-600 mb-1">{{ 'product.fields.renewalLeadTimeDays' | translate }}:</span>
-                  <span class="text-gray-800">{{ product()!.behavior.renewalLeadTimeDays }} days</span>
+                  <span class="text-gray-800">{{ product()!.behavior?.renewalLeadTimeDays }} days</span>
                 </div>
               }
-              <div>
-                <span class="block text-sm font-medium text-gray-600 mb-1">{{ 'product.fields.contributesToMembership' | translate }}:</span>
-                <span class="text-gray-800">{{ product()!.behavior.contributesToMembershipStatus ? ('common.yes' | translate) : ('common.no' | translate) }}</span>
-              </div>
-              @if (product()!.behavior.maxActivePerCustomer) {
+              @if (product()!.behavior?.maxActivePerCustomer) {
                 <div>
                   <span class="block text-sm font-medium text-gray-600 mb-1">{{ 'product.fields.maxActivePerCustomer' | translate }}:</span>
-                  <span class="text-gray-800">{{ product()!.behavior.maxActivePerCustomer }}</span>
-                </div>
-              }
-              @if (product()!.behavior.exclusivityGroup) {
-                <div>
-                  <span class="block text-sm font-medium text-gray-600 mb-1">{{ 'product.fields.exclusivityGroup' | translate }}:</span>
-                  <span class="text-gray-800">{{ product()!.behavior.exclusivityGroup }}</span>
+                  <span class="text-gray-800">{{ product()!.behavior?.maxActivePerCustomer }}</span>
                 </div>
               }
             </div>
@@ -193,30 +183,6 @@
               <label class="flex items-center cursor-pointer">
                 <input
                   type="checkbox"
-                  [(ngModel)]="editedProduct!.behavior.isTimeBased"
-                  name="isTimeBased"
-                  class="mr-2 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                />
-                <span class="text-sm font-medium text-gray-700">{{ 'product.fields.timeBased' | translate }}</span>
-              </label>
-            </div>
-
-            <div class="mb-4 flex items-center">
-              <label class="flex items-center cursor-pointer">
-                <input
-                  type="checkbox"
-                  [(ngModel)]="editedProduct!.behavior.isSessionBased"
-                  name="isSessionBased"
-                  class="mr-2 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                />
-                <span class="text-sm font-medium text-gray-700">{{ 'product.fields.sessionBased' | translate }}</span>
-              </label>
-            </div>
-
-            <div class="mb-4 flex items-center">
-              <label class="flex items-center cursor-pointer">
-                <input
-                  type="checkbox"
                   [(ngModel)]="editedProduct!.behavior.canBePaused"
                   name="canBePaused"
                   class="mr-2 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
@@ -225,42 +191,40 @@
               </label>
             </div>
 
-            <div class="mb-4 flex items-center">
-              <label class="flex items-center cursor-pointer">
-                <input
-                  type="checkbox"
-                  [(ngModel)]="editedProduct!.behavior.autoRenew"
-                  name="autoRenew"
-                  class="mr-2 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                />
-                <span class="text-sm font-medium text-gray-700">{{ 'product.fields.autoRenew' | translate }}</span>
-              </label>
+            <div class="mb-4">
+              <label for="durationInMonths" class="block text-sm font-medium text-gray-700 mb-1">{{ 'product.fields.durationInMonths' | translate }}</label>
+              <input
+                type="number"
+                id="durationInMonths"
+                [(ngModel)]="editedProduct!.behavior.durationInMonths"
+                name="durationInMonths"
+                min="0"
+                class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
             </div>
 
-            @if (editedProduct!.behavior.autoRenew) {
-              <div class="mb-4">
-                <label for="renewalLeadTimeDays" class="block text-sm font-medium text-gray-700 mb-1">{{ 'product.fields.renewalLeadTime' | translate }}</label>
-                <input
-                  type="number"
-                  id="renewalLeadTimeDays"
-                  [(ngModel)]="editedProduct!.behavior.renewalLeadTimeDays"
-                  name="renewalLeadTimeDays"
-                  min="0"
-                  class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-            }
+            <div class="mb-4">
+              <label for="numberOfSessions" class="block text-sm font-medium text-gray-700 mb-1">{{ 'product.fields.numberOfSessions' | translate }}</label>
+              <input
+                type="number"
+                id="numberOfSessions"
+                [(ngModel)]="editedProduct!.behavior.numberOfSessions"
+                name="numberOfSessions"
+                min="0"
+                class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
 
-            <div class="mb-4 flex items-center">
-              <label class="flex items-center cursor-pointer">
-                <input
-                  type="checkbox"
-                  [(ngModel)]="editedProduct!.behavior.contributesToMembershipStatus"
-                  name="contributesToMembershipStatus"
-                  class="mr-2 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                />
-                <span class="text-sm font-medium text-gray-700">{{ 'product.fields.contributesToMembership' | translate }}</span>
-              </label>
+            <div class="mb-4">
+              <label for="renewalLeadTimeDays" class="block text-sm font-medium text-gray-700 mb-1">{{ 'product.fields.renewalLeadTime' | translate }}</label>
+              <input
+                type="number"
+                id="renewalLeadTimeDays"
+                [(ngModel)]="editedProduct!.behavior.renewalLeadTimeDays"
+                name="renewalLeadTimeDays"
+                min="0"
+                class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
             </div>
 
             <div class="mb-4">
@@ -271,17 +235,6 @@
                 [(ngModel)]="editedProduct!.behavior.maxActivePerCustomer"
                 name="maxActivePerCustomer"
                 min="0"
-                class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-
-            <div class="mb-4">
-              <label for="exclusivityGroup" class="block text-sm font-medium text-gray-700 mb-1">{{ 'product.fields.exclusivityGroup' | translate }}</label>
-              <input
-                type="text"
-                id="exclusivityGroup"
-                [(ngModel)]="editedProduct!.behavior.exclusivityGroup"
-                name="exclusivityGroup"
                 class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>

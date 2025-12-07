@@ -113,8 +113,8 @@ export class ProductList implements OnInit {
     const term = this.searchTerm().toLowerCase();
     if (term) {
       filtered = filtered.filter(product =>
-        product.name.toLowerCase().includes(term) ||
-        product.code.toLowerCase().includes(term)
+        product.name?.toLowerCase().includes(term) ||
+        product.code?.toLowerCase().includes(term)
       );
     }
 
@@ -124,19 +124,19 @@ export class ProductList implements OnInit {
 
       switch (this.sortColumn()) {
         case 'name':
-          comparison = a.name.localeCompare(b.name);
+          comparison = (a.name || '').localeCompare(b.name || '');
           break;
         case 'code':
-          comparison = a.code.localeCompare(b.code);
+          comparison = (a.code || '').localeCompare(b.code || '');
           break;
         case 'productType':
-          comparison = a.productType.localeCompare(b.productType);
+          comparison = (a.productType || '').localeCompare(b.productType || '');
           break;
         case 'price':
-          comparison = a.price - b.price;
+          comparison = (a.price || 0) - (b.price || 0);
           break;
         case 'audience':
-          comparison = a.audience.localeCompare(b.audience);
+          comparison = (a.audience || '').localeCompare(b.audience || '');
           break;
       }
 
@@ -182,6 +182,6 @@ export class ProductList implements OnInit {
   }
 
   trackByProductId(index: number, product: ProductView): string {
-    return product.productId;
+    return product.productId || `index-${index}`;
   }
 }

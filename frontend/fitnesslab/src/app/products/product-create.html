@@ -96,30 +96,6 @@
         <label class="flex items-center cursor-pointer">
           <input
             type="checkbox"
-            [(ngModel)]="product.behavior.isTimeBased"
-            name="isTimeBased"
-            class="mr-2 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-          />
-          <span class="text-sm font-medium text-gray-700">{{ 'product.fields.timeBased' | translate }}</span>
-        </label>
-      </div>
-
-      <div class="mb-4 flex items-center">
-        <label class="flex items-center cursor-pointer">
-          <input
-            type="checkbox"
-            [(ngModel)]="product.behavior.isSessionBased"
-            name="isSessionBased"
-            class="mr-2 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-          />
-          <span class="text-sm font-medium text-gray-700">{{ 'product.fields.sessionBased' | translate }}</span>
-        </label>
-      </div>
-
-      <div class="mb-4 flex items-center">
-        <label class="flex items-center cursor-pointer">
-          <input
-            type="checkbox"
             [(ngModel)]="product.behavior.canBePaused"
             name="canBePaused"
             class="mr-2 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
@@ -128,42 +104,40 @@
         </label>
       </div>
 
-      <div class="mb-4 flex items-center">
-        <label class="flex items-center cursor-pointer">
-          <input
-            type="checkbox"
-            [(ngModel)]="product.behavior.autoRenew"
-            name="autoRenew"
-            class="mr-2 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-          />
-          <span class="text-sm font-medium text-gray-700">{{ 'product.fields.autoRenew' | translate }}</span>
-        </label>
+      <div class="mb-4">
+        <label for="durationInMonths" class="block text-sm font-medium text-gray-700 mb-1">{{ 'product.fields.durationInMonths' | translate }}</label>
+        <input
+          type="number"
+          id="durationInMonths"
+          [(ngModel)]="product.behavior.durationInMonths"
+          name="durationInMonths"
+          min="0"
+          class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
       </div>
 
-      @if (product.behavior.autoRenew) {
-        <div class="mb-4">
-          <label for="renewalLeadTimeDays" class="block text-sm font-medium text-gray-700 mb-1">{{ 'product.fields.renewalLeadTime' | translate }}</label>
-          <input
-            type="number"
-            id="renewalLeadTimeDays"
-            [(ngModel)]="product.behavior.renewalLeadTimeDays"
-            name="renewalLeadTimeDays"
-            min="0"
-            class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
-      }
+      <div class="mb-4">
+        <label for="numberOfSessions" class="block text-sm font-medium text-gray-700 mb-1">{{ 'product.fields.numberOfSessions' | translate }}</label>
+        <input
+          type="number"
+          id="numberOfSessions"
+          [(ngModel)]="product.behavior.numberOfSessions"
+          name="numberOfSessions"
+          min="0"
+          class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+      </div>
 
-      <div class="mb-4 flex items-center">
-        <label class="flex items-center cursor-pointer">
-          <input
-            type="checkbox"
-            [(ngModel)]="product.behavior.contributesToMembershipStatus"
-            name="contributesToMembershipStatus"
-            class="mr-2 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-          />
-          <span class="text-sm font-medium text-gray-700">{{ 'product.fields.contributesToMembership' | translate }}</span>
-        </label>
+      <div class="mb-4">
+        <label for="renewalLeadTimeDays" class="block text-sm font-medium text-gray-700 mb-1">{{ 'product.fields.renewalLeadTime' | translate }}</label>
+        <input
+          type="number"
+          id="renewalLeadTimeDays"
+          [(ngModel)]="product.behavior.renewalLeadTimeDays"
+          name="renewalLeadTimeDays"
+          min="0"
+          class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
       </div>
 
       <div class="mb-4">
@@ -174,17 +148,6 @@
           [(ngModel)]="product.behavior.maxActivePerCustomer"
           name="maxActivePerCustomer"
           min="0"
-          class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-      </div>
-
-      <div class="mb-4">
-        <label for="exclusivityGroup" class="block text-sm font-medium text-gray-700 mb-1">{{ 'product.fields.exclusivityGroup' | translate }}</label>
-        <input
-          type="text"
-          id="exclusivityGroup"
-          [(ngModel)]="product.behavior.exclusivityGroup"
-          name="exclusivityGroup"
           class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
       </div>

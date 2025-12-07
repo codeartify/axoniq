@@ -116,6 +116,8 @@
   "product.fields.contributesToMembership": "Trägt zum Mitgliedsstatus bei",
   "product.fields.maxActivePerCustomer": "Max. aktiv pro Kunde",
   "product.fields.exclusivityGroup": "Exklusivitätsgruppe",
+  "product.fields.durationInMonths": "Laufzeit in Monaten",
+  "product.fields.numberOfSessions": "Anzahl Sessions",
 
   "form.required": "*",
   "form.customerId": "Kunden-ID:",

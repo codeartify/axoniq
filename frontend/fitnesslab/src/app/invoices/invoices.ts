@@ -1,48 +1,38 @@
-import {Injectable, inject} from '@angular/core';
-import {HttpClient} from '@angular/common/http';
-import {Observable} from 'rxjs';
+import { Injectable, inject } from '@angular/core';
+import { InvoicesService } from '../generated-api/api/invoices.service';
+import { Observable } from 'rxjs';
+import { InvoiceDto, CancelInvoiceRequest } from '../generated-api/model/models';
 
-export interface InvoiceView {
-  invoiceId: string;
-  customerId: string;
-  customerName: string;
-  bookingId: string;
-  amount: number;
-  dueDate: string;
-  status: string;
-  isInstallment: boolean;
-  installmentNumber?: number;
-  paidAt?: string;
-}
+export type InvoiceView = InvoiceDto;
 
 @Injectable({
   providedIn: 'root'
 })
 export class Invoices {
-  private http = inject(HttpClient);
-  private apiUrl = 'http://localhost:8080/api/invoices';
+  private invoicesService = inject(InvoicesService);
 
   getAllInvoices(): Observable<InvoiceView[]> {
-    return this.http.get<InvoiceView[]>(this.apiUrl);
+    return this.invoicesService.getInvoices();
   }
 
   getInvoicesByCustomerId(customerId: string): Observable<InvoiceView[]> {
-    return this.http.get<InvoiceView[]>(`${this.apiUrl}/customer/${customerId}`);
+    return this.invoicesService.getInvoicesByCustomerId(customerId);
   }
 
   getInvoiceById(invoiceId: string): Observable<InvoiceView> {
-    return this.http.get<InvoiceView>(`${this.apiUrl}/${invoiceId}`);
+    return this.invoicesService.getInvoiceById(invoiceId);
   }
 
   markInvoiceAsPaid(invoiceId: string): Observable<void> {
-    return this.http.post<void>(`${this.apiUrl}/${invoiceId}/pay`, {});
+    return this.invoicesService.markAsPaid(invoiceId);
   }
 
   markInvoiceAsOverdue(invoiceId: string): Observable<void> {
-    return this.http.post<void>(`${this.apiUrl}/${invoiceId}/mark-overdue`, {});
+    return this.invoicesService.markAsOverdue(invoiceId);
   }
 
   cancelInvoice(invoiceId: string, reason: string): Observable<void> {
-    return this.http.post<void>(`${this.apiUrl}/${invoiceId}/cancel`, { reason });
+    const request: CancelInvoiceRequest = { reason };
+    return this.invoicesService.cancelInvoice(invoiceId, request);
   }
 }

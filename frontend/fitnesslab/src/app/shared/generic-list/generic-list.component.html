@@ -62,8 +62,8 @@
       </div>
     } @else {
       <!-- Table -->
-      <div class="overflow-x-auto bg-white shadow-md rounded-lg">
-        <table class="w-full border-collapse">
+      <div class="overflow-x-auto bg-white shadow-md rounded-lg" style="overflow: visible;">
+        <table class="w-full border-collapse" style="overflow: visible;">
           <thead class="bg-gray-100">
             <tr>
               @for (column of columns(); track column.key) {
@@ -90,7 +90,7 @@
           <tbody>
             @for (item of items(); track trackByFn()($index, item)) {
               <tr
-                [class.cursor-pointer]="onRowClick"
+                [class.cursor-pointer]="onRowClick()"
                 [class.hover:bg-gray-50]="true"
                 class="transition-colors"
                 (click)="onRowClick()? handleRowClick(item, $event) : null"
@@ -104,28 +104,30 @@
                     }
                   </td>
                 }
-                @if (rowActions.length > 0) {
-                  <td class="px-3 py-3 border-b border-gray-200 relative">
-                    <button
-                      (click)="toggleDropdown(trackByFn()($index, item), $event)"
-                      class="px-2 py-1 text-gray-600 hover:bg-gray-200 rounded border-none cursor-pointer text-lg"
-                      aria-label="Actions"
-                    >
-                      ⋮
-                    </button>
-                    @if (isDropdownOpen(trackByFn()($index, item))) {
-                      <div class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-10 overflow-hidden">
-                        @for (action of rowActions(); track action.labelKey) {
-                          <button
-                            (click)="executeAction(action, item, $event)"
-                            [disabled]="action.isDisabled ? action.isDisabled(item) : false"
-                            class="w-full text-left px-4 py-2 text-sm bg-white border-b border-gray-200 last:border-b-0 disabled:text-gray-400 disabled:cursor-not-allowed disabled:bg-gray-50 enabled:text-gray-700 enabled:hover:bg-gray-100 enabled:cursor-pointer block"
-                          >
-                            {{ action.labelKey | translate }}
-                          </button>
-                        }
-                      </div>
-                    }
+                @if (rowActions().length > 0) {
+                  <td class="px-3 py-3 border-b border-gray-200 dropdown-container">
+                    <div class="relative">
+                      <button
+                        (click)="toggleDropdown(trackByFn()($index, item), $event)"
+                        class="px-2 py-1 text-gray-600 hover:bg-gray-200 rounded border-none cursor-pointer text-lg"
+                        aria-label="Actions"
+                      >
+                        ⋮
+                      </button>
+                      @if (isDropdownOpen(trackByFn()($index, item))) {
+                        <div class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden" style="z-index: 9999;">
+                          @for (action of rowActions(); track action.labelKey) {
+                            <button
+                              (click)="executeAction(action, item, $event)"
+                              [disabled]="action.isDisabled ? action.isDisabled(item) : false"
+                              class="w-full text-left px-4 py-2 text-sm bg-white border-b border-gray-200 last:border-b-0 disabled:text-gray-400 disabled:cursor-not-allowed disabled:bg-gray-50 enabled:text-gray-700 enabled:hover:bg-gray-100 enabled:cursor-pointer block"
+                            >
+                              {{ action.labelKey | translate }}
+                            </button>
+                          }
+                        </div>
+                      }
+                    </div>
                   </td>
                 }
               </tr>

@@ -19,15 +19,15 @@ export class ProductCreate {
     code: '',
     name: '',
     productType: '',
-    audience: 'BOTH',
+    audience: 'BOTH' as any,
     requiresMembership: false,
     price: 0,
     behavior: {
-      isTimeBased: false,
-      isSessionBased: false,
       canBePaused: false,
-      autoRenew: false,
-      contributesToMembershipStatus: false
+      renewalLeadTimeDays: null,
+      maxActivePerCustomer: null,
+      durationInMonths: null,
+      numberOfSessions: null
     }
   };
 

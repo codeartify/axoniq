@@ -5,8 +5,9 @@ import {ActivatedRoute, Router} from '@angular/router';
 import {TranslateModule} from '@ngx-translate/core';
 import {Customers, CustomerView} from './customers';
 import {Products, ProductView} from '../products/products';
-import {Memberships, PaymentMode} from '../memberships/memberships';
+import {Memberships, MembershipSignUpRequest} from '../memberships/memberships';
 import {Invoices, InvoiceView} from '../invoices/invoices';
+import {MembershipSignUpRequestDto} from '../generated-api/model/models';
 
 @Component({
   selector: 'app-customer-detail',
@@ -193,23 +194,17 @@ export class CustomerDetail implements OnInit {
 
   selectProduct(product: ProductView): void {
     const customer = this.customer();
-    if (!customer) return;
+    if (!customer || !product.productId) return;
 
     this.isAssigningProduct.set(true);
     this.errorMessage.set(null);
     this.successMessage.set(null);
 
-    // Calculate duration months (simplified - you may need to adjust based on product)
-      const durationMonths = 12; // Default to 12 months, adjust as needed
-
-      const signUpRequest = {
+    const signUpRequest: MembershipSignUpRequest = {
         customerId: customer.customerId,
-        customerName: `${customer.salutation} ${customer.firstName} ${customer.lastName}`,
-        customerEmail: customer.email,
         productVariantId: product.productId,
-        price: product.price,
-        durationMonths: durationMonths,
-        paymentMode: PaymentMode.INVOICE_EMAIL
+        paymentMode: MembershipSignUpRequestDto.PaymentModeEnum.InvoiceEmail,
+        startDate: new Date().toISOString().split('T')[0]
       };
 
       this.membershipService.signUp(signUpRequest).subscribe({

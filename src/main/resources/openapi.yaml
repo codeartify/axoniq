@@ -280,7 +280,7 @@ paths:
           required: false
           schema:
             type: string
-            enum: [PENDING, PAID, OVERDUE, CANCELLED]
+            enum: [OPEN, PAID, OVERDUE, CANCELLED]
       responses:
         '200':
           description: List of invoices

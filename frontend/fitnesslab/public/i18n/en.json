@@ -116,6 +116,8 @@
   "product.fields.contributesToMembership": "Contributes to Membership Status",
   "product.fields.maxActivePerCustomer": "Max Active Per Customer",
   "product.fields.exclusivityGroup": "Exclusivity Group",
+  "product.fields.durationInMonths": "Duration in months",
+  "product.fields.numberOfSessions": "Number of sessions",
 
   "form.required": "*",
   "form.customerId": "Customer ID:",
