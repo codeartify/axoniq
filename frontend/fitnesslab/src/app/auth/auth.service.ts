@@ -67,7 +67,12 @@ class AuthService {
   private configureOAuth(): void {
     this.oauthService.configure(authConfig);
 
-    // Try to restore session from storage
+    // If tokens exist in sessionStorage, load profile immediately
+    if (this.isAuthenticated()) {
+      this.loadUserProfile();
+    }
+
+    // Try to restore session from OAuth storage
     this.oauthService.loadDiscoveryDocument().then(() => {
       this.oauthService.tryLogin().then(() => {
         if (this.oauthService.hasValidAccessToken()) {
