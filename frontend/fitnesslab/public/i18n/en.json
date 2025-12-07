@@ -78,6 +78,10 @@
 
   "invoice.installment.yes": "Yes (#{{number}})",
   "invoice.installment.no": "No",
+  "invoice.status.open": "PENDING",
+  "invoice.status.paid": "PAID",
+  "invoice.status.overdue": "OVERDUE",
+  "invoice.status.cancelled": "CANCELLED",
 
   "product.list.title": "Product List",
   "product.list.searchPlaceholder": "Search by product name or code...",

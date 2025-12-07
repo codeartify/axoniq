@@ -30,11 +30,13 @@ type SortColumn = 'invoiceId' | 'customerName' | 'amount' | 'dueDate' | 'status'
 
     <!-- Cancel Modal -->
     @if (showCancelModal()) {
-      <div class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50" (click)="closeCancelModal()"
+      <div class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"
+           (click)="closeCancelModal()"
            (keydown.escape)="closeCancelModal()" tabindex="0" role="dialog" aria-modal="true">
         <div class="bg-white p-6 rounded-lg max-w-lg w-11/12 shadow-xl" (click)="$event.stopPropagation()"
              (keydown)="$event.stopPropagation()" tabindex="-1">
-          <h2 class="mt-0 mb-4 text-xl font-semibold text-gray-800">{{ 'invoice.list.cancelModal.title' | translate }}</h2>
+          <h2
+            class="mt-0 mb-4 text-xl font-semibold text-gray-800">{{ 'invoice.list.cancelModal.title' | translate }}</h2>
           <p class="mb-4">{{ 'invoice.list.cancelModal.reasonPrompt' | translate }}</p>
           <textarea
             [(ngModel)]="cancelReason"
@@ -78,26 +80,9 @@ type SortColumn = 'invoiceId' | 'customerName' | 'amount' | 'dueDate' | 'status'
     </ng-template>
 
     <ng-template #statusTemplate let-invoice>
-      @if (invoice.status === 'OPEN') {
-        <span class="px-2 py-1 rounded text-xs font-semibold uppercase bg-blue-100 text-blue-800">
-          {{ invoice.status }}
+         <span class="px-2 py-1 rounded text-xs font-semibold {{statusColor(invoice.status)}}">
+          {{ ('invoice.status.' + invoice.status.toLocaleLowerCase()) |translate }}
         </span>
-      }
-      @if (invoice.status === 'PAID') {
-        <span class="px-2 py-1 rounded text-xs font-semibold uppercase bg-green-100 text-green-800">
-          {{ invoice.status }}
-        </span>
-      }
-      @if (invoice.status === 'OVERDUE') {
-        <span class="px-2 py-1 rounded text-xs font-semibold uppercase bg-orange-100 text-orange-800">
-          {{ invoice.status }}
-        </span>
-      }
-      @if (invoice.status === 'CANCELLED') {
-        <span class="px-2 py-1 rounded text-xs font-semibold uppercase bg-red-100 text-red-800">
-          {{ invoice.status }}
-        </span>
-      }
     </ng-template>
 
     <ng-template #installmentTemplate let-invoice>
@@ -128,6 +113,20 @@ export class InvoiceList implements AfterViewInit {
   showCancelModal = signal(false);
   selectedInvoiceId = signal<string | null>(null);
   cancelReason = signal('');
+  statusColor = (status: string) => computed(() => {
+    switch (status) {
+      case 'OPEN':
+        return 'bg-blue-100 text-blue-800';
+      case 'PAID':
+        return 'bg-green-100 text-green-800';
+      case 'OVERDUE':
+        return 'bg-orange-100 text-orange-800';
+      case 'CANCELLED':
+        return 'bg-red-100 text-red-800';
+      default:
+        return '';
+    }
+  });
 
   columns: ColumnDefinition<InvoiceView>[] = [];
 
@@ -162,7 +161,7 @@ export class InvoiceList implements AfterViewInit {
           key: 'status',
           headerKey: 'invoice.table.status',
           sortable: true,
-          template: this.statusTemplate
+          template: this.statusTemplate,
         },
         {
           key: 'isInstallment',
