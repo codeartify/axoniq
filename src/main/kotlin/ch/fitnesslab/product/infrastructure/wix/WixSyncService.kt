@@ -1,12 +1,18 @@
 package ch.fitnesslab.product.infrastructure.wix
 
 import ch.fitnesslab.common.types.ProductVariantId
+import ch.fitnesslab.generated.model.ProductView
+import ch.fitnesslab.product.application.FindAllProductsQuery
+import ch.fitnesslab.product.application.ProductUpdatedUpdate
 import ch.fitnesslab.product.domain.*
 import ch.fitnesslab.product.domain.commands.CreateProductCommand
 import ch.fitnesslab.product.infrastructure.ProductRepository
 import ch.fitnesslab.product.infrastructure.wix.v3.WixPlan
 import ch.fitnesslab.product.infrastructure.wix.v3.WixPricingVariantV3
+import ch.fitnesslab.utils.waitForUpdateOf
 import org.axonframework.commandhandling.gateway.CommandGateway
+import org.axonframework.messaging.responsetypes.ResponseTypes
+import org.axonframework.queryhandling.QueryGateway
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
@@ -17,6 +23,7 @@ import java.util.*
 class WixSyncService(
     private val wixClient: WixClient,
     private val commandGateway: CommandGateway,
+    private val queryGateway: QueryGateway,
     private val productRepository: ProductRepository
 ) {
     private val logger = LoggerFactory.getLogger(WixSyncService::class.java)
@@ -24,7 +31,7 @@ class WixSyncService(
     fun syncWixProducts() {
         try {
             val wixPlans = wixClient.fetchPricingPlans()
-            logger.info("Syncing ${wixPlans.size} Wix pricing plans")
+            logger.info("Fetched ${wixPlans.size} Wix pricing plans")
 
             wixPlans.forEach { wixPlan ->
                 syncWixPlan(wixPlan)
@@ -38,6 +45,12 @@ class WixSyncService(
 
     private fun syncWixPlan(wixPlan: WixPlan) {
         try {
+            // Skip if no ID
+            if (wixPlan.id.isNullOrBlank()) {
+                logger.warn("Skipping Wix plan without ID: ${wixPlan.name}")
+                return
+            }
+
             // Check if product with this Wix ID already exists
             val existingProduct = productRepository.findAll()
                 .firstOrNull { product ->
@@ -51,10 +64,22 @@ class WixSyncService(
                 return
             }
 
-            // Create new product from Wix plan
-            val command = mapWixPlanToCommand(wixPlan)
-            commandGateway.sendAndWait<Unit>(command)
-            logger.info("Created product from Wix plan: ${wixPlan.name} (${wixPlan.id})")
+            val subscriptionQuery = queryGateway.subscriptionQuery(
+                FindAllProductsQuery(),
+                ResponseTypes.multipleInstancesOf(ProductView::class.java),
+                ResponseTypes.instanceOf(ProductUpdatedUpdate::class.java),
+            )
+
+            try {
+                val command = mapWixPlanToCommand(wixPlan)
+                commandGateway.sendAndWait<Unit>(command)
+
+                waitForUpdateOf(subscriptionQuery)
+
+                logger.info("Created product from Wix plan: ${wixPlan.name} (${wixPlan.id})")
+            } finally {
+                subscriptionQuery.close()
+            }
         } catch (e: Exception) {
             logger.error("Failed to sync Wix plan ${wixPlan.id}: ${e.message}", e)
         }

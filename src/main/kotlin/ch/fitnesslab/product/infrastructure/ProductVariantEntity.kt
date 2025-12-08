@@ -5,6 +5,8 @@ import ch.fitnesslab.product.domain.LinkedPlatformSync
 import ch.fitnesslab.product.domain.PricingModel
 import ch.fitnesslab.product.domain.ProductAudience
 import ch.fitnesslab.product.domain.ProductVisibility
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import jakarta.persistence.*
 import java.math.BigDecimal
 import java.util.*
@@ -55,6 +57,27 @@ class ProductVariantEntity(
     @CollectionTable(name = "product_perks", joinColumns = [JoinColumn(name = "product_id")])
     @Column(name = "perk")
     val perks: List<String>? = null,
-    @Transient
+    @Column(name = "linked_platforms", columnDefinition = "TEXT")
+    @Convert(converter = LinkedPlatformsConverter::class)
     val linkedPlatforms: List<LinkedPlatformSync>? = null,
 )
+
+@Converter
+class LinkedPlatformsConverter : AttributeConverter<List<LinkedPlatformSync>?, String?> {
+    private val objectMapper: ObjectMapper = jacksonObjectMapper().apply {
+        findAndRegisterModules() // Register Java 8 time module for Instant
+    }
+
+    override fun convertToDatabaseColumn(attribute: List<LinkedPlatformSync>?): String? {
+        return attribute?.let { objectMapper.writeValueAsString(it) }
+    }
+
+    override fun convertToEntityAttribute(dbData: String?): List<LinkedPlatformSync>? {
+        return dbData?.let {
+            objectMapper.readValue(
+                it,
+                objectMapper.typeFactory.constructCollectionType(List::class.java, LinkedPlatformSync::class.java)
+            )
+        }
+    }
+}

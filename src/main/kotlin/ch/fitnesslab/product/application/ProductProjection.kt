@@ -29,7 +29,6 @@ class ProductProjection(
                 audience = event.audience,
                 requiresMembership = event.requiresMembership,
 
-                // PricingVariantConfig fields (flattened)
                 pricingModel = event.pricingVariant.pricingModel,
                 flatRate = event.pricingVariant.flatRate,
                 billingCycleInterval = event.pricingVariant.billingCycle?.interval,
@@ -39,14 +38,12 @@ class ProductProjection(
                 freeTrialInterval = event.pricingVariant.freeTrial?.interval,
                 freeTrialCount = event.pricingVariant.freeTrial?.count,
 
-                // ProductBehaviorConfig fields (flattened)
                 canBePaused = event.behavior.canBePaused,
                 renewalLeadTimeDays = event.behavior.renewalLeadTimeDays,
                 maxActivePerCustomer = event.behavior.maxActivePerCustomer,
                 maxPurchasesPerBuyer = event.behavior.maxPurchasesPerBuyer,
                 numberOfSessions = event.behavior.numberOfSessions,
 
-                // New fields
                 description = event.description,
                 termsAndConditions = event.termsAndConditions,
                 visibility = event.visibility,
@@ -76,7 +73,6 @@ class ProductProjection(
                     audience = event.audience,
                     requiresMembership = event.requiresMembership,
 
-                    // PricingVariantConfig fields (flattened)
                     pricingModel = event.pricingVariant.pricingModel,
                     flatRate = event.pricingVariant.flatRate,
                     billingCycleInterval = event.pricingVariant.billingCycle?.interval,
@@ -86,14 +82,12 @@ class ProductProjection(
                     freeTrialInterval = event.pricingVariant.freeTrial?.interval,
                     freeTrialCount = event.pricingVariant.freeTrial?.count,
 
-                    // ProductBehaviorConfig fields (flattened)
                     canBePaused = event.behavior.canBePaused,
                     renewalLeadTimeDays = event.behavior.renewalLeadTimeDays,
                     maxActivePerCustomer = event.behavior.maxActivePerCustomer,
                     maxPurchasesPerBuyer = event.behavior.maxPurchasesPerBuyer,
                     numberOfSessions = event.behavior.numberOfSessions,
 
-                    // New fields
                     description = event.description,
                     termsAndConditions = event.termsAndConditions,
                     visibility = event.visibility,
@@ -219,12 +213,12 @@ class ProductProjection(
     private fun toLinkedPlatformSyncView(
         domain: ch.fitnesslab.product.domain.LinkedPlatformSync
     ): ch.fitnesslab.generated.model.LinkedPlatformSync {
-        return ch.fitnesslab.generated.model.LinkedPlatformSync(
+        return LinkedPlatformSync(
             platformName = domain.platformName,
             idOnPlatform = domain.idOnPlatform,
             revision = domain.revision,
             visibilityOnPlatform = domain.visibilityOnPlatform?.let {
-                ch.fitnesslab.generated.model.LinkedPlatformSync.VisibilityOnPlatform.valueOf(it.name)
+                LinkedPlatformSync.VisibilityOnPlatform.valueOf(it.name)
             },
             isSynced = domain.isSynced,
             isSourceOfTruth = domain.isSourceOfTruth,

@@ -133,8 +133,8 @@ class ProductController(
 
     @GetMapping
     fun getAllProducts(): ResponseEntity<List<ProductView>> {
-        // Sync with Wix before fetching products
         wixSyncService.syncWixProducts()
+
         return ResponseEntity.ok(productProjection.findAll())
     }
 
