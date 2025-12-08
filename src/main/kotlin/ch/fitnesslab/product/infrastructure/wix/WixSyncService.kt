@@ -4,6 +4,8 @@ import ch.fitnesslab.common.types.ProductVariantId
 import ch.fitnesslab.product.domain.*
 import ch.fitnesslab.product.domain.commands.CreateProductCommand
 import ch.fitnesslab.product.infrastructure.ProductRepository
+import ch.fitnesslab.product.infrastructure.wix.v3.WixPlan
+import ch.fitnesslab.product.infrastructure.wix.v3.WixPricingVariantV3
 import org.axonframework.commandhandling.gateway.CommandGateway
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -70,13 +72,13 @@ class WixSyncService(
             syncError = null
         )
 
-        // Get first pricing variant (Wix API ensures minItems: 1, maxItems: 1)
-        val pricingVariant = wixPlan.pricingVariants?.firstOrNull()
+        // Get first pricing variant
+        val pricingVariant = wixPlan.pricingVariants.firstOrNull()
 
         return CreateProductCommand(
             productId = ProductVariantId(UUID.randomUUID()),
-            slug = wixPlan.slug ?: generateSlug(wixPlan.name),
-            name = wixPlan.name,
+            slug = wixPlan.slug ?: generateSlug(wixPlan.name ?: "unnamed-plan"),
+            name = wixPlan.name.toString(),
             productType = "Wix Plan",
             audience = ProductAudience.BOTH,
             requiresMembership = false,
@@ -89,13 +91,13 @@ class WixSyncService(
                 numberOfSessions = null
             ),
             description = wixPlan.description,
-            termsAndConditions = wixPlan.termsAndConditions,
+            termsAndConditions = null, // Not available in v3
             visibility = mapWixVisibilityToProductVisibility(wixPlan.visibility),
-            buyable = wixPlan.buyable,
-            buyerCanCancel = wixPlan.buyerCanCancel,
-            perks = wixPlan.perks?.values
-                ?.map { it.title }
-                ?.takeIf { it.isNotEmpty() },
+            buyable = wixPlan.buyable == true,
+            buyerCanCancel = wixPlan.buyerCanCancel == true,
+            perks = wixPlan.perks
+                .mapNotNull { it.description }
+                .takeIf { it.isNotEmpty() },
             linkedPlatforms = listOf(linkedPlatformSync)
         )
     }
@@ -118,42 +120,73 @@ class WixSyncService(
         }
     }
 
-    private fun mapWixPricingVariant(pricingVariant: WixPricingVariant?): PricingVariantConfig {
+    private fun mapWixPricingVariant(pricingVariant: WixPricingVariantV3?): PricingVariantConfig {
         if (pricingVariant == null) {
             return createDefaultPricing()
         }
 
-        val flatRate = pricingVariant.flatRate?.toBigDecimal() ?: BigDecimal.ZERO
-        val pricingModel = when (pricingVariant.pricingModel?.uppercase()) {
-            "SUBSCRIPTION" -> PricingModel.SUBSCRIPTION
-            "SINGLE_PAYMENT_FOR_DURATION" -> PricingModel.SINGLE_PAYMENT_FOR_DURATION
-            "SINGLE_PAYMENT_UNLIMITED" -> PricingModel.SINGLE_PAYMENT_UNLIMITED
-            else -> PricingModel.SUBSCRIPTION
+        // Extract flat rate from first pricing strategy
+        val flatRate = pricingVariant.pricingStrategies
+            .firstOrNull()
+            ?.flatRate
+            ?.amount
+            ?.toBigDecimalOrNull() ?: BigDecimal.ZERO
+
+        // Determine pricing model from billing terms
+        val pricingModel = determinePricingModel(pricingVariant.billingTerms)
+
+        // Map billing cycle
+        val billingCycle = pricingVariant.billingTerms?.billingCycle?.let { cycle ->
+            PricingDuration(
+                interval = mapWixPeriodToInterval(cycle.period),
+                count = cycle.count ?: 1
+            )
         }
+
+        // Map duration (for fixed-duration plans)
+        val duration = if (pricingVariant.billingTerms?.endType == "CYCLES_COMPLETED") {
+            val cycleCount = pricingVariant.billingTerms?.cyclesCompletedDetails?.billingCycleCount ?: 1
+            val period = pricingVariant.billingTerms?.billingCycle?.period
+            val count = (pricingVariant.billingTerms?.billingCycle?.count ?: 1) * cycleCount
+            PricingDuration(
+                interval = mapWixPeriodToInterval(period),
+                count = count
+            )
+        } else null
+
+        // Map free trial
+        val freeTrial = if ((pricingVariant.freeTrialDays ?: 0) > 0) {
+            PricingDuration(
+                interval = BillingInterval.DAY,
+                count = pricingVariant.freeTrialDays!!
+            )
+        } else null
 
         return PricingVariantConfig(
             pricingModel = pricingModel,
             flatRate = flatRate,
-            billingCycle = mapWixDuration(pricingVariant.billingCycle),
-            duration = mapWixDuration(pricingVariant.duration),
-            freeTrial = mapWixDuration(pricingVariant.freeTrial)
+            billingCycle = billingCycle,
+            duration = duration,
+            freeTrial = freeTrial
         )
     }
 
-    private fun mapWixDuration(wixDuration: WixDuration?): PricingDuration? {
-        if (wixDuration == null || wixDuration.interval == null || wixDuration.count == null) {
-            return null
+    private fun determinePricingModel(billingTerms: ch.fitnesslab.product.infrastructure.wix.v3.WixBillingTerms?): PricingModel {
+        return when (billingTerms?.endType?.uppercase()) {
+            "UNTIL_CANCELLED" -> PricingModel.SUBSCRIPTION
+            "CYCLES_COMPLETED" -> PricingModel.SINGLE_PAYMENT_FOR_DURATION
+            else -> PricingModel.SUBSCRIPTION
         }
+    }
 
-        val interval = when (wixDuration.interval.uppercase()) {
+    private fun mapWixPeriodToInterval(period: String?): BillingInterval {
+        return when (period?.uppercase()) {
             "DAY" -> BillingInterval.DAY
             "WEEK" -> BillingInterval.WEEK
             "MONTH" -> BillingInterval.MONTH
             "YEAR" -> BillingInterval.YEAR
             else -> BillingInterval.MONTH
         }
-
-        return PricingDuration(interval, wixDuration.count)
     }
 
     private fun createDefaultPricing(): PricingVariantConfig {

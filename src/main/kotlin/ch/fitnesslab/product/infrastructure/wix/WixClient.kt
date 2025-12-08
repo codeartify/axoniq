@@ -1,5 +1,7 @@
 package ch.fitnesslab.product.infrastructure.wix
 
+import ch.fitnesslab.product.infrastructure.wix.v3.WixPlan
+import ch.fitnesslab.product.infrastructure.wix.v3.WixQueryPlansResponse
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpEntity
@@ -15,7 +17,7 @@ class WixClient(
     private val restTemplate: RestTemplate = RestTemplate()
 ) {
     private val logger = LoggerFactory.getLogger(WixClient::class.java)
-    private val wixApiUrl = "https://www.wixapis.com/pricing-plans/v2/plans"
+    private val wixApiUrl = "https://www.wixapis.com/pricing-plans/v3/plans/query"
 
     fun fetchPricingPlans(): List<WixPlan> {
         if (wixToken.isBlank() || wixSiteId.isBlank()) {
@@ -25,17 +27,30 @@ class WixClient(
 
         return try {
             val headers = HttpHeaders().apply {
-                set("Authorization", wixToken)
+                set("Authorization", wixToken)       // assuming you already include "Bearer ..." in the property
                 set("wix-site-id", wixSiteId)
                 set("Content-Type", "application/json")
             }
 
-            val request = HttpEntity<String>(headers)
+            // Basic v3 query with cursorPaging (filter is optional; you can extend it later)
+            val body =
+                """
+                {
+                  "query": {
+                    "cursorPaging": {
+                      "limit": 100
+                    }
+                  }
+                }
+                """.trimIndent()
+
+            val request = HttpEntity<String>(body, headers)
+
             val response = restTemplate.exchange(
                 wixApiUrl,
-                HttpMethod.GET,
+                HttpMethod.POST,
                 request,
-                WixPricingPlansResponse::class.java
+                WixQueryPlansResponse::class.java
             )
 
             logger.info("Successfully fetched ${response.body?.plans?.size ?: 0} pricing plans from Wix")
