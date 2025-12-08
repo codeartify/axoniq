@@ -3,8 +3,10 @@ package ch.fitnesslab.customers.domain
 import ch.fitnesslab.common.types.Address
 import ch.fitnesslab.common.types.CustomerId
 import ch.fitnesslab.common.types.Salutation
+import ch.fitnesslab.customers.domain.commands.LinkBexioContactCommand
 import ch.fitnesslab.customers.domain.commands.RegisterCustomerCommand
 import ch.fitnesslab.customers.domain.commands.UpdateCustomerCommand
+import ch.fitnesslab.customers.domain.events.BexioContactLinkedEvent
 import ch.fitnesslab.customers.domain.events.CustomerRegisteredEvent
 import ch.fitnesslab.customers.domain.events.CustomerUpdatedEvent
 import org.axonframework.commandhandling.CommandHandler
@@ -25,6 +27,7 @@ class CustomerAggregate() {
     private lateinit var address: Address
     private lateinit var email: String
     private var phoneNumber: String? = null
+    private var bexioContactId: Int? = null
 
     @CommandHandler
     constructor(command: RegisterCustomerCommand) : this() {
@@ -113,5 +116,20 @@ class CustomerAggregate() {
         this.address = event.address
         this.email = event.email
         this.phoneNumber = event.phoneNumber
+    }
+
+    @CommandHandler
+    fun handle(command: LinkBexioContactCommand) {
+        AggregateLifecycle.apply(
+            BexioContactLinkedEvent(
+                customerId = command.customerId,
+                bexioContactId = command.bexioContactId
+            )
+        )
+    }
+
+    @EventSourcingHandler
+    fun on(event: BexioContactLinkedEvent) {
+        this.bexioContactId = event.bexioContactId
     }
 }

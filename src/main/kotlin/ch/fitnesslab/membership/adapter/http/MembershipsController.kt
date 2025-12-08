@@ -39,6 +39,7 @@ class MembershipsController(
                 contractId = result.contractId.toString(),
                 bookingId = result.bookingId.toString(),
                 invoiceId = result.invoiceId.toString(),
+                bexioInvoiceId = result.bexioInvoiceId,
             ),
         )
     }

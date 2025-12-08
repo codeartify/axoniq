@@ -4,7 +4,7 @@ spring:
   profiles:
     active: dev
   datasource:
-    url: jdbc:postgresql://localhost:5432/axoniq
+    url: jdbc:postgresql://localhost:5432/fitnesslab
     username: test
     password: test
   jpa:
@@ -35,3 +35,13 @@ wix:
   token: ${WIX_TOKEN:default-token-here}
   site:
     id: ${WIX_SITE_ID:default-site-id-here}
+bexio:
+  api:
+    token: ${BEXIO_API_TOKEN:default-token-here}
+  contact:
+    type:
+      id: 2
+  user:
+    id: 1
+  owner:
+    id: ${BEXIO_OWNER_ID:default-owner-id-here}

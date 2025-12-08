@@ -1,10 +1,6 @@
 package ch.fitnesslab.membership.application
 
-import ch.fitnesslab.billing.application.FindAllInvoicesQuery
-import ch.fitnesslab.billing.application.InvoiceUpdated
-import ch.fitnesslab.billing.application.InvoiceView
-import ch.fitnesslab.billing.domain.commands.CreateInvoiceCommand
-import ch.fitnesslab.billing.domain.commands.MarkInvoicePaidCommand
+import ch.fitnesslab.billing.infrastructure.bexio.BexioInvoiceService
 import ch.fitnesslab.booking.application.BookingUpdatedUpdate
 import ch.fitnesslab.booking.application.BookingView
 import ch.fitnesslab.booking.application.FindAllBookingsQuery
@@ -33,6 +29,7 @@ import java.time.LocalDate
 class MembershipSignUpService(
     private val commandGateway: CommandGateway,
     private val queryGateway: QueryGateway,
+    private val bexioInvoiceService: BexioInvoiceService,
 ) {
     fun signUp(request: MembershipSignUpRequest): MembershipSignUpResult {
         val customerId = request.customerId
@@ -41,7 +38,6 @@ class MembershipSignUpService(
 
         val bookingSubscription = createBookingSubscriptionQuery()
         val contractSubscription = createContractSubscription()
-        val invoiceSubscription = createInvoiceSubscriptionQuery()
 
         val productVariantId = request.productVariantId
         val productVariantEntity = getProductVariant(productVariantId)
@@ -61,6 +57,7 @@ class MembershipSignUpService(
             )
             waitForUpdateOf(bookingSubscription)
 
+            // 2. Create contract
             commandGateway.sendAndWait<Any>(
                 CreateProductContractCommand(
                     contractId = contractId,
@@ -73,47 +70,31 @@ class MembershipSignUpService(
             )
             waitForUpdateOf(contractSubscription)
 
-            // 3. Create invoice
-            commandGateway.sendAndWait<Any>(
-                CreateInvoiceCommand(
-                    invoiceId = invoiceId,
-                    bookingId = bookingId,
-                    customerId = customerId,
-                    productVariantId = productVariantId,
-                    amount = productVariantEntity.flatRate,
-                    dueDate = DueDate.inDays(30),
-                    isInstallment = false,
-                    installmentNumber = null,
-                ),
+            // 3. Create invoice in Bexio
+            val dueDate = LocalDate.now().plusDays(30)
+            val bexioInvoiceId = bexioInvoiceService.createInvoiceInBexio(
+                invoiceId = invoiceId,
+                customerId = customerId,
+                productVariantId = productVariantId,
+                amount = productVariantEntity.flatRate,
+                dueDate = dueDate
             )
-            waitForUpdateOf(invoiceSubscription)
 
-            if (paidOnSite(request.paymentMode)) {
-                commandGateway.sendAndWait<Any>(MarkInvoicePaidCommand(invoiceId = invoiceId))
-                waitForUpdateOf(invoiceSubscription)
-            }
+            // Note: Payment status is now managed in Bexio
+            // The payment mode (PAY_ON_SITE) would need to be handled in Bexio separately
 
             return MembershipSignUpResult(
                 contractId = contractId,
                 bookingId = bookingId,
                 invoiceId = invoiceId,
+                bexioInvoiceId = bexioInvoiceId
             )
         } finally {
             bookingSubscription.close()
             contractSubscription.close()
-            invoiceSubscription.close()
         }
     }
 
-
-    private fun paidOnSite(mode: PaymentMode): Boolean = mode == PaymentMode.PAY_ON_SITE
-
-    private fun createInvoiceSubscriptionQuery(): SubscriptionQueryResult<MutableList<InvoiceView>, InvoiceUpdated> =
-        queryGateway.subscriptionQuery(
-            FindAllInvoicesQuery(),
-            ResponseTypes.multipleInstancesOf(InvoiceView::class.java),
-            ResponseTypes.instanceOf(InvoiceUpdated::class.java),
-        )
 
     private fun createContractSubscription(): SubscriptionQueryResult<MutableList<ProductContractView>, ProductContractUpdatedUpdate> =
         queryGateway.subscriptionQuery(

@@ -34,4 +34,6 @@ class CustomerEntity(
     val email: String,
     @Column(nullable = true)
     val phoneNumber: String?,
+    @Column(name = "bexio_contact_id", nullable = true)
+    val bexioContactId: Int? = null,
 )

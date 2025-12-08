@@ -1,12 +1,5 @@
 
 services:
-  axonserver:
-    image: 'axoniq/axonserver:latest'
-    environment:
-      - 'AXONIQ_AXONSERVER_STANDALONE=TRUE'
-    ports:
-      - '8024:8024'
-      - '8124:8124'
   postgres:
     image: postgres:18
     container_name: postgres-container
@@ -14,7 +7,7 @@ services:
     environment:
       POSTGRES_USER: test
       POSTGRES_PASSWORD: test
-      POSTGRES_DB: axoniq
+      POSTGRES_DB: fitnesslab
     ports:
       - "5432:5432"
     volumes:

@@ -8,4 +8,5 @@ data class MembershipSignUpResult(
     val contractId: ProductContractId,
     val bookingId: BookingId,
     val invoiceId: InvoiceId,
+    val bexioInvoiceId: Int,
 )

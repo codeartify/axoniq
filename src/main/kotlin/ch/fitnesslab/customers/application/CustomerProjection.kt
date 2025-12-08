@@ -1,6 +1,7 @@
 package ch.fitnesslab.customers.application
 
 import ch.fitnesslab.common.types.CustomerId
+import ch.fitnesslab.customers.domain.events.BexioContactLinkedEvent
 import ch.fitnesslab.customers.domain.events.CustomerRegisteredEvent
 import ch.fitnesslab.customers.domain.events.CustomerUpdatedEvent
 import ch.fitnesslab.customers.infrastructure.CustomerEntity
@@ -60,6 +61,36 @@ class CustomerProjection(
                     country = event.address.country,
                     email = event.email,
                     phoneNumber = event.phoneNumber,
+                    bexioContactId = existing.bexioContactId,
+                )
+            customerRepository.save(updated)
+
+            queryUpdateEmitter.emit(
+                FindAllCustomersQuery::class.java,
+                { true },
+                CustomerUpdatedUpdate(event.customerId.value.toString()),
+            )
+        }
+    }
+
+    @EventHandler
+    fun on(event: BexioContactLinkedEvent) {
+        customerRepository.findById(event.customerId.value).ifPresent { existing ->
+            val updated =
+                CustomerEntity(
+                    customerId = existing.customerId,
+                    salutation = existing.salutation,
+                    firstName = existing.firstName,
+                    lastName = existing.lastName,
+                    dateOfBirth = existing.dateOfBirth,
+                    street = existing.street,
+                    houseNumber = existing.houseNumber,
+                    postalCode = existing.postalCode,
+                    city = existing.city,
+                    country = existing.country,
+                    email = existing.email,
+                    phoneNumber = existing.phoneNumber,
+                    bexioContactId = event.bexioContactId,
                 )
             customerRepository.save(updated)
 
