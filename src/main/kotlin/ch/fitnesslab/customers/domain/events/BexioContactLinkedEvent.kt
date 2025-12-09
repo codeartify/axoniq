@@ -1,8 +1,9 @@
 package ch.fitnesslab.customers.domain.events
 
-import ch.fitnesslab.common.types.CustomerId
+import ch.fitnesslab.domain.value.BexioContactId
+import ch.fitnesslab.domain.value.CustomerId
 
 data class BexioContactLinkedEvent(
     val customerId: CustomerId,
-    val bexioContactId: Int
+    val bexioContactId: BexioContactId,
 )

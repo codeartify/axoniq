@@ -1,4 +1,4 @@
-package ch.fitnesslab.common.types
+package ch.fitnesslab.domain.value
 
 enum class Salutation {
     MR,

@@ -5,7 +5,7 @@ import ch.fitnesslab.booking.domain.PurchasedProduct
 import ch.fitnesslab.booking.domain.events.BookingPlacedEvent
 import ch.fitnesslab.booking.infrastructure.BookingEntity
 import ch.fitnesslab.booking.infrastructure.BookingRepository
-import ch.fitnesslab.common.types.BookingId
+import ch.fitnesslab.domain.value.BookingId
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import org.axonframework.config.ProcessingGroup

@@ -8,9 +8,9 @@ import ch.fitnesslab.billing.domain.events.InvoicePaidEvent
 import ch.fitnesslab.billing.infrastructure.InvoiceEmailService
 import ch.fitnesslab.billing.infrastructure.InvoiceEntity
 import ch.fitnesslab.billing.infrastructure.InvoiceRepository
-import ch.fitnesslab.common.types.CustomerId
-import ch.fitnesslab.common.types.InvoiceId
 import ch.fitnesslab.customers.application.CustomerProjection
+import ch.fitnesslab.domain.value.CustomerId
+import ch.fitnesslab.domain.value.InvoiceId
 import org.axonframework.config.ProcessingGroup
 import org.axonframework.eventhandling.EventHandler
 import org.axonframework.queryhandling.QueryHandler

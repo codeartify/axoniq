@@ -1,6 +1,6 @@
 package ch.fitnesslab.billing.infrastructure.bexio
 
-import ch.fitnesslab.customers.infrastructure.bexio.BexioContactDto
+import ch.fitnesslab.customers.infrastructure.bexio.BexioContactResponse
 import ch.fitnesslab.customers.infrastructure.bexio.BexioCreateContactRequest
 import ch.fitnesslab.customers.infrastructure.bexio.BexioUpdateContactRequest
 import org.slf4j.LoggerFactory
@@ -15,7 +15,7 @@ import org.springframework.web.client.RestTemplate
 @Component
 class BexioClient(
     @Value("\${bexio.api.token}") private val bexioToken: String,
-    private val restTemplate: RestTemplate = RestTemplate()
+    private val restTemplate: RestTemplate = RestTemplate(),
 ) {
     private val logger = LoggerFactory.getLogger(BexioClient::class.java)
     private val bexioApiUrl = "https://api.bexio.com/2.0"
@@ -30,12 +30,13 @@ class BexioClient(
             val headers = createHeaders()
             val request = HttpEntity<String>(headers)
 
-            val response = restTemplate.exchange(
-                "$bexioApiUrl/kb_invoice",
-                HttpMethod.GET,
-                request,
-                Array<BexioInvoiceDto>::class.java
-            )
+            val response =
+                restTemplate.exchange(
+                    "$bexioApiUrl/kb_invoice",
+                    HttpMethod.GET,
+                    request,
+                    Array<BexioInvoiceDto>::class.java,
+                )
 
             logger.info("Successfully fetched ${response.body?.size ?: 0} invoices from Bexio")
             response.body?.toList() ?: emptyList()
@@ -55,12 +56,13 @@ class BexioClient(
             val headers = createHeaders()
             val request = HttpEntity<String>(headers)
 
-            val response = restTemplate.exchange(
-                "$bexioApiUrl/kb_invoice?contact_id=$contactId",
-                HttpMethod.GET,
-                request,
-                Array<BexioInvoiceDto>::class.java
-            )
+            val response =
+                restTemplate.exchange(
+                    "$bexioApiUrl/kb_invoice?contact_id=$contactId",
+                    HttpMethod.GET,
+                    request,
+                    Array<BexioInvoiceDto>::class.java,
+                )
 
             logger.info("Successfully fetched ${response.body?.size ?: 0} invoices for contact $contactId from Bexio")
             response.body?.toList() ?: emptyList()
@@ -80,12 +82,13 @@ class BexioClient(
             val headers = createHeaders()
             val request = HttpEntity<String>(headers)
 
-            val response = restTemplate.exchange(
-                "$bexioApiUrl/kb_invoice/$invoiceId",
-                HttpMethod.GET,
-                request,
-                BexioInvoiceDto::class.java
-            )
+            val response =
+                restTemplate.exchange(
+                    "$bexioApiUrl/kb_invoice/$invoiceId",
+                    HttpMethod.GET,
+                    request,
+                    BexioInvoiceDto::class.java,
+                )
 
             logger.info("Successfully fetched invoice $invoiceId from Bexio")
             response.body
@@ -104,12 +107,13 @@ class BexioClient(
             val headers = createHeaders()
             val httpEntity = HttpEntity(request, headers)
 
-            val response = restTemplate.exchange(
-                "$bexioApiUrl/kb_invoice",
-                HttpMethod.POST,
-                httpEntity,
-                BexioInvoiceDto::class.java
-            )
+            val response =
+                restTemplate.exchange(
+                    "$bexioApiUrl/kb_invoice",
+                    HttpMethod.POST,
+                    httpEntity,
+                    BexioInvoiceDto::class.java,
+                )
 
             logger.info("Successfully created invoice in Bexio: ${response.body?.id}")
             response.body ?: throw BexioException("No response body from Bexio")
@@ -121,7 +125,7 @@ class BexioClient(
 
     // ========== Contact Methods ==========
 
-    fun createContact(request: BexioCreateContactRequest): BexioContactDto {
+    fun createContact(request: BexioCreateContactRequest): BexioContactResponse {
         if (bexioToken.isBlank()) {
             throw BexioException("Bexio API token not configured")
         }
@@ -130,12 +134,13 @@ class BexioClient(
             val headers = createHeaders()
             val httpEntity = HttpEntity(request, headers)
 
-            val response = restTemplate.exchange(
-                "$bexioApiUrl/contact",
-                HttpMethod.POST,
-                httpEntity,
-                BexioContactDto::class.java
-            )
+            val response =
+                restTemplate.exchange(
+                    "$bexioApiUrl/contact",
+                    HttpMethod.POST,
+                    httpEntity,
+                    BexioContactResponse::class.java,
+                )
 
             logger.info("Successfully created contact in Bexio: ${response.body?.id}")
             response.body ?: throw BexioException("No response body from Bexio")
@@ -145,7 +150,10 @@ class BexioClient(
         }
     }
 
-    fun updateContact(contactId: Int, request: BexioUpdateContactRequest): BexioContactDto {
+    fun updateContact(
+        contactId: Int,
+        request: BexioUpdateContactRequest,
+    ): BexioContactResponse {
         if (bexioToken.isBlank()) {
             throw BexioException("Bexio API token not configured")
         }
@@ -154,12 +162,13 @@ class BexioClient(
             val headers = createHeaders()
             val httpEntity = HttpEntity(request, headers)
 
-            val response = restTemplate.exchange(
-                "$bexioApiUrl/contact/$contactId",
-                HttpMethod.POST,
-                httpEntity,
-                BexioContactDto::class.java
-            )
+            val response =
+                restTemplate.exchange(
+                    "$bexioApiUrl/contact/$contactId",
+                    HttpMethod.POST,
+                    httpEntity,
+                    BexioContactResponse::class.java,
+                )
 
             logger.info("Successfully updated contact in Bexio: $contactId")
             response.body ?: throw BexioException("No response body from Bexio")
@@ -182,7 +191,7 @@ class BexioClient(
                 "$bexioApiUrl/contact/$contactId",
                 HttpMethod.DELETE,
                 request,
-                Void::class.java
+                Void::class.java,
             )
 
             logger.info("Successfully deleted contact in Bexio: $contactId")
@@ -192,7 +201,7 @@ class BexioClient(
         }
     }
 
-    fun fetchContactById(contactId: Int): BexioContactDto? {
+    fun fetchContactById(contactId: Int): BexioContactResponse? {
         if (bexioToken.isBlank()) {
             logger.warn("Bexio API token not configured. Skipping contact fetch.")
             return null
@@ -202,12 +211,13 @@ class BexioClient(
             val headers = createHeaders()
             val request = HttpEntity<String>(headers)
 
-            val response = restTemplate.exchange(
-                "$bexioApiUrl/contact/$contactId",
-                HttpMethod.GET,
-                request,
-                BexioContactDto::class.java
-            )
+            val response =
+                restTemplate.exchange(
+                    "$bexioApiUrl/contact/$contactId",
+                    HttpMethod.GET,
+                    request,
+                    BexioContactResponse::class.java,
+                )
 
             logger.info("Successfully fetched contact $contactId from Bexio")
             response.body
@@ -217,13 +227,10 @@ class BexioClient(
         }
     }
 
-    private fun createHeaders(): HttpHeaders {
-        return HttpHeaders().apply {
+    private fun createHeaders(): HttpHeaders =
+        HttpHeaders().apply {
             set("Authorization", "Bearer $bexioToken")
             contentType = MediaType.APPLICATION_JSON
             accept = listOf(MediaType.APPLICATION_JSON)
         }
-    }
 }
-
-class BexioException(message: String, cause: Throwable? = null) : RuntimeException(message, cause)

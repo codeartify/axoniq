@@ -2,8 +2,8 @@ package ch.fitnesslab.booking.domain.events
 
 import ch.fitnesslab.booking.domain.BookingStatus
 import ch.fitnesslab.booking.domain.PurchasedProduct
-import ch.fitnesslab.common.types.BookingId
-import ch.fitnesslab.common.types.CustomerId
+import ch.fitnesslab.domain.value.BookingId
+import ch.fitnesslab.domain.value.CustomerId
 import org.axonframework.serialization.Revision
 
 @Revision("1.0")

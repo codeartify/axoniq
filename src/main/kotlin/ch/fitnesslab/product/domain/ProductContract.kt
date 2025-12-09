@@ -1,6 +1,10 @@
 package ch.fitnesslab.product.domain
 
-import ch.fitnesslab.common.types.*
+import ch.fitnesslab.domain.value.BookingId
+import ch.fitnesslab.domain.value.CustomerId
+import ch.fitnesslab.domain.value.DateRange
+import ch.fitnesslab.domain.value.ProductContractId
+import ch.fitnesslab.domain.value.ProductVariantId
 import ch.fitnesslab.product.domain.ProductContractStatus.*
 import ch.fitnesslab.product.domain.commands.CreateProductContractCommand
 import ch.fitnesslab.product.domain.commands.PauseProductContractCommand

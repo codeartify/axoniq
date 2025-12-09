@@ -22,7 +22,6 @@ class ProductVariantEntity(
     @Enumerated(EnumType.STRING)
     val audience: ProductAudience,
     val requiresMembership: Boolean = false,
-
     // PricingVariantConfig fields (flattened)
     @Enumerated(EnumType.STRING)
     val pricingModel: PricingModel,
@@ -36,14 +35,12 @@ class ProductVariantEntity(
     @Enumerated(EnumType.STRING)
     val freeTrialInterval: BillingInterval? = null,
     val freeTrialCount: Int? = null,
-
     // ProductBehaviorConfig fields (flattened)
     val canBePaused: Boolean = false,
     val renewalLeadTimeDays: Int? = null,
     val maxActivePerCustomer: Int? = null, // TODO: remove, use maxPurchasesPerBuyer
     val maxPurchasesPerBuyer: Int? = null,
     val numberOfSessions: Int? = null,
-
     // New fields
     @Column(columnDefinition = "TEXT")
     val description: String? = null,
@@ -64,20 +61,19 @@ class ProductVariantEntity(
 
 @Converter
 class LinkedPlatformsConverter : AttributeConverter<List<LinkedPlatformSync>?, String?> {
-    private val objectMapper: ObjectMapper = jacksonObjectMapper().apply {
-        findAndRegisterModules() // Register Java 8 time module for Instant
-    }
+    private val objectMapper: ObjectMapper =
+        jacksonObjectMapper().apply {
+            findAndRegisterModules() // Register Java 8 time module for Instant
+        }
 
-    override fun convertToDatabaseColumn(attribute: List<LinkedPlatformSync>?): String? {
-        return attribute?.let { objectMapper.writeValueAsString(it) }
-    }
+    override fun convertToDatabaseColumn(attribute: List<LinkedPlatformSync>?): String? =
+        attribute?.let { objectMapper.writeValueAsString(it) }
 
-    override fun convertToEntityAttribute(dbData: String?): List<LinkedPlatformSync>? {
-        return dbData?.let {
+    override fun convertToEntityAttribute(dbData: String?): List<LinkedPlatformSync>? =
+        dbData?.let {
             objectMapper.readValue(
                 it,
-                objectMapper.typeFactory.constructCollectionType(List::class.java, LinkedPlatformSync::class.java)
+                objectMapper.typeFactory.constructCollectionType(List::class.java, LinkedPlatformSync::class.java),
             )
         }
-    }
 }

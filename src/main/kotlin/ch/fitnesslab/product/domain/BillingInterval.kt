@@ -4,5 +4,5 @@ enum class BillingInterval {
     DAY,
     WEEK,
     MONTH,
-    YEAR
+    YEAR,
 }

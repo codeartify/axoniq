@@ -14,7 +14,7 @@ import org.springframework.web.client.RestTemplate
 class WixClient(
     @Value("\${wix.token}") private val wixToken: String,
     @Value("\${wix.site.id:}") private val wixSiteId: String,
-    private val restTemplate: RestTemplate = RestTemplate()
+    private val restTemplate: RestTemplate = RestTemplate(),
 ) {
     private val logger = LoggerFactory.getLogger(WixClient::class.java)
     private val wixApiUrl = "https://www.wixapis.com/pricing-plans/v3/plans/query"
@@ -26,11 +26,12 @@ class WixClient(
         }
 
         return try {
-            val headers = HttpHeaders().apply {
-                set("Authorization", wixToken)       // assuming you already include "Bearer ..." in the property
-                set("wix-site-id", wixSiteId)
-                set("Content-Type", "application/json")
-            }
+            val headers =
+                HttpHeaders().apply {
+                    set("Authorization", wixToken) // assuming you already include "Bearer ..." in the property
+                    set("wix-site-id", wixSiteId)
+                    set("Content-Type", "application/json")
+                }
 
             // Basic v3 query with cursorPaging (filter is optional; you can extend it later)
             val body =
@@ -46,12 +47,13 @@ class WixClient(
 
             val request = HttpEntity<String>(body, headers)
 
-            val response = restTemplate.exchange(
-                wixApiUrl,
-                HttpMethod.POST,
-                request,
-                WixQueryPlansResponse::class.java
-            )
+            val response =
+                restTemplate.exchange(
+                    wixApiUrl,
+                    HttpMethod.POST,
+                    request,
+                    WixQueryPlansResponse::class.java,
+                )
 
             logger.info("Successfully fetched ${response.body?.plans?.size ?: 0} pricing plans from Wix")
             response.body?.plans ?: emptyList()
@@ -62,4 +64,7 @@ class WixClient(
     }
 }
 
-class WixSyncException(message: String, cause: Throwable? = null) : RuntimeException(message, cause)
+class WixSyncException(
+    message: String,
+    cause: Throwable? = null,
+) : RuntimeException(message, cause)

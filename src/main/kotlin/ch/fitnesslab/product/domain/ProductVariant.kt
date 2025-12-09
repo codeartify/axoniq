@@ -1,6 +1,6 @@
 package ch.fitnesslab.product.domain
 
-import ch.fitnesslab.common.types.ProductVariantId
+import ch.fitnesslab.domain.value.ProductVariantId
 import java.math.BigDecimal
 
 data class ProductVariant(

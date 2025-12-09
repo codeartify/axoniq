@@ -1,8 +1,8 @@
 package ch.fitnesslab.membership.application
 
-import ch.fitnesslab.common.types.BookingId
-import ch.fitnesslab.common.types.InvoiceId
-import ch.fitnesslab.common.types.ProductContractId
+import ch.fitnesslab.domain.value.BookingId
+import ch.fitnesslab.domain.value.InvoiceId
+import ch.fitnesslab.domain.value.ProductContractId
 
 data class MembershipSignUpResult(
     val contractId: ProductContractId,

@@ -1,7 +1,7 @@
 package ch.fitnesslab.membership.application
 
-import ch.fitnesslab.common.types.CustomerId
-import ch.fitnesslab.common.types.ProductVariantId
+import ch.fitnesslab.domain.value.CustomerId
+import ch.fitnesslab.domain.value.ProductVariantId
 import ch.fitnesslab.membership.domain.PaymentMode
 import java.time.LocalDate
 

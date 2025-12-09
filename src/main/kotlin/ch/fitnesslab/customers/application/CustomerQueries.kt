@@ -1,6 +1,6 @@
 package ch.fitnesslab.customers.application
 
-import ch.fitnesslab.common.types.CustomerId
+import ch.fitnesslab.domain.value.CustomerId
 
 data class FindAllCustomersQuery(
     val timestamp: Long = System.currentTimeMillis(),

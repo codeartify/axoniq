@@ -1,6 +1,6 @@
 package ch.fitnesslab.product.application
 
-import ch.fitnesslab.common.types.DateRange
+import ch.fitnesslab.domain.value.DateRange
 import ch.fitnesslab.product.domain.ProductContractStatus
 
 data class ProductContractView(

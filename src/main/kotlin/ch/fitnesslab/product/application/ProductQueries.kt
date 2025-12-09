@@ -1,6 +1,6 @@
 package ch.fitnesslab.product.application
 
-import ch.fitnesslab.common.types.ProductVariantId
+import ch.fitnesslab.domain.value.ProductVariantId
 
 data class FindAllProductsQuery(
     val timestamp: Long = System.currentTimeMillis(),

@@ -1,6 +1,6 @@
 package ch.fitnesslab.billing.domain.events
 
-import ch.fitnesslab.common.types.InvoiceId
+import ch.fitnesslab.domain.value.InvoiceId
 import org.axonframework.serialization.Revision
 import java.time.Instant
 

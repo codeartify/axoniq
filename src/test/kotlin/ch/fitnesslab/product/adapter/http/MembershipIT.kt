@@ -27,7 +27,6 @@ import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 import java.io.ByteArrayInputStream
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
-import java.time.temporal.ChronoUnit
 import java.time.temporal.ChronoUnit.DAYS
 
 class MembershipIT : IntegrationTest() {
@@ -101,10 +100,11 @@ class MembershipIT : IntegrationTest() {
             .isEqualTo(expectedProductView)
 
         // 3) Sign up membership via /api/memberships/sign-up
-        val memberShip = signUpForMemberShip(
-            customerId = customerIdWhoWantsToSignUpForMembership,
-            memberShipId = productViewFromGET.productId,
-        )
+        val memberShip =
+            signUpForMemberShip(
+                customerId = customerIdWhoWantsToSignUpForMembership,
+                memberShipId = productViewFromGET.productId,
+            )
 
         // 4) Verify InvoiceEmailService was called with correct InvoiceView and recipient
         val invoiceCaptor = argumentCaptor<InvoiceView>()
@@ -156,8 +156,9 @@ class MembershipIT : IntegrationTest() {
 
         val sentEmailBody = extractTextBody(sentMessage)
         val expectedEmailPattern =
-         Regex(
-            """(?s)Dear\s+${Regex.escape(sentCustomerName)},\s*
+            Regex(
+                """
+                (?s)Dear\s+${Regex.escape(sentCustomerName)},\s*
 .*Thank you for your business with FitnessLab!
 .*Please find attached your invoice details:
 .*Invoice Number:\s*${Regex.escape(sentInvoice.invoiceId)}
@@ -167,8 +168,9 @@ class MembershipIT : IntegrationTest() {
 .*Please ensure payment is made by the due date\.
 .*If you have any questions, please don't hesitate to contact us\.
 .*Best regards,
-.*FitnessLab Team\s*""".trimIndent()
-        )
+.*FitnessLab Team\s*
+                """.trimIndent(),
+            )
 
         assertThat(sentEmailBody).matches { expectedEmailPattern.matches(it) }
 
@@ -208,7 +210,6 @@ class MembershipIT : IntegrationTest() {
             expectedPdfRegex.matches(it)
         }
 
-
         // 5) Pause membership contract via /api/product-contracts/{contractId}/pause
         val pauseRequest =
             PauseContractRequest(
@@ -238,20 +239,24 @@ class MembershipIT : IntegrationTest() {
 
         val pausedContract = getContract(contractId)
 
-        val expectedPausedContract = initialContract.copy(
-            status = "PAUSED",
-            pauseHistory = listOf(
-                PauseHistoryEntryDto(
-                    pauseRange = DateRangeDto(
-                        pauseRequest.startDate,
-                        pauseRequest.endDate
+        val expectedPausedContract =
+            initialContract.copy(
+                status = "PAUSED",
+                pauseHistory =
+                    listOf(
+                        PauseHistoryEntryDto(
+                            pauseRange =
+                                DateRangeDto(
+                                    pauseRequest.startDate,
+                                    pauseRequest.endDate,
+                                ),
+                            reason = PauseReason.MEDICAL.toString(),
+                        ),
                     ),
-                    reason = PauseReason.MEDICAL.toString()
-                )
-            ),
-            canBePaused = false,
-        )
-        assertThat(pausedContract).usingRecursiveComparison()
+                canBePaused = false,
+            )
+        assertThat(pausedContract)
+            .usingRecursiveComparison()
             .isEqualTo(expectedPausedContract)
 
         // 6) Resume membership contract via /api/product-contracts/{contractId}/resume
@@ -261,19 +266,21 @@ class MembershipIT : IntegrationTest() {
 
         val pausedContractValidity = pausedContract.validity!!
 
-        val expectedResumedContract = pausedContract.copy(
-            status = "ACTIVE",
-            canBePaused = true,
-            validity = DateRangeDto(
-                pausedContractValidity.start,
-                pausedContractValidity.end.plusDays(
-                    DAYS.between(
-                        pauseRequest.startDate,
-                        pauseRequest.endDate
-                    )
-                )
+        val expectedResumedContract =
+            pausedContract.copy(
+                status = "ACTIVE",
+                canBePaused = true,
+                validity =
+                    DateRangeDto(
+                        pausedContractValidity.start,
+                        pausedContractValidity.end.plusDays(
+                            DAYS.between(
+                                pauseRequest.startDate,
+                                pauseRequest.endDate,
+                            ),
+                        ),
+                    ),
             )
-        )
 
         assertThat(actualResumedContract)
             .usingRecursiveComparison()
@@ -289,18 +296,22 @@ class MembershipIT : IntegrationTest() {
             .isOk
     }
 
-    private fun getContract(contractId: String): ProductContractDetailDto = webTestClient
-        .get()
-        .uri("/api/product-contracts/$contractId")
-        .accept(MediaType.APPLICATION_JSON)
-        .exchange()
-        .expectStatus()
-        .isOk
-        .expectBody(ProductContractDetailDto::class.java)
-        .returnResult()
-        .responseBody!!
+    private fun getContract(contractId: String): ProductContractDetailDto =
+        webTestClient
+            .get()
+            .uri("/api/product-contracts/$contractId")
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isOk
+            .expectBody(ProductContractDetailDto::class.java)
+            .returnResult()
+            .responseBody!!
 
-    private fun pauseContract(contractId: String, pauseRequest: PauseContractRequest) {
+    private fun pauseContract(
+        contractId: String,
+        pauseRequest: PauseContractRequest,
+    ) {
         webTestClient
             .post()
             .uri("/api/product-contracts/$contractId/pause")
@@ -310,7 +321,6 @@ class MembershipIT : IntegrationTest() {
             .expectStatus()
             .isOk
     }
-
 
     private fun getPDFContent(sentMessage: MimeMessage): String {
         val pdfBytes = extractPdfAttachmentBytes(sentMessage)
@@ -353,7 +363,10 @@ class MembershipIT : IntegrationTest() {
         error("No text body found in multipart message")
     }
 
-    private fun signUpForMemberShip(customerId: String?, memberShipId: String?): MembershipSignUpResultDto {
+    private fun signUpForMemberShip(
+        customerId: String?,
+        memberShipId: String?,
+    ): MembershipSignUpResultDto {
         val signupRequest =
             MembershipSignUpRequestDto(
                 customerId = customerId!!,

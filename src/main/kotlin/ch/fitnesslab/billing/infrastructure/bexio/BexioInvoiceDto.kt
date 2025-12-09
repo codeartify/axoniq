@@ -74,7 +74,7 @@ data class BexioInvoiceDto(
     val templateSlug: String?,
     val taxs: List<Any> = emptyList(),
     @JsonProperty("network_link")
-    val networkLink: String?
+    val networkLink: String?,
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -88,7 +88,7 @@ data class BexioCreateInvoiceRequest(
     val title: String?,
     val positions: List<BexioInvoicePosition>,
     @JsonProperty("api_reference")
-    val apiReference: String? = null
+    val apiReference: String? = null,
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -102,5 +102,5 @@ data class BexioInvoicePosition(
     val accountId: Int,
     @JsonProperty("tax_id")
     val taxId: Int,
-    val amount: BigDecimal = BigDecimal.ONE
+    val amount: BigDecimal = BigDecimal.ONE,
 )

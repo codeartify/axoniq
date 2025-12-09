@@ -10,7 +10,7 @@ data class LinkedPlatformSync(
     val isSynced: Boolean,
     val isSourceOfTruth: Boolean = false,
     val lastSyncedAt: Instant?,
-    val syncError: String?
+    val syncError: String?,
 )
 
 enum class PlatformVisibility {
@@ -18,5 +18,5 @@ enum class PlatformVisibility {
     PUBLISHED,
     ARCHIVED,
     HIDDEN,
-    NOT_PUBLISHED
+    NOT_PUBLISHED,
 }

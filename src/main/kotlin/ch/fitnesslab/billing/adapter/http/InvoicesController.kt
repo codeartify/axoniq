@@ -3,15 +3,13 @@ package ch.fitnesslab.billing.adapter.http
 import ch.fitnesslab.billing.domain.InvoiceStatus
 import ch.fitnesslab.billing.infrastructure.bexio.BexioInvoiceDto
 import ch.fitnesslab.billing.infrastructure.bexio.BexioInvoiceService
-import ch.fitnesslab.common.types.CustomerId
+import ch.fitnesslab.domain.value.CustomerId
 import ch.fitnesslab.generated.api.InvoicesApi
 import ch.fitnesslab.generated.model.CancelInvoiceRequest
 import ch.fitnesslab.generated.model.InvoiceDto
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
-import java.math.BigDecimal
 import java.time.LocalDate
-import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
 
 @RestController
@@ -25,11 +23,12 @@ class InvoicesController(
     ): ResponseEntity<List<InvoiceDto>> {
         val invoices = bexioInvoiceService.fetchAllInvoices()
 
-        val filtered = if (status != null) {
-            invoices.filter { bexioInvoiceService.mapBexioStatusToInvoiceStatus(it.kbItemStatusId) == status }
-        } else {
-            invoices
-        }
+        val filtered =
+            if (status != null) {
+                invoices.filter { bexioInvoiceService.mapBexioStatusToInvoiceStatus(it.kbItemStatusId) == status }
+            } else {
+                invoices
+            }
 
         return ResponseEntity.ok(filtered.map { it.toDto(bexioInvoiceService) })
     }
@@ -47,8 +46,9 @@ class InvoicesController(
         @PathVariable invoiceId: String,
     ): ResponseEntity<InvoiceDto> {
         // Assuming invoiceId is the Bexio invoice ID
-        val invoice = bexioInvoiceService.fetchInvoiceById(invoiceId.toInt())
-            ?: return ResponseEntity.notFound().build()
+        val invoice =
+            bexioInvoiceService.fetchInvoiceById(invoiceId.toInt())
+                ?: return ResponseEntity.notFound().build()
 
         return ResponseEntity.ok(invoice.toDto(bexioInvoiceService))
     }

@@ -1,6 +1,6 @@
 package ch.fitnesslab.product.application
 
-import ch.fitnesslab.common.types.ProductVariantId
+import ch.fitnesslab.domain.value.ProductVariantId
 import ch.fitnesslab.generated.model.*
 import ch.fitnesslab.product.domain.events.ProductCreatedEvent
 import ch.fitnesslab.product.domain.events.ProductUpdatedEvent
@@ -28,7 +28,6 @@ class ProductProjection(
                 productType = event.productType,
                 audience = event.audience,
                 requiresMembership = event.requiresMembership,
-
                 pricingModel = event.pricingVariant.pricingModel,
                 flatRate = event.pricingVariant.flatRate,
                 billingCycleInterval = event.pricingVariant.billingCycle?.interval,
@@ -37,13 +36,11 @@ class ProductProjection(
                 durationCount = event.pricingVariant.duration?.count,
                 freeTrialInterval = event.pricingVariant.freeTrial?.interval,
                 freeTrialCount = event.pricingVariant.freeTrial?.count,
-
                 canBePaused = event.behavior.canBePaused,
                 renewalLeadTimeDays = event.behavior.renewalLeadTimeDays,
                 maxActivePerCustomer = event.behavior.maxActivePerCustomer,
                 maxPurchasesPerBuyer = event.behavior.maxPurchasesPerBuyer,
                 numberOfSessions = event.behavior.numberOfSessions,
-
                 description = event.description,
                 termsAndConditions = event.termsAndConditions,
                 visibility = event.visibility,
@@ -72,7 +69,6 @@ class ProductProjection(
                     productType = event.productType,
                     audience = event.audience,
                     requiresMembership = event.requiresMembership,
-
                     pricingModel = event.pricingVariant.pricingModel,
                     flatRate = event.pricingVariant.flatRate,
                     billingCycleInterval = event.pricingVariant.billingCycle?.interval,
@@ -81,13 +77,11 @@ class ProductProjection(
                     durationCount = event.pricingVariant.duration?.count,
                     freeTrialInterval = event.pricingVariant.freeTrial?.interval,
                     freeTrialCount = event.pricingVariant.freeTrial?.count,
-
                     canBePaused = event.behavior.canBePaused,
                     renewalLeadTimeDays = event.behavior.renewalLeadTimeDays,
                     maxActivePerCustomer = event.behavior.maxActivePerCustomer,
                     maxPurchasesPerBuyer = event.behavior.maxPurchasesPerBuyer,
                     numberOfSessions = event.behavior.numberOfSessions,
-
                     description = event.description,
                     termsAndConditions = event.termsAndConditions,
                     visibility = event.visibility,
@@ -154,7 +148,7 @@ class ProductProjection(
                     if (productVariantEntity.durationInterval != null &&
                         productVariantEntity.durationCount != null
                     ) {
-                        //TODO fix
+                        // TODO fix
                         PricingDuration(
                             interval =
                                 productVariantEntity.durationInterval?.let { BillingInterval.valueOf(it.name) }
@@ -211,19 +205,19 @@ class ProductProjection(
     }
 
     private fun toLinkedPlatformSyncView(
-        domain: ch.fitnesslab.product.domain.LinkedPlatformSync
-    ): ch.fitnesslab.generated.model.LinkedPlatformSync {
-        return LinkedPlatformSync(
+        domain: ch.fitnesslab.product.domain.LinkedPlatformSync,
+    ): ch.fitnesslab.generated.model.LinkedPlatformSync =
+        LinkedPlatformSync(
             platformName = domain.platformName,
             idOnPlatform = domain.idOnPlatform,
             revision = domain.revision,
-            visibilityOnPlatform = domain.visibilityOnPlatform?.let {
-                LinkedPlatformSync.VisibilityOnPlatform.valueOf(it.name)
-            },
+            visibilityOnPlatform =
+                domain.visibilityOnPlatform?.let {
+                    LinkedPlatformSync.VisibilityOnPlatform.valueOf(it.name)
+                },
             isSynced = domain.isSynced,
             isSourceOfTruth = domain.isSourceOfTruth,
             lastSyncedAt = domain.lastSyncedAt?.atOffset(java.time.ZoneOffset.UTC),
-            syncError = domain.syncError
+            syncError = domain.syncError,
         )
-    }
 }

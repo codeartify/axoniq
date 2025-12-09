@@ -1,10 +1,10 @@
 package ch.fitnesslab.product.domain.commands
 
-import ch.fitnesslab.common.types.BookingId
-import ch.fitnesslab.common.types.CustomerId
-import ch.fitnesslab.common.types.DateRange
-import ch.fitnesslab.common.types.ProductContractId
-import ch.fitnesslab.common.types.ProductVariantId
+import ch.fitnesslab.domain.value.BookingId
+import ch.fitnesslab.domain.value.CustomerId
+import ch.fitnesslab.domain.value.DateRange
+import ch.fitnesslab.domain.value.ProductContractId
+import ch.fitnesslab.domain.value.ProductVariantId
 import org.axonframework.modelling.command.TargetAggregateIdentifier
 
 data class CreateProductContractCommand(

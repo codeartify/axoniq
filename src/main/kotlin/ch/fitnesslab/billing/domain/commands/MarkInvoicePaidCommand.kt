@@ -1,6 +1,6 @@
 package ch.fitnesslab.billing.domain.commands
 
-import ch.fitnesslab.common.types.InvoiceId
+import ch.fitnesslab.domain.value.InvoiceId
 import org.axonframework.modelling.command.TargetAggregateIdentifier
 import java.time.Instant
 

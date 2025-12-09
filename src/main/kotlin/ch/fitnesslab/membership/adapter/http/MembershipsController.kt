@@ -1,7 +1,7 @@
 package ch.fitnesslab.membership.adapter.http
 
-import ch.fitnesslab.common.types.CustomerId
-import ch.fitnesslab.common.types.ProductVariantId
+import ch.fitnesslab.domain.value.CustomerId
+import ch.fitnesslab.domain.value.ProductVariantId
 import ch.fitnesslab.generated.api.MembershipsApi
 import ch.fitnesslab.generated.model.MembershipSignUpRequestDto
 import ch.fitnesslab.generated.model.MembershipSignUpResultDto

@@ -1,6 +1,6 @@
 package ch.fitnesslab.product.domain
 
-import ch.fitnesslab.common.types.ProductVariantId
+import ch.fitnesslab.domain.value.ProductVariantId
 import ch.fitnesslab.product.domain.commands.CreateProductCommand
 import ch.fitnesslab.product.domain.commands.UpdateProductCommand
 import ch.fitnesslab.product.domain.events.ProductCreatedEvent

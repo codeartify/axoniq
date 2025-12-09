@@ -8,10 +8,10 @@ import ch.fitnesslab.billing.domain.events.InvoiceCancelledEvent
 import ch.fitnesslab.billing.domain.events.InvoiceCreatedEvent
 import ch.fitnesslab.billing.domain.events.InvoiceMarkedOverdueEvent
 import ch.fitnesslab.billing.domain.events.InvoicePaidEvent
-import ch.fitnesslab.common.types.BookingId
-import ch.fitnesslab.common.types.CustomerId
-import ch.fitnesslab.common.types.InvoiceId
-import ch.fitnesslab.common.types.ProductVariantId
+import ch.fitnesslab.domain.value.BookingId
+import ch.fitnesslab.domain.value.CustomerId
+import ch.fitnesslab.domain.value.InvoiceId
+import ch.fitnesslab.domain.value.ProductVariantId
 import ch.fitnesslab.membership.domain.DueDate
 import org.axonframework.commandhandling.CommandHandler
 import org.axonframework.eventsourcing.EventSourcingHandler

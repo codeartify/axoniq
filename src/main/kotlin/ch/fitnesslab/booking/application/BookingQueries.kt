@@ -1,6 +1,6 @@
 package ch.fitnesslab.booking.application
 
-import ch.fitnesslab.common.types.BookingId
+import ch.fitnesslab.domain.value.BookingId
 
 data class FindAllBookingsQuery(
     val timestamp: Long = System.currentTimeMillis(),

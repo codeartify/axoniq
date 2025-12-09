@@ -1,11 +1,11 @@
 package ch.fitnesslab.customers.application
 
-import ch.fitnesslab.common.types.CustomerId
 import ch.fitnesslab.customers.domain.events.BexioContactLinkedEvent
 import ch.fitnesslab.customers.domain.events.CustomerRegisteredEvent
 import ch.fitnesslab.customers.domain.events.CustomerUpdatedEvent
 import ch.fitnesslab.customers.infrastructure.CustomerEntity
 import ch.fitnesslab.customers.infrastructure.CustomerRepository
+import ch.fitnesslab.domain.value.CustomerId
 import org.axonframework.config.ProcessingGroup
 import org.axonframework.eventhandling.EventHandler
 import org.axonframework.queryhandling.QueryHandler
@@ -22,18 +22,18 @@ class CustomerProjection(
     fun on(event: CustomerRegisteredEvent) {
         val entity =
             CustomerEntity(
-                customerId = event.customerId.value,
-                salutation = event.salutation,
-                firstName = event.firstName,
-                lastName = event.lastName,
-                dateOfBirth = event.dateOfBirth,
-                street = event.address.street,
-                houseNumber = event.address.houseNumber,
-                postalCode = event.address.postalCode,
-                city = event.address.city,
-                country = event.address.country,
-                email = event.email,
-                phoneNumber = event.phoneNumber,
+                customerId = event.customerId.value.toString(),
+                salutation = event.salutation.name,
+                firstName = event.firstName.value,
+                lastName = event.lastName.value,
+                dateOfBirth = event.dateOfBirth.value,
+                street = event.address.street.value,
+                houseNumber = event.address.houseNumber.value,
+                postalCode = event.address.postalCode.value,
+                city = event.address.city.value,
+                country = event.address.country.value,
+                email = event.email.value,
+                phoneNumber = event.phoneNumber?.value,
             )
         customerRepository.save(entity)
 
@@ -47,26 +47,23 @@ class CustomerProjection(
     @EventHandler
     fun on(event: CustomerUpdatedEvent) {
         customerRepository.findById(event.customerId.value).ifPresent { existing ->
-            val updated =
-                CustomerEntity(
-                    customerId = existing.customerId,
-                    salutation = event.salutation,
-                    firstName = event.firstName,
-                    lastName = event.lastName,
-                    dateOfBirth = event.dateOfBirth,
-                    street = event.address.street,
-                    houseNumber = event.address.houseNumber,
-                    postalCode = event.address.postalCode,
-                    city = event.address.city,
-                    country = event.address.country,
-                    email = event.email,
-                    phoneNumber = event.phoneNumber,
-                    bexioContactId = existing.bexioContactId,
-                )
-            customerRepository.save(updated)
+            existing.customerId = event.customerId.value.toString()
+            existing.salutation = event.salutation.name
+            existing.firstName = event.firstName.value
+            existing.lastName = event.lastName.value
+            existing.dateOfBirth = event.dateOfBirth.value
+            existing.street = event.address.street.value
+            existing.houseNumber = event.address.houseNumber.value
+            existing.postalCode = event.address.postalCode.value
+            existing.city = event.address.city.value
+            existing.country = event.address.country.value
+            existing.email = event.email.value
+            existing.phoneNumber = event.phoneNumber?.value
+
+            customerRepository.save(existing)
 
             queryUpdateEmitter.emit(
-                FindAllCustomersQuery::class.java,
+                FindAllCustomersQuery::class.java, // TODO: emit also FindCustomerByIdQuery?
                 { true },
                 CustomerUpdatedUpdate(event.customerId.value.toString()),
             )
@@ -76,25 +73,11 @@ class CustomerProjection(
     @EventHandler
     fun on(event: BexioContactLinkedEvent) {
         customerRepository.findById(event.customerId.value).ifPresent { existing ->
-            val updated =
-                CustomerEntity(
-                    customerId = existing.customerId,
-                    salutation = existing.salutation,
-                    firstName = existing.firstName,
-                    lastName = existing.lastName,
-                    dateOfBirth = existing.dateOfBirth,
-                    street = existing.street,
-                    houseNumber = existing.houseNumber,
-                    postalCode = existing.postalCode,
-                    city = existing.city,
-                    country = existing.country,
-                    email = existing.email,
-                    phoneNumber = existing.phoneNumber,
-                    bexioContactId = event.bexioContactId,
-                )
-            customerRepository.save(updated)
+            existing.bexioContactId = event.bexioContactId.value
+            customerRepository.save(existing)
 
             queryUpdateEmitter.emit(
+                // TODO: emit also FindCustomerByIdQuery?
                 FindAllCustomersQuery::class.java,
                 { true },
                 CustomerUpdatedUpdate(event.customerId.value.toString()),

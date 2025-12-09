@@ -1,7 +1,7 @@
 package ch.fitnesslab.product.application
 
-import ch.fitnesslab.common.types.DateRange
-import ch.fitnesslab.common.types.ProductContractId
+import ch.fitnesslab.domain.value.DateRange
+import ch.fitnesslab.domain.value.ProductContractId
 import ch.fitnesslab.product.domain.ProductContractStatus
 import ch.fitnesslab.product.domain.events.ProductContractPausedEvent
 import ch.fitnesslab.product.domain.events.ProductContractResumedEvent

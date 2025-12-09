@@ -1,7 +1,7 @@
 package ch.fitnesslab.product.adapter.http
 
-import ch.fitnesslab.common.types.DateRange
-import ch.fitnesslab.common.types.ProductContractId
+import ch.fitnesslab.domain.value.DateRange
+import ch.fitnesslab.domain.value.ProductContractId
 import ch.fitnesslab.generated.api.ProductContractsApi
 import ch.fitnesslab.generated.model.DateRangeDto
 import ch.fitnesslab.generated.model.PauseContractRequest

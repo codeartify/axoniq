@@ -2,9 +2,9 @@ package ch.fitnesslab.booking.domain
 
 import ch.fitnesslab.booking.domain.commands.PlaceBookingCommand
 import ch.fitnesslab.booking.domain.events.BookingPlacedEvent
-import ch.fitnesslab.common.types.BookingId
-import ch.fitnesslab.common.types.CustomerId
-import ch.fitnesslab.common.types.InvoiceId
+import ch.fitnesslab.domain.value.BookingId
+import ch.fitnesslab.domain.value.CustomerId
+import ch.fitnesslab.domain.value.InvoiceId
 import org.axonframework.commandhandling.CommandHandler
 import org.axonframework.eventsourcing.EventSourcingHandler
 import org.axonframework.modelling.command.AggregateIdentifier

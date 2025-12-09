@@ -1,8 +1,8 @@
 package ch.fitnesslab.booking.domain.commands
 
 import ch.fitnesslab.booking.domain.PurchasedProduct
-import ch.fitnesslab.common.types.BookingId
-import ch.fitnesslab.common.types.CustomerId
+import ch.fitnesslab.domain.value.BookingId
+import ch.fitnesslab.domain.value.CustomerId
 import org.axonframework.modelling.command.TargetAggregateIdentifier
 
 data class PlaceBookingCommand(

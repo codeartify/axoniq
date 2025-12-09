@@ -1,77 +1,51 @@
 package ch.fitnesslab.customers.adapter.http
 
-import ch.fitnesslab.common.types.Address
-import ch.fitnesslab.common.types.CustomerId
-import ch.fitnesslab.common.types.Salutation
 import ch.fitnesslab.customers.application.CustomerProjection
-import ch.fitnesslab.customers.application.CustomerUpdatedUpdate
-import ch.fitnesslab.customers.application.FindAllCustomersQuery
+import ch.fitnesslab.customers.application.use_case.RegisterCustomerUseCase
+import ch.fitnesslab.customers.application.use_case.UpdateCustomerUseCase
 import ch.fitnesslab.customers.domain.commands.RegisterCustomerCommand
 import ch.fitnesslab.customers.domain.commands.UpdateCustomerCommand
+import ch.fitnesslab.customers.domain.value.*
 import ch.fitnesslab.customers.infrastructure.CustomerEntity
+import ch.fitnesslab.domain.value.Address
+import ch.fitnesslab.domain.value.CustomerId
+import ch.fitnesslab.domain.value.Salutation
 import ch.fitnesslab.generated.api.CustomersApi
 import ch.fitnesslab.generated.model.*
-import ch.fitnesslab.utils.waitForUpdateOf
-import org.axonframework.commandhandling.gateway.CommandGateway
-import org.axonframework.messaging.responsetypes.ResponseTypes
-import org.axonframework.queryhandling.QueryGateway
-import org.axonframework.queryhandling.SubscriptionQueryResult
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
+import ch.fitnesslab.generated.model.Salutation as DomainSalutation
 
 @RestController
 @RequestMapping("/api/customers")
 class CustomerController(
-    private val commandGateway: CommandGateway,
     private val customerProjection: CustomerProjection,
-    private val queryGateway: QueryGateway,
+    private val registerCustomerUseCase: RegisterCustomerUseCase,
+    private val updateCustomerUseCase: UpdateCustomerUseCase,
 ) : CustomersApi {
     @PostMapping
     override fun registerCustomer(
         @RequestBody registerCustomerRequest: RegisterCustomerRequest,
     ): ResponseEntity<CustomerRegistrationResponse> {
-        val customerId = CustomerId.generate()
+        val command = toRegisterCommand(CustomerId.generate(), registerCustomerRequest)
 
-        val subscriptionQuery =
-            queryGateway.subscriptionQuery(
-                FindAllCustomersQuery(),
-                ResponseTypes.multipleInstancesOf(CustomerView::class.java),
-                ResponseTypes.instanceOf(CustomerUpdatedUpdate::class.java),
-            )
+        val customerId = registerCustomerUseCase.execute(command)
 
-        try {
-            val command = toRegisterCommand(customerId, registerCustomerRequest)
-
-            commandGateway.sendAndWait<Any>(command)
-
-            // Wait for projection update
-            waitFor(subscriptionQuery)
-
-            return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(CustomerRegistrationResponse(customerId.toString()))
-        } finally {
-            subscriptionQuery.close()
-        }
+        return ResponseEntity
+            .status(HttpStatus.CREATED)
+            .body(CustomerRegistrationResponse(customerId.toString()))
     }
 
     @GetMapping("/{customerId}")
     override fun getCustomer(
         @PathVariable customerId: String,
-    ): ResponseEntity<CustomerView> {
-        val customer = customerProjection.findById(CustomerId.from(customerId))
-
-        return if (customer != null) {
-            ResponseEntity.ok(
-                customer.let {
-                    toViewModel(it)
-                },
-            )
-        } else {
-            ResponseEntity.notFound().build()
-        }
-    }
+    ): ResponseEntity<CustomerView> =
+        customerProjection
+            .findById(CustomerId.from(customerId))
+            ?.let(::toViewModel)
+            ?.let { ResponseEntity.ok(it) }
+            ?: ResponseEntity.notFound().build()
 
     @GetMapping
     override fun getAllCustomers(): ResponseEntity<List<CustomerView>> =
@@ -86,80 +60,65 @@ class CustomerController(
         @PathVariable customerId: String,
         @RequestBody updateCustomerRequest: UpdateCustomerRequest,
     ): ResponseEntity<Unit> {
-        val subscriptionQuery =
-            queryGateway.subscriptionQuery(
-                FindAllCustomersQuery(),
-                ResponseTypes.multipleInstancesOf(CustomerView::class.java),
-                ResponseTypes.instanceOf(CustomerUpdatedUpdate::class.java),
-            )
+        val command = toUpdateCustomerCommand(customerId, updateCustomerRequest)
 
-        try {
-            val command = toUpdateCustomerCommand(customerId, updateCustomerRequest)
-
-            commandGateway.sendAndWait<Any>(command)
-
-            waitFor(subscriptionQuery)
-
-            return ResponseEntity.ok().build()
-        } finally {
-            subscriptionQuery.close()
-        }
+        updateCustomerUseCase.execute(command)
+        return ResponseEntity.ok().build()
     }
 
     private fun toRegisterCommand(
         customerId: CustomerId,
-        registerCustomerRequest: RegisterCustomerRequest,
-    ): RegisterCustomerCommand =
-        RegisterCustomerCommand(
+        request: RegisterCustomerRequest,
+    ): RegisterCustomerCommand {
+        val address = request.address
+
+        return RegisterCustomerCommand(
             customerId = customerId,
-            salutation = registerCustomerRequest.salutation.let { Salutation.valueOf(it.name) },
-            firstName = registerCustomerRequest.firstName,
-            lastName = registerCustomerRequest.lastName,
-            dateOfBirth = registerCustomerRequest.dateOfBirth,
+            salutation = request.salutation.let { Salutation.valueOf(it.name) },
+            firstName = FirstName.of(request.firstName),
+            lastName = LastName.of(request.lastName),
+            dateOfBirth = DateOfBirth.of(request.dateOfBirth),
             address =
-                Address(
-                    street = registerCustomerRequest.address.street,
-                    houseNumber = registerCustomerRequest.address.houseNumber,
-                    postalCode = registerCustomerRequest.address.postalCode,
-                    city = registerCustomerRequest.address.city,
-                    country = registerCustomerRequest.address.country,
+                Address.of(
+                    address.street,
+                    address.houseNumber,
+                    address.postalCode,
+                    address.city,
+                    address.country,
                 ),
-            email = registerCustomerRequest.email,
-            phoneNumber = registerCustomerRequest.phoneNumber,
+            email = EmailAddress.of(request.email),
+            phoneNumber = PhoneNumber.of(request.phoneNumber),
         )
+    }
 
     private fun toUpdateCustomerCommand(
         customerId: String,
-        updateCustomerRequest: UpdateCustomerRequest,
-    ): UpdateCustomerCommand =
-        UpdateCustomerCommand(
+        request: UpdateCustomerRequest,
+    ): UpdateCustomerCommand {
+        val address = request.address
+        return UpdateCustomerCommand(
             customerId = CustomerId.from(customerId),
-            salutation = updateCustomerRequest.salutation.let { Salutation.valueOf(it.name) },
-            firstName = updateCustomerRequest.firstName,
-            lastName = updateCustomerRequest.lastName,
-            dateOfBirth = updateCustomerRequest.dateOfBirth,
+            salutation = request.salutation.let { Salutation.valueOf(it.name) },
+            firstName = FirstName.of(request.firstName),
+            lastName = LastName.of(request.lastName),
+            dateOfBirth = DateOfBirth.of(request.dateOfBirth),
             address =
-                Address(
-                    street = updateCustomerRequest.address.street,
-                    houseNumber = updateCustomerRequest.address.houseNumber,
-                    postalCode = updateCustomerRequest.address.postalCode,
-                    city = updateCustomerRequest.address.city,
-                    country = updateCustomerRequest.address.country,
+                Address.of(
+                    address.street,
+                    address.houseNumber,
+                    address.postalCode,
+                    address.city,
+                    address.country,
                 ),
-            email = updateCustomerRequest.email,
-            phoneNumber = updateCustomerRequest.phoneNumber,
+            email = EmailAddress.of(request.email),
+            phoneNumber = PhoneNumber.of(request.phoneNumber),
         )
-
-    private fun waitFor(subscriptionQuery: SubscriptionQueryResult<MutableList<CustomerView>, CustomerUpdatedUpdate>) {
-        waitForUpdateOf(subscriptionQuery)
     }
 
     private fun toViewModel(entity: CustomerEntity): CustomerView =
         CustomerView(
-            customerId = entity.customerId.toString(),
-            salutation =
-                ch.fitnesslab.generated.model.Salutation
-                    .forValue(entity.salutation.name),
+            customerId = entity.customerId,
+            salutation = DomainSalutation.forValue(entity.salutation),
             firstName = entity.firstName,
             lastName = entity.lastName,
             dateOfBirth = entity.dateOfBirth,

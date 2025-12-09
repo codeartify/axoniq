@@ -1,6 +1,6 @@
 package ch.fitnesslab.product.adapter.http
 
-import ch.fitnesslab.common.types.ProductVariantId
+import ch.fitnesslab.domain.value.ProductVariantId
 import ch.fitnesslab.generated.model.CreateProductRequest
 import ch.fitnesslab.generated.model.ProductCreationResponse
 import ch.fitnesslab.generated.model.ProductView
@@ -101,7 +101,8 @@ class ProductController(
                     termsAndConditions = request.termsAndConditions,
                     visibility =
                         request.visibility?.let {
-                            ch.fitnesslab.product.domain.ProductVisibility.valueOf(it.name)
+                            ch.fitnesslab.product.domain.ProductVisibility
+                                .valueOf(it.name)
                         } ?: ch.fitnesslab.product.domain.ProductVisibility.PUBLIC,
                     buyable = request.buyable ?: true,
                     buyerCanCancel = request.buyerCanCancel ?: true,
@@ -209,7 +210,8 @@ class ProductController(
                     termsAndConditions = request.termsAndConditions,
                     visibility =
                         request.visibility?.let {
-                            ch.fitnesslab.product.domain.ProductVisibility.valueOf(it.name)
+                            ch.fitnesslab.product.domain.ProductVisibility
+                                .valueOf(it.name)
                         } ?: ch.fitnesslab.product.domain.ProductVisibility.PUBLIC,
                     buyable = request.buyable ?: true,
                     buyerCanCancel = request.buyerCanCancel ?: true,
