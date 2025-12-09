@@ -76,9 +76,17 @@ class BexioCustomerSyncHandler(
                 return
             }
 
-            // Update contact in Bexio using event data
+            // Fetch existing contact from Bexio to get nr and contact_type_id
+            val existingContact = bexioContactService.fetchContact(customer.bexioContactId!!)
+            if (existingContact == null) {
+                logger.warn("Bexio contact ${customer.bexioContactId} not found, skipping update")
+                return
+            }
+
+            // Update contact in Bexio using event data (preserve nr and contact_type_id)
             val request =
                 BexioUpdateContactRequest(
+                    nr = existingContact.nr,
                     name1 = "${event.firstName} ${event.lastName}",
                     name2 = null,
                     salutationId = mapSalutationToBexioId(event.salutation),
@@ -89,6 +97,7 @@ class BexioCustomerSyncHandler(
                     countryId = mapCountryToBexio(event.address.country),
                     mail = event.email.value,
                     phoneMobile = event.phoneNumber?.value,
+                    contactTypeId = existingContact.contactTypeId,
                 )
 
             bexioContactService.updateContact(customer.bexioContactId!!, request)

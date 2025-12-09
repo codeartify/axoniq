@@ -28,4 +28,6 @@ class BexioContactService(
         bexioClient.deleteContact(bexioContactId)
         logger.info("Deleted Bexio contact $bexioContactId")
     }
+
+    fun fetchContact(bexioContactId: Int): BexioContactResponse? = bexioClient.fetchContactById(bexioContactId)
 }
