@@ -65,7 +65,7 @@ class BexioCustomerSyncHandler(
     fun on(event: CustomerUpdatedEvent) {
         try {
             // Get customer entity to retrieve bexioContactId
-            val customer = customerRepository.findById(event.customerId.value).orElse(null)
+            val customer = customerRepository.findById(event.customerId.value.toString()).orElse(null)
             if (customer == null) {
                 logger.warn("Customer ${event.customerId} not found in projection, cannot sync to Bexio")
                 return

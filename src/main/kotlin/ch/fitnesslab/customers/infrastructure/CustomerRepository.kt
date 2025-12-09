@@ -5,4 +5,4 @@ import org.springframework.stereotype.Repository
 import java.util.*
 
 @Repository
-interface CustomerRepository : JpaRepository<CustomerEntity, UUID>
+interface CustomerRepository : JpaRepository<CustomerEntity, String>

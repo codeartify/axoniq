@@ -46,7 +46,7 @@ class CustomerProjection(
 
     @EventHandler
     fun on(event: CustomerUpdatedEvent) {
-        customerRepository.findById(event.customerId.value).ifPresent { existing ->
+        customerRepository.findById(event.customerId.value.toString()).ifPresent { existing ->
             existing.customerId = event.customerId.value.toString()
             existing.salutation = event.salutation.name
             existing.firstName = event.firstName.value
@@ -72,7 +72,7 @@ class CustomerProjection(
 
     @EventHandler
     fun on(event: BexioContactLinkedEvent) {
-        customerRepository.findById(event.customerId.value).ifPresent { existing ->
+        customerRepository.findById(event.customerId.value.toString()).ifPresent { existing ->
             existing.bexioContactId = event.bexioContactId.value
             customerRepository.save(existing)
 
@@ -93,7 +93,7 @@ class CustomerProjection(
 
     fun findById(customerId: CustomerId): CustomerEntity? =
         customerRepository
-            .findById(customerId.value)
+            .findById(customerId.value.toString())
             .orElse(null)
 
     fun findAll(): List<CustomerEntity> = customerRepository.findAll()
