@@ -31,6 +31,10 @@ spring:
 axon:
   serializer:
     events: jackson
+  kafka:
+    bootstrap-servers: localhost:9092
+    client-id: axon-local
+    default-topic: axon.events
 wix:
   token: ${WIX_TOKEN:default-token-here}
   site:

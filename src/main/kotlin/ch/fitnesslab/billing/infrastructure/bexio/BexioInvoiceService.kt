@@ -92,12 +92,14 @@ class BexioInvoiceService(
 
     fun fetchInvoiceById(bexioInvoiceId: Int): BexioInvoiceDto? = bexioClient.fetchInvoiceById(bexioInvoiceId)
 
-    fun mapBexioStatusToInvoiceStatus(kbItemStatusId: Int): InvoiceStatus =
-        when (kbItemStatusId) {
-            7 -> InvoiceStatus.OPEN // Draft
-            9 -> InvoiceStatus.OPEN // Pending
-            19 -> InvoiceStatus.PAID // Paid
-            18 -> InvoiceStatus.CANCELLED // Cancelled
-            else -> InvoiceStatus.OPEN
-        }
+    companion object {
+        fun mapBexioStatusToInvoiceStatus(kbItemStatusId: Int): InvoiceStatus =
+            when (kbItemStatusId) {
+                7 -> InvoiceStatus.OPEN // Draft
+                9 -> InvoiceStatus.OPEN // Pending
+                19 -> InvoiceStatus.PAID // Paid
+                18 -> InvoiceStatus.CANCELLED // Cancelled
+                else -> InvoiceStatus.OPEN
+            }
+    }
 }

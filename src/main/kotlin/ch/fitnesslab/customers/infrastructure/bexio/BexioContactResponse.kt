@@ -40,7 +40,7 @@ data class BexioContactResponse(
     @JsonProperty("contact_type_id")
     val contactTypeId: Int?,
     @JsonProperty("contact_group_ids")
-    val contactGroupIds: List<Int>?,
+    val contactGroupIds: String?,
     @JsonProperty("contact_sector_id")
     val contactSectorId: Int?,
 )

@@ -3,6 +3,7 @@ package ch.fitnesslab.billing.adapter.http
 import ch.fitnesslab.billing.domain.InvoiceStatus
 import ch.fitnesslab.billing.infrastructure.bexio.BexioInvoiceDto
 import ch.fitnesslab.billing.infrastructure.bexio.BexioInvoiceService
+import ch.fitnesslab.customers.infrastructure.bexio.BexioContactService
 import ch.fitnesslab.domain.value.CustomerId
 import ch.fitnesslab.generated.api.InvoicesApi
 import ch.fitnesslab.generated.model.CancelInvoiceRequest
@@ -15,22 +16,21 @@ import java.time.format.DateTimeFormatter
 @RestController
 @RequestMapping("/api/invoices")
 class InvoicesController(
-    private val bexioInvoiceService: BexioInvoiceService,
+    private val bexioInvoiceService: BexioInvoiceService, private val bexioContactService: BexioContactService
 ) : InvoicesApi {
     @GetMapping
     fun getInvoices(
         @RequestParam(required = false) status: InvoiceStatus?,
     ): ResponseEntity<List<InvoiceDto>> {
         val invoices = bexioInvoiceService.fetchAllInvoices()
-
         val filtered =
             if (status != null) {
-                invoices.filter { bexioInvoiceService.mapBexioStatusToInvoiceStatus(it.kbItemStatusId) == status }
+                invoices.filter { BexioInvoiceService.mapBexioStatusToInvoiceStatus(it.kbItemStatusId) == status }
             } else {
                 invoices
             }
 
-        return ResponseEntity.ok(filtered.map { it.toDto(bexioInvoiceService) })
+        return ResponseEntity.ok(filtered.map { toDto(it) })
     }
 
     @GetMapping("/customer/{customerId}")
@@ -38,7 +38,7 @@ class InvoicesController(
         @PathVariable customerId: String,
     ): ResponseEntity<List<InvoiceDto>> {
         val invoices = bexioInvoiceService.fetchInvoicesByCustomerId(CustomerId.from(customerId))
-        return ResponseEntity.ok(invoices.map { it.toDto(bexioInvoiceService) })
+        return ResponseEntity.ok(invoices.map { toDto(it) })
     }
 
     @GetMapping("/{invoiceId}")
@@ -50,7 +50,7 @@ class InvoicesController(
             bexioInvoiceService.fetchInvoiceById(invoiceId.toInt())
                 ?: return ResponseEntity.notFound().build()
 
-        return ResponseEntity.ok(invoice.toDto(bexioInvoiceService))
+        return ResponseEntity.ok(toDto(invoice))
     }
 
     @PostMapping("/{invoiceId}/pay")
@@ -81,18 +81,28 @@ class InvoicesController(
         // This endpoint would need to call Bexio API
         return ResponseEntity.status(501).build()
     }
-}
 
-private fun BexioInvoiceDto.toDto(service: BexioInvoiceService) =
-    InvoiceDto(
-        invoiceId = id.toString(),
-        customerId = contactId.toString(),
-        customerName = contactAddress?.substringBefore("\n") ?: "Unknown",
-        bookingId = apiReference ?: "N/A",
-        amount = total,
-        dueDate = LocalDate.parse(isValidTo, DateTimeFormatter.ISO_LOCAL_DATE),
-        status = service.mapBexioStatusToInvoiceStatus(kbItemStatusId).name,
-        isInstallment = false,
-        installmentNumber = null,
-        paidAt = null, // Would need to parse from Bexio data
-    )
+    private fun toDto(invoiceDto: BexioInvoiceDto): InvoiceDto {
+        val contact = bexioContactService.fetchContact(invoiceDto.contactId)
+
+        val customerName: String
+        if (contact == null) {
+            customerName = invoiceDto.contactAddress?.substringBefore("\n") ?: "Unknown"
+        } else {
+            customerName = "${contact.name1}  ${contact.name2 ?: ""}".trim()
+        }
+
+        return InvoiceDto(
+            invoiceId = invoiceDto.id.toString(),
+            customerId = invoiceDto.contactId.toString(),
+            customerName = customerName,
+            bookingId = invoiceDto.apiReference ?: "N/A",
+            amount = invoiceDto.total,
+            dueDate = LocalDate.parse(invoiceDto.isValidTo, DateTimeFormatter.ISO_LOCAL_DATE),
+            status = BexioInvoiceService.mapBexioStatusToInvoiceStatus(invoiceDto.kbItemStatusId).name,
+            isInstallment = false,
+            installmentNumber = null,
+            paidAt = null, // Would need to parse from Bexio data
+        )
+    }
+}
