@@ -1,31 +1,21 @@
-import { Component, signal, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import AuthService, { UserProfile } from './auth.service';
-import { TranslateModule } from '@ngx-translate/core';
+import {Component, inject, signal} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import AuthService from './auth.service';
+import {TranslateModule} from '@ngx-translate/core';
+import {ProfileImageButton} from './profile-image-button';
+import {toSignal} from '@angular/core/rxjs-interop';
+import {filter} from 'rxjs';
+
 
 @Component({
   selector: 'app-user-profile-menu',
   standalone: true,
-  imports: [CommonModule, TranslateModule],
+  imports: [CommonModule, TranslateModule, ProfileImageButton],
   template: `
-    @if (userProfile) {
+    @if (userProfile()) {
+      @let profile = userProfile();
       <div class="relative">
-        <!-- Profile Image Button -->
-        <button
-          (click)="toggleMenu()"
-          class="flex items-center justify-center w-10 h-10 rounded-full bg-blue-600 text-white font-semibold hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-        >
-          @if (userProfile.picture) {
-            <img
-              [src]="userProfile.picture"
-              [alt]="userProfile.firstName + ' ' + userProfile.lastName"
-              class="w-10 h-10 rounded-full object-cover"
-            />
-          }
-          @if (!userProfile.picture) {
-            <span>{{ getInitials() }}</span>
-          }
-        </button>
+        <app-profile-image-button [userProfile]="profile" (emitToggleMenu)="toggleMenu()"/>
 
         <!-- Dropdown Menu -->
         @if (isOpen()) {
@@ -35,11 +25,11 @@ import { TranslateModule } from '@ngx-translate/core';
             <!-- User Info -->
             <div class="px-4 py-3 border-b border-gray-200">
               <p class="text-sm font-semibold text-gray-900">
-                {{ userProfile.firstName }} {{ userProfile.lastName }}
+                {{ profile.firstName }} {{ profile.lastName }}
               </p>
-              <p class="text-xs text-gray-500 mt-1">{{ userProfile.email }}</p>
+              <p class="text-xs text-gray-500 mt-1">{{ profile.email }}</p>
               <div class="flex gap-1 mt-2">
-                @for (role of userProfile.roles; track role) {
+                @for (role of profile.roles; track role) {
                   <span
                     class="inline-block px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded"
                   >
@@ -74,17 +64,19 @@ import { TranslateModule } from '@ngx-translate/core';
     }
   `,
 })
-export class UserProfileMenuComponent {
+export class UserProfileMenu {
   private authService = inject(AuthService);
-
   isOpen = signal(false);
-  userProfile: UserProfile | null = null;
+  userProfile = toSignal(this.authService.userProfile$.pipe(filter(v => v !== null && v !== undefined)), {
+    initialValue: {
+      username: "",
+      email: "",
+      firstName: "",
+      lastName: "",
+      roles: [],
+    }
+  });
 
-  constructor() {
-    this.authService.userProfile$.subscribe((profile) => {
-      this.userProfile = profile;
-    });
-  }
 
   toggleMenu(): void {
     this.isOpen.update((value) => !value);
@@ -101,8 +93,8 @@ export class UserProfileMenuComponent {
 
   getInitials(): string {
     if (!this.userProfile) return '';
-    const first = this.userProfile.firstName?.charAt(0) || '';
-    const last = this.userProfile.lastName?.charAt(0) || '';
+    const first = this.userProfile()?.firstName?.charAt(0) || '';
+    const last = this.userProfile()?.lastName?.charAt(0) || '';
     return (first + last).toUpperCase();
   }
 }
