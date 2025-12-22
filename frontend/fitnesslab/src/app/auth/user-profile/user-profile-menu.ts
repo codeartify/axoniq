@@ -28,8 +28,8 @@ const hasUserProfile = (u: UserProfile | null) => u !== null && u !== undefined;
 
       <div class="relative">
         <gym-user-profile-image-button
-          [userProfile]="profile"
-          (emitToggleMenu)="toggleMenu()"/>
+          [userProfileButton]="profile"
+          (menuToggled)="toggleMenu()"/>
 
         <gym-user-profile-drop-down-menu
           [userProfile]="profile"
@@ -60,6 +60,5 @@ export class UserProfileMenu {
 
   logout(): void {
     this.closeMenu();
-    this.authService.logout();
   }
 }
