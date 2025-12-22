@@ -10,7 +10,7 @@ import {Invoices, InvoiceView} from '../invoices/invoices';
 import {MembershipSignUpRequestDto} from '../generated-api/model/models';
 
 @Component({
-  selector: 'app-customer-detail',
+  selector: 'gym-customer-detail',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, TranslateModule],
   templateUrl: './customer-detail.html'

@@ -6,7 +6,7 @@ import { TranslateModule } from '@ngx-translate/core';
 import { Products, ProductView, UpdateProductRequest } from './products';
 
 @Component({
-  selector: 'app-product-detail',
+  selector: 'gym-product-detail',
   standalone: true,
   imports: [CommonModule, FormsModule, TranslateModule],
   templateUrl: './product-detail.html'

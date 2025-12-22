@@ -6,7 +6,7 @@ import { TranslateModule } from '@ngx-translate/core';
 import { Customers } from './customers';
 
 @Component({
-  selector: 'app-customer-create',
+  selector: 'gym-customer-create',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, TranslateModule],
   templateUrl: './customer-create.html'

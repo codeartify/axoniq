@@ -19,7 +19,7 @@ let defaultProfile = {
 let hasUserProfile = (u: UserProfile | null) => u !== null && u !== undefined;
 
 @Component({
-  selector: 'app-user-profile-menu',
+  selector: 'gym-user-profile-menu',
   standalone: true,
   imports: [CommonModule, TranslateModule, ProfileImageButton, UserProfileDropDownMenu],
   template: `
@@ -27,11 +27,11 @@ let hasUserProfile = (u: UserProfile | null) => u !== null && u !== undefined;
       @let profile = userProfile();
 
       <div class="relative">
-        <app-profile-image-button
+        <gym-profile-image-button
           [userProfile]="profile"
           (emitToggleMenu)="toggleMenu()"/>
 
-        <app-user-profile-drop-down-menu
+        <gym-user-profile-drop-down-menu
           [userProfile]="profile"
           [isOpen]="isOpen()"
           (onMenuClosed)="closeMenu()"

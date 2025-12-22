@@ -2,7 +2,7 @@ import {Component, computed, input, output} from '@angular/core';
 import {UserProfile} from './auth.service';
 
 @Component({
-  selector: 'app-profile-image-button',
+  selector: 'gym-profile-image-button',
   imports: [],
   template: `
     <button

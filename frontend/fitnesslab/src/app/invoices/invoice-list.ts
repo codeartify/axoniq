@@ -9,11 +9,11 @@ import {ColumnDefinition, GenericListComponent, RowAction} from '../shared/gener
 type SortColumn = 'invoiceId' | 'customerName' | 'amount' | 'dueDate' | 'status';
 
 @Component({
-  selector: 'app-invoice-list',
+  selector: 'gym-invoice-list',
   standalone: true,
   imports: [CommonModule, FormsModule, TranslateModule, GenericListComponent],
   template: `
-    <app-generic-list
+    <gym-generic-list
       [titleKey]="'invoice.list.title'"
       [searchPlaceholderKey]="'invoice.list.searchPlaceholder'"
       [noItemsFoundKey]="'invoice.list.noInvoicesFound'"

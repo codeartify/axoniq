@@ -6,7 +6,7 @@ import { FormsModule } from '@angular/forms';
 import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
-  selector: 'app-login',
+  selector: 'gym-login',
   standalone: true,
   imports: [CommonModule, FormsModule, TranslateModule],
   template: `

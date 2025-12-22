@@ -3,7 +3,7 @@ import {LoadingService} from './loading.service';
 import {ChangeDetectionStrategy, Component, inject} from '@angular/core';
 
 @Component({
-  selector: 'app-loading-bar',
+  selector: 'gym-loading-bar',
   standalone: true,
   imports: [CommonModule],
   changeDetection: ChangeDetectionStrategy.OnPush,

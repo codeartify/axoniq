@@ -1,11 +1,15 @@
 import {Component, input, output} from '@angular/core';
 import {TranslatePipe} from '@ngx-translate/core';
 import {UserProfile} from './auth.service';
+import {UserProfileTitle} from './user-profile-title';
+import {UserProfileEmail} from './user-profile-email';
 
 @Component({
-  selector: 'app-user-profile-drop-down-menu',
+  selector: 'gym-user-profile-drop-down-menu',
   imports: [
-    TranslatePipe
+    TranslatePipe,
+    UserProfileTitle,
+    UserProfileEmail
   ],
   template: `
     @let profile = userProfile();
@@ -15,10 +19,10 @@ import {UserProfile} from './auth.service';
         class="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-xl border border-gray-200 py-2 z-50"
       >
         <div class="px-4 py-3 border-b border-gray-200">
-          <p class="text-sm font-semibold text-gray-900">
-            {{ profile.firstName }} {{ profile.lastName }}
-          </p>
-          <p class="text-xs text-gray-500 mt-1">{{ profile.email }}</p>
+          <gym-user-profile-title [userProfile]="profile"/>
+          <gym-user-profile-email [email]="profile.email"/>
+
+          <!-- rolese -->
           <div class="flex gap-1 mt-2">
             @for (role of profile.roles; track role) {
               <span

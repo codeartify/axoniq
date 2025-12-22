@@ -4,7 +4,7 @@ import {TranslateModule} from '@ngx-translate/core';
 import {TranslationService} from './translation.service';
 
 @Component({
-  selector: 'app-language-switcher',
+  selector: 'gym-language-switcher',
   standalone: true,
   imports: [CommonModule, TranslateModule],
   template: `

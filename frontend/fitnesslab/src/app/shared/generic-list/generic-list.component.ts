@@ -35,7 +35,7 @@ export interface CollectionAction {
 }
 
 @Component({
-  selector: 'app-generic-list',
+  selector: 'gym-generic-list',
   standalone: true,
   imports: [CommonModule, FormsModule, TranslateModule],
   templateUrl: './generic-list.component.html'

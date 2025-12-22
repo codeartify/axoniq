@@ -6,11 +6,11 @@ import {GenericListComponent, ColumnDefinition, RowAction, CollectionAction} fro
 type SortColumn = 'name' | 'email' | 'phone' | 'city' | 'dateOfBirth';
 
 @Component({
-  selector: 'app-customer-list',
+  selector: 'gym-customer-list',
   standalone: true,
   imports: [GenericListComponent],
   template: `
-    <app-generic-list
+    <gym-generic-list
       [titleKey]="'customer.list.title'"
       [searchPlaceholderKey]="'customer.list.searchPlaceholder'"
       [noItemsFoundKey]="'customer.list.noCustomersFound'"

@@ -1,14 +1,13 @@
 import {Component, inject, signal} from '@angular/core';
-import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
-import { TranslateModule } from '@ngx-translate/core';
-import { LoadingBar } from './shared/loading-bar';
-import { LanguageSwitcher } from './shared/language-switcher';
-import { UserProfileMenu } from './auth/user-profile-menu.component';
+import {RouterLink, RouterLinkActive, RouterOutlet} from '@angular/router';
+import {TranslateModule} from '@ngx-translate/core';
+import {LoadingBar} from './shared/loading-bar';
+import {LanguageSwitcher} from './shared/language-switcher';
+import {UserProfileMenu} from './auth/user-profile-menu.component';
 import AuthService from './auth/auth.service';
-import {AsyncPipe} from '@angular/common';
 
 @Component({
-  selector: 'app-root',
+  selector: 'gym-root',
   imports: [RouterOutlet, RouterLink, RouterLinkActive, LoadingBar, LanguageSwitcher, UserProfileMenu, TranslateModule],
   templateUrl: './app.html',
   standalone: true

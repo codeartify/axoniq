@@ -9,11 +9,11 @@ import {TranslateModule} from '@ngx-translate/core';
 type SortColumn = 'name' | 'slug' | 'productType' | 'price' | 'audience' | 'visibility';
 
 @Component({
-  selector: 'app-product-list',
+  selector: 'gym-product-list',
   standalone: true,
   imports: [GenericListComponent, CommonModule, TranslateModule],
   template: `
-    <app-generic-list
+    <gym-generic-list
       [titleKey]="'product.list.title'"
       [searchPlaceholderKey]="'product.list.searchPlaceholder'"
       [noItemsFoundKey]="'product.list.noProductsFound'"
