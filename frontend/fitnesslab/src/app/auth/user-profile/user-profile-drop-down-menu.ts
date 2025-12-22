@@ -1,6 +1,6 @@
 import {Component, input, output} from '@angular/core';
 import {TranslatePipe} from '@ngx-translate/core';
-import {UserProfile} from './auth.service';
+import {UserProfile} from '../auth.service';
 import {UserProfileTitle} from './user-profile-title';
 import {UserProfileEmail} from './user-profile-email';
 import {UserProfileRoles} from './user-profile-roles';

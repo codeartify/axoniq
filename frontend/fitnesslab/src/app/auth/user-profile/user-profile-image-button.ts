@@ -1,8 +1,8 @@
 import {Component, computed, input, output} from '@angular/core';
-import {UserProfile} from './auth.service';
+import {UserProfile} from '../auth.service';
 
 @Component({
-  selector: 'gym-profile-image-button',
+  selector: 'gym-user-profile-image-button',
   imports: [],
   template: `
     <button
@@ -25,7 +25,7 @@ import {UserProfile} from './auth.service';
   `,
   styles: ``,
 })
-export class ProfileImageButton {
+export class UserProfileImageButton {
   userProfile = input.required<UserProfile>();
   emitToggleMenu = output<void>();
 

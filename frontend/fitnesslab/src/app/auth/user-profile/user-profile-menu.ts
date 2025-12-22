@@ -1,8 +1,8 @@
 import {Component, inject, signal} from '@angular/core';
 import {CommonModule} from '@angular/common';
-import AuthService, {UserProfile} from './auth.service';
+import AuthService, {UserProfile} from '../auth.service';
 import {TranslateModule} from '@ngx-translate/core';
-import {ProfileImageButton} from './profile-image-button';
+import {UserProfileImageButton} from './user-profile-image-button';
 import {toSignal} from '@angular/core/rxjs-interop';
 import {filter} from 'rxjs';
 import {UserProfileDropDownMenu} from './user-profile-drop-down-menu';
@@ -21,13 +21,13 @@ const hasUserProfile = (u: UserProfile | null) => u !== null && u !== undefined;
 @Component({
   selector: 'gym-user-profile-menu',
   standalone: true,
-  imports: [CommonModule, TranslateModule, ProfileImageButton, UserProfileDropDownMenu],
+  imports: [CommonModule, TranslateModule, UserProfileImageButton, UserProfileDropDownMenu],
   template: `
     @if (userProfile()) {
       @let profile = userProfile();
 
       <div class="relative">
-        <gym-profile-image-button
+        <gym-user-profile-image-button
           [userProfile]="profile"
           (emitToggleMenu)="toggleMenu()"/>
 
