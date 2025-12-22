@@ -1,6 +1,6 @@
 import {Component, inject, signal} from '@angular/core';
 import {Navigation} from './navigation';
-import {LanguageSwitch} from './shared/language-switch';
+import {LanguageSwitch} from './shared/language-switch/language-switch';
 import {UserProfileMenu} from './auth/user-profile-menu';
 import AuthService from './auth/auth.service';
 

@@ -63,17 +63,19 @@ export class TranslationService {
     return [...this.SUPPORTED_LANGUAGES];
   }
 
-  changeLanguage(lang: string): void {
-    if (!this.isValidLanguage(lang)) {
+  changeLanguage(lang: Language): void {
+    let code = lang.code
+
+    if (!this.isValidLanguage(code)) {
       console.warn(`Language '${lang}' is not supported. Using default language.`);
-      lang = this.DEFAULT_LANGUAGE_CODE;
+      code = this.DEFAULT_LANGUAGE_CODE;
     }
 
     // Update the translation service
-    this.translateService.use(lang);
+    this.translateService.use(code);
 
     // Update the URL with the new language parameter
-    this.updateUrlParameter('lang', lang);
+    this.updateUrlParameter('lang', code);
   }
 
   private updateUrlParameter(key: string, value: string): void {
