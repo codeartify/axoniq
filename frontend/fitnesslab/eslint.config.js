@@ -6,6 +6,11 @@ const angular = require("angular-eslint");
 
 module.exports = defineConfig([
   {
+    ignores: [
+      'src/app/generated-api/**',
+    ],
+  },
+  {
     files: ["**/*.ts"],
     extends: [
       eslint.configs.recommended,
@@ -19,7 +24,7 @@ module.exports = defineConfig([
         "error",
         {
           type: "attribute",
-          prefix: "fitnesslab",
+          prefix: "gym",
           style: "camelCase",
         },
       ],
@@ -27,7 +32,7 @@ module.exports = defineConfig([
         "error",
         {
           type: "element",
-          prefix: "fitnesslab",
+          prefix: "gym",
           style: "kebab-case",
         },
       ],

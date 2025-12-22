@@ -2,7 +2,7 @@ import {Component, computed, inject, OnInit, signal, TemplateRef, ViewChild} fro
 import {Router} from '@angular/router';
 import {Products, ProductView} from './products';
 import AuthService from '../auth/auth.service';
-import {GenericListComponent, ColumnDefinition, RowAction, CollectionAction} from '../shared/generic-list/generic-list.component';
+import {GenericList, ColumnDefinition, RowAction, CollectionAction} from '../shared/generic-list/generic-list';
 import {CommonModule} from '@angular/common';
 import {TranslateModule} from '@ngx-translate/core';
 
@@ -11,7 +11,7 @@ type SortColumn = 'name' | 'slug' | 'productType' | 'price' | 'audience' | 'visi
 @Component({
   selector: 'gym-product-list',
   standalone: true,
-  imports: [GenericListComponent, CommonModule, TranslateModule],
+  imports: [GenericList, CommonModule, TranslateModule],
   template: `
     <gym-generic-list
       [titleKey]="'product.list.title'"

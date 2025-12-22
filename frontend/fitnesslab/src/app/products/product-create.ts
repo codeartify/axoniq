@@ -49,7 +49,7 @@ export class ProductCreate {
   billingIntervals = ['DAY', 'WEEK', 'MONTH', 'YEAR'];
   isSubmitting = false;
   errorMessage: string | null = null;
-  perksInput: string = '';
+  perksInput = '';
 
   onSubmit(): void {
     if (!this.isFormValid()) {

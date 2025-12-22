@@ -167,5 +167,13 @@
   "login.password": "Password",
   "login.signIn": "Sign In",
   "login.signingIn": "Signing in...",
-  "login.adminCredentials": "Default Admin Credentials:"
+  "login.adminCredentials": "Default Admin Credentials:",
+
+
+  "notFound.title": "Page not found",
+  "notFound.description": "The page you are looking for does not exist.",
+  "notFound.toDashboard": "To the dashboard",
+
+  "language.german": "German",
+  "language.english": "English"
 }

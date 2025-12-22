@@ -28,7 +28,7 @@ export class ProductDetail implements OnInit {
   pricingModels = ['SUBSCRIPTION', 'SINGLE_PAYMENT_FOR_DURATION', 'SINGLE_PAYMENT_UNLIMITED'];
   visibilityOptions = ['PUBLIC', 'HIDDEN', 'ARCHIVED'];
   billingIntervals = ['DAY', 'WEEK', 'MONTH', 'YEAR'];
-  perksInput: string = '';
+  perksInput = '';
 
   ngOnInit(): void {
     const productId = this.route.snapshot.paramMap.get('id');

@@ -4,14 +4,14 @@ import {CommonModule} from '@angular/common';
 import {FormsModule} from '@angular/forms';
 import {Router} from '@angular/router';
 import {TranslateModule} from '@ngx-translate/core';
-import {ColumnDefinition, GenericListComponent, RowAction} from '../shared/generic-list/generic-list.component';
+import {ColumnDefinition, GenericList, RowAction} from '../shared/generic-list/generic-list';
 
 type SortColumn = 'invoiceId' | 'customerName' | 'amount' | 'dueDate' | 'status';
 
 @Component({
   selector: 'gym-invoice-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, TranslateModule, GenericListComponent],
+  imports: [CommonModule, FormsModule, TranslateModule, GenericList],
   template: `
     <gym-generic-list
       [titleKey]="'invoice.list.title'"

@@ -1,14 +1,14 @@
 import {Component, computed, OnInit, signal, inject} from '@angular/core';
 import {Router} from '@angular/router';
 import {Customers, CustomerView} from './customers';
-import {GenericListComponent, ColumnDefinition, RowAction, CollectionAction} from '../shared/generic-list/generic-list.component';
+import {GenericList, ColumnDefinition, RowAction, CollectionAction} from '../shared/generic-list/generic-list';
 
 type SortColumn = 'name' | 'email' | 'phone' | 'city' | 'dateOfBirth';
 
 @Component({
   selector: 'gym-customer-list',
   standalone: true,
-  imports: [GenericListComponent],
+  imports: [GenericList],
   template: `
     <gym-generic-list
       [titleKey]="'customer.list.title'"

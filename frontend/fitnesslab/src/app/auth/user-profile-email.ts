@@ -1,5 +1,4 @@
 import {Component, input} from '@angular/core';
-import {UserProfile} from './auth.service';
 
 @Component({
   selector: 'gym-user-profile-email',

@@ -8,7 +8,7 @@ import {filter} from 'rxjs';
 import {UserProfileDropDownMenu} from './user-profile-drop-down-menu';
 
 
-let defaultProfile = {
+const defaultProfile = {
   username: "",
   email: "",
   firstName: "",
@@ -16,7 +16,7 @@ let defaultProfile = {
   roles: [],
 };
 
-let hasUserProfile = (u: UserProfile | null) => u !== null && u !== undefined;
+const hasUserProfile = (u: UserProfile | null) => u !== null && u !== undefined;
 
 @Component({
   selector: 'gym-user-profile-menu',
@@ -34,8 +34,8 @@ let hasUserProfile = (u: UserProfile | null) => u !== null && u !== undefined;
         <gym-user-profile-drop-down-menu
           [userProfile]="profile"
           [isOpen]="isOpen()"
-          (onMenuClosed)="closeMenu()"
-          (onLogout)="logout()"/>
+          (menuClosed)="closeMenu()"
+          (loggedOut)="logout()"/>
       </div>
     }
   `,

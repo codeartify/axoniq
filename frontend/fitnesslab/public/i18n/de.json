@@ -167,5 +167,12 @@
   "login.password": "Passwort",
   "login.signIn": "Anmelden",
   "login.signingIn": "Wird angemeldet...",
-  "login.adminCredentials": "Standard-Admin-Zugangsdaten:"
+  "login.adminCredentials": "Standard-Admin-Zugangsdaten:",
+
+  "notFound.title": "Seite nicht gefunden",
+  "notFound.description": "Die Seite, die Sie suchen, wurde nicht gefunden.",
+  "notFound.toDashboard": "Zum Dashboard",
+
+  "language.german": "Deutsch",
+  "language.english": "Englisch"
 }

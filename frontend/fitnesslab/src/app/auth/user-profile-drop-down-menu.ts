@@ -48,14 +48,14 @@ export class UserProfileDropDownMenu {
   userProfile = input.required<UserProfile>();
   isOpen = input.required<boolean>();
 
-  onMenuClosed = output<void>();
-  onLogout = output<void>();
+  menuClosed = output<void>();
+  loggedOut = output<void>();
 
   closeMenu(): void {
-    this.onMenuClosed.emit();
+    this.menuClosed.emit();
   }
 
   logout(): void {
-    this.onLogout.emit();
+    this.loggedOut.emit();
   }
 }
