@@ -9,8 +9,7 @@ import ch.fitnesslab.generated.model.UpdateProductRequest
 import ch.fitnesslab.product.application.FindAllProductsQuery
 import ch.fitnesslab.product.application.ProductProjection
 import ch.fitnesslab.product.application.ProductUpdatedUpdate
-import ch.fitnesslab.product.domain.ProductAudience
-import ch.fitnesslab.product.domain.ProductBehaviorConfig
+import ch.fitnesslab.product.domain.*
 import ch.fitnesslab.product.domain.commands.CreateProductCommand
 import ch.fitnesslab.product.domain.commands.UpdateProductCommand
 import ch.fitnesslab.product.infrastructure.wix.WixSyncService
@@ -40,71 +39,7 @@ class ProductController(
         try {
             val productId = ProductVariantId.generate()
 
-            val command =
-                CreateProductCommand(
-                    productId = productId,
-                    slug = createProductRequest.slug,
-                    name = createProductRequest.name,
-                    productType = createProductRequest.productType,
-                    audience = createProductRequest.audience.let { ProductAudience.valueOf(it.name) },
-                    requiresMembership = createProductRequest.requiresMembership,
-                    pricingVariant =
-                        ch.fitnesslab.product.domain.PricingVariantConfig(
-                            pricingModel =
-                                ch.fitnesslab.product.domain.PricingModel.valueOf(
-                                    createProductRequest.pricingVariant.pricingModel.name,
-                                ),
-                            flatRate = createProductRequest.pricingVariant.flatRate,
-                            billingCycle =
-                                createProductRequest.pricingVariant.billingCycle?.let {
-                                    ch.fitnesslab.product.domain.PricingDuration(
-                                        interval =
-                                            ch.fitnesslab.product.domain.BillingInterval.valueOf(
-                                                it.interval.name,
-                                            ),
-                                        count = it.count,
-                                    )
-                                },
-                            duration =
-                                createProductRequest.pricingVariant.duration?.let {
-                                    ch.fitnesslab.product.domain.PricingDuration(
-                                        interval =
-                                            ch.fitnesslab.product.domain.BillingInterval.valueOf(
-                                                it.interval.name,
-                                            ),
-                                        count = it.count,
-                                    )
-                                },
-                            freeTrial =
-                                createProductRequest.pricingVariant.freeTrial?.let {
-                                    ch.fitnesslab.product.domain.PricingDuration(
-                                        interval =
-                                            ch.fitnesslab.product.domain.BillingInterval.valueOf(
-                                                it.interval.name,
-                                            ),
-                                        count = it.count,
-                                    )
-                                },
-                        ),
-                    behavior =
-                        ProductBehaviorConfig(
-                            canBePaused = createProductRequest.behavior.canBePaused,
-                            renewalLeadTimeDays = createProductRequest.behavior.renewalLeadTimeDays,
-                            maxActivePerCustomer = createProductRequest.behavior.maxActivePerCustomer,
-                            maxPurchasesPerBuyer = createProductRequest.behavior.maxPurchasesPerBuyer,
-                            numberOfSessions = createProductRequest.behavior.numberOfSessions,
-                        ),
-                    description = createProductRequest.description,
-                    termsAndConditions = createProductRequest.termsAndConditions,
-                    visibility =
-                        createProductRequest.visibility?.let {
-                            ch.fitnesslab.product.domain.ProductVisibility
-                                .valueOf(it.name)
-                        } ?: ch.fitnesslab.product.domain.ProductVisibility.PUBLIC,
-                    buyable = createProductRequest.buyable ?: true,
-                    buyerCanCancel = createProductRequest.buyerCanCancel ?: true,
-                    perks = createProductRequest.perks,
-                )
+            val command = toCreateProductCommand(productId, createProductRequest)
             commandGateway.sendAndWait<Any>(command)
 
             waitForUpdateOf(subscriptionQuery)
@@ -117,7 +52,6 @@ class ProductController(
         }
     }
 
-
     override fun getProduct(productId: String): ResponseEntity<ProductView> {
         val product = productProjection.findById(ProductVariantId.from(productId))
         return if (product != null) {
@@ -126,6 +60,7 @@ class ProductController(
             ResponseEntity.notFound().build()
         }
     }
+
 
     override fun getAllProducts(): ResponseEntity<List<ProductView>> {
         wixSyncService.syncWixProducts()
@@ -145,71 +80,7 @@ class ProductController(
             )
 
         try {
-            val command =
-                UpdateProductCommand(
-                    productId = ProductVariantId.from(productId),
-                    slug = updateProductRequest.slug,
-                    name = updateProductRequest.name,
-                    productType = updateProductRequest.productType,
-                    audience = updateProductRequest.audience.let { ProductAudience.valueOf(it.name) },
-                    requiresMembership = updateProductRequest.requiresMembership,
-                    pricingVariant =
-                        ch.fitnesslab.product.domain.PricingVariantConfig(
-                            pricingModel =
-                                ch.fitnesslab.product.domain.PricingModel.valueOf(
-                                    updateProductRequest.pricingVariant.pricingModel.name,
-                                ),
-                            flatRate = updateProductRequest.pricingVariant.flatRate,
-                            billingCycle =
-                                updateProductRequest.pricingVariant.billingCycle?.let {
-                                    ch.fitnesslab.product.domain.PricingDuration(
-                                        interval =
-                                            ch.fitnesslab.product.domain.BillingInterval.valueOf(
-                                                it.interval.name,
-                                            ),
-                                        count = it.count,
-                                    )
-                                },
-                            duration =
-                                updateProductRequest.pricingVariant.duration?.let {
-                                    ch.fitnesslab.product.domain.PricingDuration(
-                                        interval =
-                                            ch.fitnesslab.product.domain.BillingInterval.valueOf(
-                                                it.interval.name,
-                                            ),
-                                        count = it.count,
-                                    )
-                                },
-                            freeTrial =
-                                updateProductRequest.pricingVariant.freeTrial?.let {
-                                    ch.fitnesslab.product.domain.PricingDuration(
-                                        interval =
-                                            ch.fitnesslab.product.domain.BillingInterval.valueOf(
-                                                it.interval.name,
-                                            ),
-                                        count = it.count,
-                                    )
-                                },
-                        ),
-                    behavior =
-                        ProductBehaviorConfig(
-                            canBePaused = updateProductRequest.behavior.canBePaused,
-                            renewalLeadTimeDays = updateProductRequest.behavior.renewalLeadTimeDays,
-                            maxActivePerCustomer = updateProductRequest.behavior.maxActivePerCustomer,
-                            maxPurchasesPerBuyer = updateProductRequest.behavior.maxPurchasesPerBuyer,
-                            numberOfSessions = updateProductRequest.behavior.numberOfSessions,
-                        ),
-                    description = updateProductRequest.description,
-                    termsAndConditions = updateProductRequest.termsAndConditions,
-                    visibility =
-                        updateProductRequest.visibility?.let {
-                            ch.fitnesslab.product.domain.ProductVisibility
-                                .valueOf(it.name)
-                        } ?: ch.fitnesslab.product.domain.ProductVisibility.PUBLIC,
-                    buyable = updateProductRequest.buyable ?: true,
-                    buyerCanCancel = updateProductRequest.buyerCanCancel ?: true,
-                    perks = updateProductRequest.perks,
-                )
+            val command = toUpdateProductCommand(productId, updateProductRequest)
 
             commandGateway.sendAndWait<Any>(command)
 
@@ -220,4 +91,140 @@ class ProductController(
             subscriptionQuery.close()
         }
     }
+
+    private fun toCreateProductCommand(
+        productId: ProductVariantId,
+        createProductRequest: CreateProductRequest
+    ): CreateProductCommand = CreateProductCommand(
+        productId = productId,
+        slug = createProductRequest.slug,
+        name = createProductRequest.name,
+        productType = createProductRequest.productType,
+        audience = createProductRequest.audience.let { ProductAudience.valueOf(it.name) },
+        requiresMembership = createProductRequest.requiresMembership,
+        pricingVariant =
+            PricingVariantConfig(
+                pricingModel =
+                    PricingModel.valueOf(
+                        createProductRequest.pricingVariant.pricingModel.name,
+                    ),
+                flatRate = createProductRequest.pricingVariant.flatRate,
+                billingCycle =
+                    createProductRequest.pricingVariant.billingCycle?.let {
+                        PricingDuration(
+                            interval =
+                                BillingInterval.valueOf(
+                                    it.interval.name,
+                                ),
+                            count = it.count,
+                        )
+                    },
+                duration =
+                    createProductRequest.pricingVariant.duration?.let {
+                        PricingDuration(
+                            interval =
+                                BillingInterval.valueOf(
+                                    it.interval.name,
+                                ),
+                            count = it.count,
+                        )
+                    },
+                freeTrial =
+                    createProductRequest.pricingVariant.freeTrial?.let {
+                        PricingDuration(
+                            interval =
+                                BillingInterval.valueOf(
+                                    it.interval.name,
+                                ),
+                            count = it.count,
+                        )
+                    },
+            ),
+        behavior =
+            ProductBehaviorConfig(
+                canBePaused = createProductRequest.behavior.canBePaused,
+                renewalLeadTimeDays = createProductRequest.behavior.renewalLeadTimeDays,
+                maxActivePerCustomer = createProductRequest.behavior.maxActivePerCustomer,
+                maxPurchasesPerBuyer = createProductRequest.behavior.maxPurchasesPerBuyer,
+                numberOfSessions = createProductRequest.behavior.numberOfSessions,
+            ),
+        description = createProductRequest.description,
+        termsAndConditions = createProductRequest.termsAndConditions,
+        visibility =
+            createProductRequest.visibility?.let {
+                ProductVisibility
+                    .valueOf(it.name)
+            } ?: ProductVisibility.PUBLIC,
+        buyable = createProductRequest.buyable ?: true,
+        buyerCanCancel = createProductRequest.buyerCanCancel ?: true,
+        perks = createProductRequest.perks,
+    )
+
+    private fun toUpdateProductCommand(
+        productId: String,
+        updateProductRequest: UpdateProductRequest
+    ): UpdateProductCommand = UpdateProductCommand(
+        productId = ProductVariantId.from(productId),
+        slug = updateProductRequest.slug,
+        name = updateProductRequest.name,
+        productType = updateProductRequest.productType,
+        audience = updateProductRequest.audience.let { ProductAudience.valueOf(it.name) },
+        requiresMembership = updateProductRequest.requiresMembership,
+        pricingVariant =
+            PricingVariantConfig(
+                pricingModel =
+                    PricingModel.valueOf(
+                        updateProductRequest.pricingVariant.pricingModel.name,
+                    ),
+                flatRate = updateProductRequest.pricingVariant.flatRate,
+                billingCycle =
+                    updateProductRequest.pricingVariant.billingCycle?.let {
+                        PricingDuration(
+                            interval =
+                                BillingInterval.valueOf(
+                                    it.interval.name,
+                                ),
+                            count = it.count,
+                        )
+                    },
+                duration =
+                    updateProductRequest.pricingVariant.duration?.let {
+                        PricingDuration(
+                            interval =
+                                BillingInterval.valueOf(
+                                    it.interval.name,
+                                ),
+                            count = it.count,
+                        )
+                    },
+                freeTrial =
+                    updateProductRequest.pricingVariant.freeTrial?.let {
+                        PricingDuration(
+                            interval =
+                                BillingInterval.valueOf(
+                                    it.interval.name,
+                                ),
+                            count = it.count,
+                        )
+                    },
+            ),
+        behavior =
+            ProductBehaviorConfig(
+                canBePaused = updateProductRequest.behavior.canBePaused,
+                renewalLeadTimeDays = updateProductRequest.behavior.renewalLeadTimeDays,
+                maxActivePerCustomer = updateProductRequest.behavior.maxActivePerCustomer,
+                maxPurchasesPerBuyer = updateProductRequest.behavior.maxPurchasesPerBuyer,
+                numberOfSessions = updateProductRequest.behavior.numberOfSessions,
+            ),
+        description = updateProductRequest.description,
+        termsAndConditions = updateProductRequest.termsAndConditions,
+        visibility =
+            updateProductRequest.visibility?.let {
+                ProductVisibility
+                    .valueOf(it.name)
+            } ?: ProductVisibility.PUBLIC,
+        buyable = updateProductRequest.buyable ?: true,
+        buyerCanCancel = updateProductRequest.buyerCanCancel ?: true,
+        perks = updateProductRequest.perks,
+    )
 }
