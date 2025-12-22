@@ -1,6 +1,7 @@
 package ch.fitnesslab.product.adapter.http
 
 import ch.fitnesslab.domain.value.ProductVariantId
+import ch.fitnesslab.generated.api.ProductsApi
 import ch.fitnesslab.generated.model.CreateProductRequest
 import ch.fitnesslab.generated.model.ProductCreationResponse
 import ch.fitnesslab.generated.model.ProductView
@@ -19,20 +20,16 @@ import org.axonframework.messaging.responsetypes.ResponseTypes
 import org.axonframework.queryhandling.QueryGateway
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.RestController
 
 @RestController
-@RequestMapping("/api/products")
 class ProductController(
     private val commandGateway: CommandGateway,
     private val queryGateway: QueryGateway,
     private val productProjection: ProductProjection,
     private val wixSyncService: WixSyncService,
-) {
-    @PostMapping
-    fun createProduct(
-        @RequestBody request: CreateProductRequest,
-    ): ResponseEntity<ProductCreationResponse> {
+) : ProductsApi {
+    override fun createProduct(createProductRequest: CreateProductRequest): ResponseEntity<ProductCreationResponse> {
         val subscriptionQuery =
             queryGateway.subscriptionQuery(
                 FindAllProductsQuery(),
@@ -46,20 +43,20 @@ class ProductController(
             val command =
                 CreateProductCommand(
                     productId = productId,
-                    slug = request.slug,
-                    name = request.name,
-                    productType = request.productType,
-                    audience = request.audience.let { ProductAudience.valueOf(it.name) },
-                    requiresMembership = request.requiresMembership,
+                    slug = createProductRequest.slug,
+                    name = createProductRequest.name,
+                    productType = createProductRequest.productType,
+                    audience = createProductRequest.audience.let { ProductAudience.valueOf(it.name) },
+                    requiresMembership = createProductRequest.requiresMembership,
                     pricingVariant =
                         ch.fitnesslab.product.domain.PricingVariantConfig(
                             pricingModel =
                                 ch.fitnesslab.product.domain.PricingModel.valueOf(
-                                    request.pricingVariant.pricingModel.name,
+                                    createProductRequest.pricingVariant.pricingModel.name,
                                 ),
-                            flatRate = request.pricingVariant.flatRate,
+                            flatRate = createProductRequest.pricingVariant.flatRate,
                             billingCycle =
-                                request.pricingVariant.billingCycle?.let {
+                                createProductRequest.pricingVariant.billingCycle?.let {
                                     ch.fitnesslab.product.domain.PricingDuration(
                                         interval =
                                             ch.fitnesslab.product.domain.BillingInterval.valueOf(
@@ -69,7 +66,7 @@ class ProductController(
                                     )
                                 },
                             duration =
-                                request.pricingVariant.duration?.let {
+                                createProductRequest.pricingVariant.duration?.let {
                                     ch.fitnesslab.product.domain.PricingDuration(
                                         interval =
                                             ch.fitnesslab.product.domain.BillingInterval.valueOf(
@@ -79,7 +76,7 @@ class ProductController(
                                     )
                                 },
                             freeTrial =
-                                request.pricingVariant.freeTrial?.let {
+                                createProductRequest.pricingVariant.freeTrial?.let {
                                     ch.fitnesslab.product.domain.PricingDuration(
                                         interval =
                                             ch.fitnesslab.product.domain.BillingInterval.valueOf(
@@ -91,22 +88,22 @@ class ProductController(
                         ),
                     behavior =
                         ProductBehaviorConfig(
-                            canBePaused = request.behavior.canBePaused,
-                            renewalLeadTimeDays = request.behavior.renewalLeadTimeDays,
-                            maxActivePerCustomer = request.behavior.maxActivePerCustomer,
-                            maxPurchasesPerBuyer = request.behavior.maxPurchasesPerBuyer,
-                            numberOfSessions = request.behavior.numberOfSessions,
+                            canBePaused = createProductRequest.behavior.canBePaused,
+                            renewalLeadTimeDays = createProductRequest.behavior.renewalLeadTimeDays,
+                            maxActivePerCustomer = createProductRequest.behavior.maxActivePerCustomer,
+                            maxPurchasesPerBuyer = createProductRequest.behavior.maxPurchasesPerBuyer,
+                            numberOfSessions = createProductRequest.behavior.numberOfSessions,
                         ),
-                    description = request.description,
-                    termsAndConditions = request.termsAndConditions,
+                    description = createProductRequest.description,
+                    termsAndConditions = createProductRequest.termsAndConditions,
                     visibility =
-                        request.visibility?.let {
+                        createProductRequest.visibility?.let {
                             ch.fitnesslab.product.domain.ProductVisibility
                                 .valueOf(it.name)
                         } ?: ch.fitnesslab.product.domain.ProductVisibility.PUBLIC,
-                    buyable = request.buyable ?: true,
-                    buyerCanCancel = request.buyerCanCancel ?: true,
-                    perks = request.perks,
+                    buyable = createProductRequest.buyable ?: true,
+                    buyerCanCancel = createProductRequest.buyerCanCancel ?: true,
+                    perks = createProductRequest.perks,
                 )
             commandGateway.sendAndWait<Any>(command)
 
@@ -121,11 +118,7 @@ class ProductController(
     }
 
 
-
-    @GetMapping("/{productId}")
-    fun getProduct(
-        @PathVariable productId: String,
-    ): ResponseEntity<ProductView> {
+    override fun getProduct(productId: String): ResponseEntity<ProductView> {
         val product = productProjection.findById(ProductVariantId.from(productId))
         return if (product != null) {
             ResponseEntity.ok(product)
@@ -134,18 +127,16 @@ class ProductController(
         }
     }
 
-    @GetMapping
-    fun getAllProducts(): ResponseEntity<List<ProductView>> {
+    override fun getAllProducts(): ResponseEntity<List<ProductView>> {
         wixSyncService.syncWixProducts()
 
         return ResponseEntity.ok(productProjection.findAll())
     }
 
-    @PutMapping("/{productId}")
-    fun updateProduct(
-        @PathVariable productId: String,
-        @RequestBody request: UpdateProductRequest,
-    ): ResponseEntity<Void> {
+    override fun updateProduct(
+        productId: String,
+        updateProductRequest: UpdateProductRequest,
+    ): ResponseEntity<Unit> {
         val subscriptionQuery =
             queryGateway.subscriptionQuery(
                 FindAllProductsQuery(),
@@ -157,20 +148,20 @@ class ProductController(
             val command =
                 UpdateProductCommand(
                     productId = ProductVariantId.from(productId),
-                    slug = request.slug,
-                    name = request.name,
-                    productType = request.productType,
-                    audience = request.audience.let { ProductAudience.valueOf(it.name) },
-                    requiresMembership = request.requiresMembership,
+                    slug = updateProductRequest.slug,
+                    name = updateProductRequest.name,
+                    productType = updateProductRequest.productType,
+                    audience = updateProductRequest.audience.let { ProductAudience.valueOf(it.name) },
+                    requiresMembership = updateProductRequest.requiresMembership,
                     pricingVariant =
                         ch.fitnesslab.product.domain.PricingVariantConfig(
                             pricingModel =
                                 ch.fitnesslab.product.domain.PricingModel.valueOf(
-                                    request.pricingVariant.pricingModel.name,
+                                    updateProductRequest.pricingVariant.pricingModel.name,
                                 ),
-                            flatRate = request.pricingVariant.flatRate,
+                            flatRate = updateProductRequest.pricingVariant.flatRate,
                             billingCycle =
-                                request.pricingVariant.billingCycle?.let {
+                                updateProductRequest.pricingVariant.billingCycle?.let {
                                     ch.fitnesslab.product.domain.PricingDuration(
                                         interval =
                                             ch.fitnesslab.product.domain.BillingInterval.valueOf(
@@ -180,7 +171,7 @@ class ProductController(
                                     )
                                 },
                             duration =
-                                request.pricingVariant.duration?.let {
+                                updateProductRequest.pricingVariant.duration?.let {
                                     ch.fitnesslab.product.domain.PricingDuration(
                                         interval =
                                             ch.fitnesslab.product.domain.BillingInterval.valueOf(
@@ -190,7 +181,7 @@ class ProductController(
                                     )
                                 },
                             freeTrial =
-                                request.pricingVariant.freeTrial?.let {
+                                updateProductRequest.pricingVariant.freeTrial?.let {
                                     ch.fitnesslab.product.domain.PricingDuration(
                                         interval =
                                             ch.fitnesslab.product.domain.BillingInterval.valueOf(
@@ -202,22 +193,22 @@ class ProductController(
                         ),
                     behavior =
                         ProductBehaviorConfig(
-                            canBePaused = request.behavior.canBePaused,
-                            renewalLeadTimeDays = request.behavior.renewalLeadTimeDays,
-                            maxActivePerCustomer = request.behavior.maxActivePerCustomer,
-                            maxPurchasesPerBuyer = request.behavior.maxPurchasesPerBuyer,
-                            numberOfSessions = request.behavior.numberOfSessions,
+                            canBePaused = updateProductRequest.behavior.canBePaused,
+                            renewalLeadTimeDays = updateProductRequest.behavior.renewalLeadTimeDays,
+                            maxActivePerCustomer = updateProductRequest.behavior.maxActivePerCustomer,
+                            maxPurchasesPerBuyer = updateProductRequest.behavior.maxPurchasesPerBuyer,
+                            numberOfSessions = updateProductRequest.behavior.numberOfSessions,
                         ),
-                    description = request.description,
-                    termsAndConditions = request.termsAndConditions,
+                    description = updateProductRequest.description,
+                    termsAndConditions = updateProductRequest.termsAndConditions,
                     visibility =
-                        request.visibility?.let {
+                        updateProductRequest.visibility?.let {
                             ch.fitnesslab.product.domain.ProductVisibility
                                 .valueOf(it.name)
                         } ?: ch.fitnesslab.product.domain.ProductVisibility.PUBLIC,
-                    buyable = request.buyable ?: true,
-                    buyerCanCancel = request.buyerCanCancel ?: true,
-                    perks = request.perks,
+                    buyable = updateProductRequest.buyable ?: true,
+                    buyerCanCancel = updateProductRequest.buyerCanCancel ?: true,
+                    perks = updateProductRequest.perks,
                 )
 
             commandGateway.sendAndWait<Any>(command)
