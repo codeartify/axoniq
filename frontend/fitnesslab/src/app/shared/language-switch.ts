@@ -1,9 +1,8 @@
-import {Component, computed, inject, signal} from '@angular/core';
+import {Component, inject, signal} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {TranslateModule} from '@ngx-translate/core';
 import {TranslationService} from './translation.service';
 
-type Language = { code: string; label: string };
 
 @Component({
   selector: 'gym-language-switch',
@@ -55,28 +54,12 @@ type Language = { code: string; label: string };
   `]
 })
 export class LanguageSwitch {
-
-  isOpen = signal(false);
-  languages = [
-    {code: 'en', label: 'language.english'},
-    {code: 'de', label: 'language.german'}
-  ];
-
   private translationService = inject(TranslationService);
 
-  private language = () => {
-    return {
-      code: this.translationService.getCurrentLanguage(),
-      label: this.languageFrom(this.languages)
-    }
-  };
-  currentLanguage = signal<Language>(this.language());
+  isOpen = signal(false);
+  readonly languages = this.translationService.SUPPORTED_LANGUAGES
+  currentLanguage = this.translationService.language;
 
-
-  private languageFrom(languages: Language[]) {
-    const lang = languages.find(l => l.code === this.translationService.getCurrentLanguage());
-    return lang ? lang.label : 'Language';
-  }
 
   toggleDropdown(): void {
     this.isOpen.set(!this.isOpen());
@@ -84,7 +67,6 @@ export class LanguageSwitch {
 
   changeLanguage(lang: string): void {
     this.translationService.changeLanguage(lang);
-    this.currentLanguage.set(this.language());
     this.isOpen.set(false);
   }
 
