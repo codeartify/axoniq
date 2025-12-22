@@ -24,8 +24,10 @@ type SortColumn = 'invoiceId' | 'customerName' | 'amount' | 'dueDate' | 'status'
       [sortColumn]="sortColumn()"
       [sortDirection]="sortDirection()"
       [trackByFn]="trackByInvoiceId"
+      [isLoading]="false"
       (searchTermChange)="searchTerm.set($event)"
       (sortChange)="onSortChange($event)"
+
     />
 
     <!-- Cancel Modal -->

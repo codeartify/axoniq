@@ -175,5 +175,12 @@
   "notFound.toDashboard": "To the dashboard",
 
   "language.german": "German",
-  "language.english": "English"
+  "language.english": "English",
+
+  "error.title": "Something went wrong",
+  "error.description": "We couldn’t load the requested data. Please try again, or go back and continue working.",
+  "error.goBack": "Go back",
+  "error.toDashboard": "Go to dashboard",
+  "error.tip": "Tip: if this keeps happening, refresh the page or sign in again.",
+  "error.errorPage": "Error page"
 }

@@ -174,5 +174,11 @@
   "notFound.toDashboard": "Zum Dashboard",
 
   "language.german": "Deutsch",
-  "language.english": "Englisch"
+  "language.english": "Englisch",
+  "error.title": "Etwas ist schiefgelaufen",
+  "error.description": "Die angeforderten Daten konnten nicht geladen werden. Bitte versuchen Sie es erneut oder gehen Sie zurück und arbeiten Sie weiter.",
+  "error.goBack": "Zurück",
+  "error.toDashboard": "Zum Dashboard",
+  "error.tip": "Tipp: Wenn dies weiterhin passiert, laden Sie die Seite neu oder melden Sie sich erneut an.",
+  "error.errorPage": "Fehlerseite"
 }

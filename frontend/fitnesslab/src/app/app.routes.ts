@@ -1,23 +1,34 @@
-import {ResolveFn, Routes} from '@angular/router';
+import {RedirectCommand, ResolveFn, Router, Routes} from '@angular/router';
 import {CustomerCreate} from './customers/customer-create';
 import {CustomerDetail} from './customers/customer-detail';
 import {CustomerList} from './customers/customer-list';
 import {ProductCreate} from './products/product-create';
 import {ProductDetail} from './products/product-detail';
 import {ProductList} from './products/product-list';
-import {InvoiceList} from './invoices/invoice-list';
 import {Login} from './auth/login';
 import {authGuard} from './auth/auth.guard';
 import {NotFound} from './not-found';
-import {CustomersService, CustomerView} from './generated-api';
+import {CustomersService, CustomerView, ProductView} from './generated-api';
 import {inject} from '@angular/core';
+import {InvoiceList} from './invoices/invoice-list';
+import {Products} from './products/products';
+import {catchError, of, timeout} from 'rxjs';
+import {Error} from './error';
 
 
-export const companyNameResolver: ResolveFn<string> = () => "Fitness Management System"!;
-export const allCustomersResolver: ResolveFn<CustomerView[]> = () => inject(CustomersService).getAllCustomers()
+export const resolveAllCustomers: ResolveFn<CustomerView[]> = () => inject(CustomersService).getAllCustomers()
+export const resolveAllProducts: ResolveFn<ProductView[] | RedirectCommand> = () => {
+  const router = inject(Router);
+  return inject(Products).getAllProducts().pipe(
+    timeout(2000),
+    catchError((error) => {
+      return of(new RedirectCommand(router.parseUrl('/error')))
+    })
+  );
+};
 
 export const routes: Routes = [
-  {path: 'login', component: Login, resolve: {companyName: companyNameResolver}},
+  {path: 'login', component: Login, data: {companyName: 'Fitness Management System'}},
   {path: 'unauthorized', component: Login},
 
   // ----------------------
@@ -31,7 +42,7 @@ export const routes: Routes = [
       roles: ['customers.read']
     },
     resolve: {
-      allCustomers: allCustomersResolver
+      allCustomers: resolveAllCustomers
     }
   },
   {
@@ -54,7 +65,10 @@ export const routes: Routes = [
     path: 'products',
     component: ProductList,
     canActivate: [authGuard],
-    data: {roles: ['products.read']} // Admin + Trainer
+    data: {roles: ['products.read']},
+    resolve: {
+      allProducts: resolveAllProducts
+    }
   },
   {
     path: 'products/new',
@@ -76,9 +90,11 @@ export const routes: Routes = [
     path: 'invoices',
     component: InvoiceList,
     canActivate: [authGuard],
-    data: {roles: ['invoices.read']}
+    data: {roles: ['invoices.read']},
   },
   {path: 'not-found', component: NotFound},
+  {path: 'error', component: Error},
   {path: '', redirectTo: '/customers', pathMatch: 'full'},
   {path: '**', redirectTo: '/not-found'}
+
 ];

@@ -1,8 +1,8 @@
-import {Component, computed, inject, OnInit, signal, TemplateRef, ViewChild} from '@angular/core';
+import {Component, computed, inject, input, signal, TemplateRef, ViewChild} from '@angular/core';
 import {Router} from '@angular/router';
 import {Products, ProductView} from './products';
 import AuthService from '../auth/auth.service';
-import {GenericList, ColumnDefinition, RowAction, CollectionAction} from '../shared/generic-list/generic-list';
+import {CollectionAction, ColumnDefinition, GenericList, RowAction} from '../shared/generic-list/generic-list';
 import {CommonModule} from '@angular/common';
 import {TranslateModule} from '@ngx-translate/core';
 
@@ -23,7 +23,7 @@ type SortColumn = 'name' | 'slug' | 'productType' | 'price' | 'audience' | 'visi
       [columns]="columns"
       [rowActions]="actions"
       [collectionActions]="collectionActions"
-      [isLoading]="isLoading()"
+      [isLoading]="false"
       [errorMessage]="errorMessage()"
       [searchTerm]="searchTerm()"
       [sortColumn]="sortColumn()"
@@ -39,14 +39,13 @@ type SortColumn = 'name' | 'slug' | 'productType' | 'price' | 'audience' | 'visi
     </ng-template>
   `
 })
-export class ProductList implements OnInit {
-  private productService = inject(Products);
+export class ProductList {
   private router = inject(Router);
   private authService = inject(AuthService);
 
   @ViewChild('requiresMembershipTemplate', { static: true }) requiresMembershipTemplate!: TemplateRef<any>;
 
-  allProducts = signal<ProductView[]>([]);
+  allProducts = input.required<ProductView[]>();
   isLoading = signal<boolean>(true);
   errorMessage = signal<string | null>(null);
   searchTerm = signal<string>('');
@@ -146,25 +145,6 @@ export class ProductList implements OnInit {
     });
   });
 
-  ngOnInit(): void {
-    this.loadProducts();
-  }
-
-  loadProducts(): void {
-    this.isLoading.set(true);
-    this.errorMessage.set(null);
-
-    this.productService.getAllProducts().subscribe({
-      next: (products) => {
-        this.allProducts.set(products);
-        this.isLoading.set(false);
-      },
-      error: () => {
-        this.errorMessage.set('Failed to load products');
-        this.isLoading.set(false);
-      }
-    });
-  }
 
   viewProduct(product: ProductView): void {
     this.router.navigate(['/products', product.productId]);
