@@ -4,10 +4,10 @@ import {ChangeDetectionStrategy, Component, inject} from '@angular/core';
 
 @Component({
   selector: 'gym-loading-bar',
-  standalone: true,
   imports: [CommonModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
+    IS LOADING = {{ loadingService.isLoading() }}
     @if (loadingService.isLoading()) {
       <div class="fixed top-0 left-0 right-0 z-50">
         <div class="h-1 bg-blue-600 loading-bar"></div>

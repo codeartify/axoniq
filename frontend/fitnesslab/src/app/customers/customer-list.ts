@@ -1,7 +1,7 @@
-import {Component, computed, OnInit, signal, inject} from '@angular/core';
+import {Component, computed, inject, input, signal} from '@angular/core';
 import {Router} from '@angular/router';
-import {Customers, CustomerView} from './customers';
-import {GenericList, ColumnDefinition, RowAction, CollectionAction} from '../shared/generic-list/generic-list';
+import {CustomerView} from './customers';
+import {CollectionAction, ColumnDefinition, GenericList, RowAction} from '../shared/generic-list/generic-list';
 
 type SortColumn = 'name' | 'email' | 'phone' | 'city' | 'dateOfBirth';
 
@@ -20,7 +20,7 @@ type SortColumn = 'name' | 'email' | 'phone' | 'city' | 'dateOfBirth';
       [columns]="columns"
       [rowActions]="actions"
       [collectionActions]="collectionActions"
-      [isLoading]="isLoading()"
+      [isLoading]="false"
       [errorMessage]="errorMessage()"
       [searchTerm]="searchTerm()"
       [sortColumn]="sortColumn()"
@@ -32,11 +32,10 @@ type SortColumn = 'name' | 'email' | 'phone' | 'city' | 'dateOfBirth';
     />
   `
 })
-export class CustomerList implements OnInit {
-  private customerService = inject(Customers);
-  private router = inject(Router);
+export class CustomerList {
+  allCustomers = input.required<CustomerView[]>();
 
-  allCustomers = signal<CustomerView[]>([]);
+  private router = inject(Router);
   isLoading = signal<boolean>(true);
   errorMessage = signal<string | null>(null);
   searchTerm = signal<string>('');
@@ -126,25 +125,6 @@ export class CustomerList implements OnInit {
     });
   });
 
-  ngOnInit(): void {
-    this.loadCustomers();
-  }
-
-  loadCustomers(): void {
-    this.isLoading.set(true);
-    this.errorMessage.set(null);
-
-    this.customerService.getAllCustomers().subscribe({
-      next: (customers) => {
-        this.allCustomers.set(customers);
-        this.isLoading.set(false);
-      },
-      error: () => {
-        this.errorMessage.set('Failed to load customers');
-        this.isLoading.set(false);
-      }
-    });
-  }
 
   viewCustomer(customer: CustomerView): void {
     this.router.navigate(['/customers', customer.customerId]);

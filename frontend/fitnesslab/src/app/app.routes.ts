@@ -1,4 +1,4 @@
-import {ActivatedRouteSnapshot, ResolveFn, RouterStateSnapshot, Routes} from '@angular/router';
+import {ResolveFn, Routes} from '@angular/router';
 import {CustomerCreate} from './customers/customer-create';
 import {CustomerDetail} from './customers/customer-detail';
 import {CustomerList} from './customers/customer-list';
@@ -9,9 +9,12 @@ import {InvoiceList} from './invoices/invoice-list';
 import {Login} from './auth/login';
 import {authGuard} from './auth/auth.guard';
 import {NotFound} from './not-found';
+import {CustomersService, CustomerView} from './generated-api';
+import {inject} from '@angular/core';
 
 
 export const companyNameResolver: ResolveFn<string> = () => "Fitness Management System"!;
+export const allCustomersResolver: ResolveFn<CustomerView[]> = () => inject(CustomersService).getAllCustomers()
 
 export const routes: Routes = [
   {path: 'login', component: Login, resolve: {companyName: companyNameResolver}},
@@ -24,7 +27,12 @@ export const routes: Routes = [
     path: 'customers',
     component: CustomerList,
     canActivate: [authGuard],
-    data: {roles: ['customers.read']} // list view
+    data: {
+      roles: ['customers.read']
+    },
+    resolve: {
+      allCustomers: allCustomersResolver
+    }
   },
   {
     path: 'customers/new',
