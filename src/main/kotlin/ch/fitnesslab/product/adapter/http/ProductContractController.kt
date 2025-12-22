@@ -21,19 +21,17 @@ import org.axonframework.messaging.responsetypes.ResponseTypes
 import org.axonframework.queryhandling.QueryGateway
 import org.axonframework.queryhandling.SubscriptionQueryResult
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.RestController
 import java.time.LocalDate
 
 @RestController
-@RequestMapping("/api/product-contracts")
 class ProductContractController(
     private val productContractProjection: ProductContractProjection,
     private val commandGateway: CommandGateway,
     private val queryGateway: QueryGateway,
 ) : ProductContractsApi {
-    @GetMapping("/{contractId}")
     override fun getContractById(
-        @PathVariable contractId: String,
+        contractId: String,
     ): ResponseEntity<ProductContractDetailDto> {
         val productContractId = ProductContractId.from(contractId)
 
@@ -46,10 +44,9 @@ class ProductContractController(
         }
     }
 
-    @PostMapping("/{contractId}/pause")
     override fun pauseContract(
-        @PathVariable contractId: String,
-        @RequestBody pauseContractRequest: PauseContractRequest,
+        contractId: String,
+        pauseContractRequest: PauseContractRequest,
     ): ResponseEntity<Unit> {
         val subscriptionQuery = createFindAllProductContractsQuery()
 
@@ -66,9 +63,8 @@ class ProductContractController(
         }
     }
 
-    @PostMapping("/{contractId}/resume")
     override fun resumeContract(
-        @PathVariable contractId: String,
+        contractId: String,
     ): ResponseEntity<Unit> {
         val resumeSubscriptionQuery = createResumeSubscriptionQuery()
 

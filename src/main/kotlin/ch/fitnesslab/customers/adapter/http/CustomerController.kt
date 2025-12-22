@@ -14,20 +14,16 @@ import ch.fitnesslab.generated.api.CustomersApi
 import ch.fitnesslab.generated.model.*
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.RestController
 import ch.fitnesslab.generated.model.Salutation as DomainSalutation
 
 @RestController
-@RequestMapping("/api/customers")
 class CustomerController(
     private val customerProjection: CustomerProjection,
     private val registerCustomerUseCase: RegisterCustomerUseCase,
     private val updateCustomerUseCase: UpdateCustomerUseCase,
 ) : CustomersApi {
-    @PostMapping
-    override fun registerCustomer(
-        @RequestBody registerCustomerRequest: RegisterCustomerRequest,
-    ): ResponseEntity<CustomerRegistrationResponse> {
+    override fun registerCustomer(registerCustomerRequest: RegisterCustomerRequest): ResponseEntity<CustomerRegistrationResponse> {
         val command = toRegisterCommand(CustomerId.generate(), registerCustomerRequest)
 
         val customerId = registerCustomerUseCase.execute(command)
@@ -37,17 +33,13 @@ class CustomerController(
             .body(CustomerRegistrationResponse(customerId.toString()))
     }
 
-    @GetMapping("/{customerId}")
-    override fun getCustomer(
-        @PathVariable customerId: String,
-    ): ResponseEntity<CustomerView> =
+    override fun getCustomer(customerId: String): ResponseEntity<CustomerView> =
         customerProjection
             .findById(CustomerId.from(customerId))
             ?.let(::toViewModel)
             ?.let { ResponseEntity.ok(it) }
             ?: ResponseEntity.notFound().build()
 
-    @GetMapping
     override fun getAllCustomers(): ResponseEntity<List<CustomerView>> =
         ResponseEntity.ok(
             customerProjection
@@ -55,10 +47,8 @@ class CustomerController(
                 .map { toViewModel(it) },
         )
 
-    @PutMapping("/{customerId}")
     override fun updateCustomer(
-        @PathVariable customerId: String,
-        @RequestBody updateCustomerRequest: UpdateCustomerRequest,
+        customerId: String, updateCustomerRequest: UpdateCustomerRequest,
     ): ResponseEntity<Unit> {
         val command = toUpdateCustomerCommand(customerId, updateCustomerRequest)
 

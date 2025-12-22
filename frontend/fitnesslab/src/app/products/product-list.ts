@@ -1,6 +1,6 @@
 import {Component, computed, inject, input, signal, TemplateRef, ViewChild} from '@angular/core';
 import {Router} from '@angular/router';
-import {Products, ProductView} from './products';
+import {ProductView} from './products';
 import AuthService from '../auth/auth.service';
 import {CollectionAction, ColumnDefinition, GenericList, RowAction} from '../shared/generic-list/generic-list';
 import {CommonModule} from '@angular/common';
@@ -93,8 +93,18 @@ export class ProductList {
       labelKey: 'button.viewDetails',
       onClick: (product) => this.viewProduct(product),
       stopPropagation: true
+    },
+    {
+      labelKey: 'products.linkWithWix',
+      onClick: (product) => this.linkWithWix(product),
+      isDisabled: (product) => this.isLinkedWithWix(product),
+      stopPropagation: true,
     }
   ];
+
+  private isLinkedWithWix(product: ProductView) {
+    return !!(product.linkedPlatforms && product.linkedPlatforms.find(platform => platform.platformName.toLowerCase() === 'wix'));
+  }
 
   collectionActions: CollectionAction[] = [
     {
@@ -165,5 +175,9 @@ export class ProductList {
 
   trackByProductId(index: number, product: ProductView): string {
     return product.productId || `index-${index}`;
+  }
+
+  private linkWithWix(product: ProductView) {
+    console.warn('Linking with WIX is not yet implemented', product);
   }
 }

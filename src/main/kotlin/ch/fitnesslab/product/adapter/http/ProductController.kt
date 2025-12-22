@@ -120,6 +120,8 @@ class ProductController(
         }
     }
 
+
+
     @GetMapping("/{productId}")
     fun getProduct(
         @PathVariable productId: String,

@@ -1,4 +1,4 @@
-package ch.fitnesslab.membership.adapter.http
+ package ch.fitnesslab.membership.adapter.http
 
 import ch.fitnesslab.domain.value.CustomerId
 import ch.fitnesslab.domain.value.ProductVariantId
@@ -9,28 +9,21 @@ import ch.fitnesslab.membership.application.MembershipSignUpRequest
 import ch.fitnesslab.membership.application.MembershipSignUpService
 import ch.fitnesslab.membership.domain.PaymentMode
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import java.time.LocalDate
 
 @RestController
-@RequestMapping("/api/memberships")
-class MembershipsController(
+ class MembershipsController(
     private val membershipSignUpService: MembershipSignUpService,
 ) : MembershipsApi {
-    @PostMapping("/sign-up")
-    override fun signUp(
-        @RequestBody request: MembershipSignUpRequestDto,
-    ): ResponseEntity<MembershipSignUpResultDto> {
+     override fun signUp(membershipSignUpRequestDto: MembershipSignUpRequestDto): ResponseEntity<MembershipSignUpResultDto> {
         val result =
             membershipSignUpService.signUp(
                 MembershipSignUpRequest(
-                    customerId = CustomerId.from(request.customerId),
-                    productVariantId = ProductVariantId.from(request.productVariantId),
-                    paymentMode = request.paymentMode.let { PaymentMode.valueOf(it.name) },
-                    startDate = LocalDate.from(request.startDate),
+                    customerId = CustomerId.from(membershipSignUpRequestDto.customerId),
+                    productVariantId = ProductVariantId.from(membershipSignUpRequestDto.productVariantId),
+                    paymentMode = membershipSignUpRequestDto.paymentMode.let { PaymentMode.valueOf(it.name) },
+                    startDate = LocalDate.from(membershipSignUpRequestDto.startDate),
                 ),
             )
 

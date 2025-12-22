@@ -133,6 +133,7 @@
   "product.fields.perks": "Vorteile",
   "product.fields.renewalLeadTime": "Erneuerungszeit (Tage)",
   "product.fields.addPerk": "Vorteil hinzufügen",
+  "products.linkWithWix": "Sync mit Wix (versteckt)",
 
   "form.required": "*",
   "form.customerId": "Kunden-ID:",

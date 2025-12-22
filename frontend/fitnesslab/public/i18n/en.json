@@ -133,6 +133,7 @@
   "product.fields.perks": "Perks",
   "product.fields.renewalLeadTime": "Renewal Lead Time (Days)",
   "product.fields.addPerk": "Add Perk",
+  "products.linkWithWix": "Sync with Wix",
 
   "form.required": "*",
   "form.customerId": "Customer ID:",
