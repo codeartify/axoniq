@@ -1,4 +1,4 @@
-import {Routes} from '@angular/router';
+import {ActivatedRouteSnapshot, ResolveFn, RouterStateSnapshot, Routes} from '@angular/router';
 import {CustomerCreate} from './customers/customer-create';
 import {CustomerDetail} from './customers/customer-detail';
 import {CustomerList} from './customers/customer-list';
@@ -6,13 +6,16 @@ import {ProductCreate} from './products/product-create';
 import {ProductDetail} from './products/product-detail';
 import {ProductList} from './products/product-list';
 import {InvoiceList} from './invoices/invoice-list';
-import {LoginComponent} from './auth/login.component';
+import {Login} from './auth/login';
 import {authGuard} from './auth/auth.guard';
 import {NotFound} from './not-found';
 
+
+export const companyNameResolver: ResolveFn<string> = () => "Fitness Management System"!;
+
 export const routes: Routes = [
-  {path: 'login', component: LoginComponent},
-  {path: 'unauthorized', component: LoginComponent},
+  {path: 'login', component: Login, resolve: {companyName: companyNameResolver}},
+  {path: 'unauthorized', component: Login},
 
   // ----------------------
   //   CUSTOMERS

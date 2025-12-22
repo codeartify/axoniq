@@ -1,5 +1,4 @@
 import {Component, input, output} from '@angular/core';
-import {TranslatePipe} from '@ngx-translate/core';
 import {UserProfile} from '../auth.service';
 import {UserProfileTitle} from './user-profile-title';
 import {UserProfileEmail} from './user-profile-email';
@@ -10,7 +9,6 @@ import {Backdrop} from './backdrop';
 @Component({
   selector: 'gym-user-profile-drop-down-menu',
   imports: [
-    TranslatePipe,
     UserProfileTitle,
     UserProfileEmail,
     UserProfileRoles,

@@ -1,9 +1,10 @@
-import { Component, OnInit, inject } from '@angular/core';
-import { Router } from '@angular/router';
+import {Component, computed, inject, input, OnInit} from '@angular/core';
+import {ActivatedRoute, Router} from '@angular/router';
 import AuthService from './auth.service';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { TranslateModule } from '@ngx-translate/core';
+import {CommonModule} from '@angular/common';
+import {FormsModule} from '@angular/forms';
+import {TranslateModule} from '@ngx-translate/core';
+import {toSignal} from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'gym-login',
@@ -13,8 +14,8 @@ import { TranslateModule } from '@ngx-translate/core';
     <div class="min-h-screen flex items-center justify-center bg-gray-100">
       <div class="max-w-md w-full bg-white rounded-lg shadow-lg p-8">
         <div class="text-center mb-8">
-          <h1 class="text-3xl font-bold text-gray-900 mb-2">FitnessLab</h1>
-          <p class="text-gray-600">{{ 'login.welcome' | translate }}</p>
+          <h1 class="text-3xl font-bold text-gray-900 mb-2">{{ companyName() }}</h1>
+          <p class="text-gray-600">{{ 'login.welcome' | translate : {companyName: companyName()} }}</p>
         </div>
 
         <form (ngSubmit)="login()" class="space-y-6">
@@ -74,7 +75,8 @@ import { TranslateModule } from '@ngx-translate/core';
     </div>
   `,
 })
-export class LoginComponent implements OnInit {
+export class Login implements OnInit {
+  companyName = input.required<string>();
   username = '';
   password = '';
   isLoading = false;

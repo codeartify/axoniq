@@ -162,7 +162,7 @@
   "validation.countryRequired": "Country is required",
 
   "auth.logout": "Logout",
-  "login.welcome": "Welcome to FitnessLab",
+  "login.welcome": "Welcome to {{ companyName }}",
   "login.username": "Username",
   "login.password": "Password",
   "login.signIn": "Sign In",
