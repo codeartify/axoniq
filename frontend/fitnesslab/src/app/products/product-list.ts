@@ -93,9 +93,10 @@ export class ProductList {
       sortable: true
     },
     {
-      key: 'audience',
-      headerKey: 'product.table.audience',
-      sortable: true
+      key: 'wix',
+      headerKey: 'product.table.wix',
+      sortable: false,
+      getValue: (product) => this.isLinkedWithWix(product) ? '🔄' : '✖'
     }
   ];
 

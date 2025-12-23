@@ -107,6 +107,7 @@
   "product.table.type": "Typ",
   "product.table.price": "Preis",
   "product.table.visibility": "Sichtbarkeit",
+  "product.table.wix": "In Wix",
   "product.table.audience": "Zielgruppe",
   "product.table.requiresMembership": "Erfordert Mitgliedschaft",
   "product.fields.slug": "Slug",
