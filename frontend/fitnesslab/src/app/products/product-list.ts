@@ -1,10 +1,12 @@
-import {Component, computed, inject, input, signal, TemplateRef, ViewChild} from '@angular/core';
+import {Component, computed, effect, inject, input, signal, TemplateRef, ViewChild} from '@angular/core';
 import {Router} from '@angular/router';
-import {ProductView} from './products';
+import {Products, ProductView} from './products';
 import AuthService from '../auth/auth.service';
 import {CollectionAction, ColumnDefinition, GenericList, RowAction} from '../shared/generic-list/generic-list';
 import {CommonModule} from '@angular/common';
 import {TranslateModule} from '@ngx-translate/core';
+import {switchMap} from 'rxjs';
+import {toSignal} from '@angular/core/rxjs-interop';
 
 type SortColumn = 'name' | 'slug' | 'productType' | 'price' | 'audience' | 'visibility';
 
@@ -42,10 +44,13 @@ type SortColumn = 'name' | 'slug' | 'productType' | 'price' | 'audience' | 'visi
 export class ProductList {
   private router = inject(Router);
   private authService = inject(AuthService);
+  private productService = inject(Products);
+
 
   @ViewChild('requiresMembershipTemplate', { static: true }) requiresMembershipTemplate!: TemplateRef<any>;
 
-  allProducts = input.required<ProductView[]>();
+  productsFromResolve = input.required<ProductView[]>();
+  allProducts = signal<ProductView[]>([]);
   isLoading = signal<boolean>(true);
   errorMessage = signal<string | null>(null);
   searchTerm = signal<string>('');
@@ -53,6 +58,12 @@ export class ProductList {
   sortDirection = signal<'asc' | 'desc'>('asc');
 
   canAddProducts = computed(() => this.authService.hasRole('products.write'));
+
+  constructor() {
+    effect(() => {
+      this.allProducts.set(this.productsFromResolve());
+    });
+  }
 
   columns: ColumnDefinition<ProductView>[] = [
     {
@@ -95,8 +106,8 @@ export class ProductList {
       stopPropagation: true
     },
     {
-      labelKey: 'products.linkWithWix',
-      onClick: (product) => this.linkWithWix(product),
+      labelKey: 'products.uploadToWix',
+      onClick: (product) => this.uploadToWix(product),
       isDisabled: (product) => this.isLinkedWithWix(product),
       stopPropagation: true,
     }
@@ -110,6 +121,11 @@ export class ProductList {
     {
       labelKey: 'button.addProduct',
       onClick: () => this.createProduct(),
+      show: this.canAddProducts()
+    },
+    {
+      labelKey: 'button.downloadFromWix',
+      onClick: () => this.downloadFromWix(),
       show: this.canAddProducts()
     }
   ];
@@ -177,7 +193,14 @@ export class ProductList {
     return product.productId || `index-${index}`;
   }
 
-  private linkWithWix(product: ProductView) {
+  private uploadToWix(product: ProductView) {
     console.warn('Linking with WIX is not yet implemented', product);
+  }
+
+  private downloadFromWix() {
+    this.productService.downloadFromWix()
+      .pipe(switchMap(() => this.productService.getAllProducts()))
+      .subscribe((products)=>this.allProducts.set(products));
+
   }
 }

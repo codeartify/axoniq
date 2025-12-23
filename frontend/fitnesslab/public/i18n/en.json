@@ -32,6 +32,7 @@
   "button.markOverdue": "Mark Overdue",
   "button.confirmCancel": "Confirm Cancel",
   "button.assigning": "Assigning...",
+  "button.downloadFromWix": "⤓ from Wix",
 
   "nav.customers": "Customers",
   "nav.products": "Products",
@@ -133,7 +134,7 @@
   "product.fields.perks": "Perks",
   "product.fields.renewalLeadTime": "Renewal Lead Time (Days)",
   "product.fields.addPerk": "Add Perk",
-  "products.linkWithWix": "Sync with Wix",
+  "products.uploadToWix": "⤒ to Wix (hidden)",
 
   "form.required": "*",
   "form.customerId": "Customer ID:",

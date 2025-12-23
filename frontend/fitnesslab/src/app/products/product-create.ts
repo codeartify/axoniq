@@ -44,9 +44,6 @@ export class ProductCreate {
   };
 
   audiences = ['INTERNAL', 'EXTERNAL', 'BOTH'];
-  pricingModels = ['SUBSCRIPTION', 'SINGLE_PAYMENT_FOR_DURATION', 'SINGLE_PAYMENT_UNLIMITED'];
-  visibilityOptions = ['PUBLIC', 'HIDDEN', 'ARCHIVED'];
-  billingIntervals = ['DAY', 'WEEK', 'MONTH', 'YEAR'];
   isSubmitting = false;
   errorMessage: string | null = null;
   perksInput = '';

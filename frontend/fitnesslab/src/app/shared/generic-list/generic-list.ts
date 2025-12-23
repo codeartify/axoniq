@@ -1,14 +1,4 @@
-import {
-  Component,
-  ContentChild,
-  EventEmitter,
-  HostListener,
-  Input,
-  Output,
-  signal,
-  TemplateRef,
-  input
-} from '@angular/core';
+import {Component, ContentChild, EventEmitter, HostListener, input, Output, signal, TemplateRef} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {FormsModule} from '@angular/forms';
 import {TranslateModule} from '@ngx-translate/core';
@@ -139,7 +129,8 @@ export interface CollectionAction {
                     @for (column of columns(); track column.key) {
                       <td class="px-3 py-3 border-b border-gray-200">
                         @if (column.template) {
-                          <ng-container *ngTemplateOutlet="column.template; context: { $implicit: item }"></ng-container>
+                          <ng-container
+                            *ngTemplateOutlet="column.template; context: { $implicit: item }"></ng-container>
                         } @else {
                           {{ getCellValue(item, column) }}
                         }
@@ -156,7 +147,9 @@ export interface CollectionAction {
                             ⋮
                           </button>
                           @if (isDropdownOpen(trackByFn()($index, item))) {
-                            <div class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden" style="z-index: 9999;">
+                            <div
+                              class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden"
+                              style="z-index: 9999;">
                               @for (action of rowActions(); track action.labelKey) {
                                 <button
                                   (click)="executeAction(action, item, $event)"

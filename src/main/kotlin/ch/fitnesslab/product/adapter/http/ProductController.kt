@@ -63,9 +63,13 @@ class ProductController(
 
 
     override fun getAllProducts(): ResponseEntity<List<ProductView>> {
-        wixSyncService.syncWixProducts()
 
         return ResponseEntity.ok(productProjection.findAll())
+    }
+
+    override fun downloadFromWix(): ResponseEntity<Unit> {
+        wixSyncService.syncWixProducts()
+        return ResponseEntity.ok().build()
     }
 
     override fun updateProduct(

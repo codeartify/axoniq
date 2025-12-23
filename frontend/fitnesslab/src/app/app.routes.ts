@@ -67,7 +67,7 @@ export const routes: Routes = [
     canActivate: [authGuard],
     data: {roles: ['products.read']},
     resolve: {
-      allProducts: resolveAllProducts
+      productsFromResolve: resolveAllProducts
     }
   },
   {

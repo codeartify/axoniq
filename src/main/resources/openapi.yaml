@@ -125,6 +125,17 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/ProductView'
+  /api/products/downloadFromWix:
+    post:
+      tags:
+        - Products
+      operationId: downloadFromWix
+      summary: download all the products from wix and store them in the database
+      responses:
+        '201':
+          description: Products downloaded successfully
+        '500':
+          description: Error downloading products
   /api/products/{productId}:
     get:
       tags:
