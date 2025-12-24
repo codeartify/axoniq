@@ -6,6 +6,7 @@ import ch.fitnesslab.product.application.FindAllProductsQuery
 import ch.fitnesslab.product.application.ProductUpdatedUpdate
 import ch.fitnesslab.product.domain.*
 import ch.fitnesslab.product.domain.commands.CreateProductCommand
+import ch.fitnesslab.product.domain.commands.UpdateProductCommand
 import ch.fitnesslab.product.infrastructure.ProductRepository
 import ch.fitnesslab.product.infrastructure.ProductVariantEntity
 import ch.fitnesslab.product.infrastructure.wix.v3.WixBillingTerms
@@ -31,7 +32,15 @@ class WixSyncService(
     private val logger = LoggerFactory.getLogger(WixSyncService::class.java)
 
     fun uploadProduct(productId: String) {
-        this.productRepository.findById(UUID.fromString(productId)).let { product -> }
+        val product = this.productRepository.findById(UUID.fromString(productId))
+
+        if (product.isPresent) {
+            val actualProduct = product.get()
+            val isNotPresentOnPlatformYet = actualProduct.linkedPlatforms?.find { it.platformName == "wix" } == null
+            if (isNotPresentOnPlatformYet) {
+                this.wixClient.uploadPricingPlanToWix(actualProduct)
+            }
+        }
     }
 
     fun syncWixProducts() {
@@ -57,6 +66,7 @@ class WixSyncService(
         logger.info("Wix sync completed successfully")
     }
 
+
     private fun syncWixPlan(wixPlan: WixPlan) {
         val wixPlanId = wixPlan.id
 
@@ -66,15 +76,92 @@ class WixSyncService(
                 return
             }
 
-            if (productWithWixIdExistsAlready(wixPlanId)) {
-                logger.debug("Product with Wix ID $wixPlanId already exists, skipping")
-                return
-            }
+            val existingProduct = productRepository.findProductByWixId(wixPlanId)
 
-            createProductFromWixPlan(wixPlan)
+            if (existingProduct != null) {
+                logger.debug("Product with Wix ID $wixPlanId already exists, updating")
+                updateProductFromWixPlan(wixPlan, existingProduct)
+            } else {
+                logger.debug("Product with Wix ID $wixPlanId does not exist yet, creating")
+                createProductFromWixPlan(wixPlan)
+            }
         } catch (e: Exception) {
             logger.error("Failed to sync Wix plan $wixPlanId: ${e.message}", e)
         }
+    }
+
+
+    private fun updateProductFromWixPlan(wixPlan: WixPlan, existingProduct: ProductVariantEntity) {
+        val subscriptionQuery =
+            queryGateway.subscriptionQuery(
+                FindAllProductsQuery(),
+                ResponseTypes.multipleInstancesOf(ProductView::class.java),
+                ResponseTypes.instanceOf(ProductUpdatedUpdate::class.java),
+            )
+
+        try {
+            val command = mapWixPlanToUpdateCommand(wixPlan, existingProduct)
+
+            commandGateway.sendAndWait<Unit>(command)
+
+            waitForUpdateOf(subscriptionQuery)
+
+            logger.info("Updated product from Wix plan: ${wixPlan.name} (${wixPlan.id})")
+        } finally {
+            subscriptionQuery.close()
+        }
+    }
+
+    private fun mapWixPlanToUpdateCommand(
+        wixPlan: WixPlan,
+        existingProduct: ProductVariantEntity
+    ): UpdateProductCommand {
+        val linkedPlatforms = (existingProduct.linkedPlatforms?.toMutableList() ?: mutableListOf()).apply {
+            // Update or add the Wix platform sync info
+            removeIf { it.platformName == "wix" }
+            add(
+                LinkedPlatformSync(
+                    platformName = "wix",
+                    idOnPlatform = wixPlan.id,
+                    revision = wixPlan.revision,
+                    visibilityOnPlatform = mapWixVisibility(wixPlan.visibility),
+                    isSynced = true,
+                    isSourceOfTruth = false,
+                    lastSyncedAt = Instant.now(),
+                    syncError = null,
+                )
+            )
+        }
+
+        val pricingVariant = wixPlan.pricingVariants.firstOrNull()
+
+        return UpdateProductCommand(
+            productId = ProductVariantId(existingProduct.productId),
+            slug = wixPlan.slug ?: existingProduct.slug,
+            name = wixPlan.name ?: existingProduct.name,
+            productType = existingProduct.productType,
+            audience = existingProduct.audience,
+            requiresMembership = existingProduct.requiresMembership,
+            pricingVariant = mapWixPricingVariant(pricingVariant),
+            behavior =
+                ProductBehaviorConfig(
+                    canBePaused = existingProduct.canBePaused,
+                    renewalLeadTimeDays = existingProduct.renewalLeadTimeDays,
+                    maxActivePerCustomer = existingProduct.maxActivePerCustomer,
+                    maxPurchasesPerBuyer = wixPlan.maxPurchasesPerBuyer ?: existingProduct.maxPurchasesPerBuyer,
+                    numberOfSessions = existingProduct.numberOfSessions,
+                ),
+            description = wixPlan.description ?: existingProduct.description,
+            termsAndConditions = existingProduct.termsAndConditions, // Not available in Wix v3
+            visibility = mapWixVisibilityToProductVisibility(wixPlan.visibility),
+            buyable = wixPlan.buyable ?: existingProduct.buyable,
+            buyerCanCancel = wixPlan.buyerCanCancel ?: existingProduct.buyerCanCancel,
+            perks =
+                wixPlan.perks
+                    .mapNotNull { it.description }
+                    .takeIf { it.isNotEmpty() } ?: existingProduct.perks,
+            linkedPlatforms = linkedPlatforms,
+        )
     }
 
     private fun createProductFromWixPlan(wixPlan: WixPlan) {
@@ -97,19 +184,6 @@ class WixSyncService(
             subscriptionQuery.close()
         }
     }
-
-    private fun productWithWixIdExistsAlready(id: String): Boolean {
-        return productRepository
-            .findAll()
-            .firstOrNull { product -> productExistsAlready(product, id) } != null
-    }
-
-    private fun productExistsAlready(
-        product: ProductVariantEntity?,
-        id: String
-    ): Boolean = product?.linkedPlatforms?.any {
-        it.platformName == "wix" && it.idOnPlatform == id
-    } == true
 
     private fun mapWixPlanToCommand(wixPlan: WixPlan): CreateProductCommand {
         val linkedPlatformSync =

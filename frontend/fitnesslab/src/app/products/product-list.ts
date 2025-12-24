@@ -5,8 +5,7 @@ import AuthService from '../auth/auth.service';
 import {CollectionAction, ColumnDefinition, GenericList, RowAction} from '../shared/generic-list/generic-list';
 import {CommonModule} from '@angular/common';
 import {TranslateModule} from '@ngx-translate/core';
-import {switchMap} from 'rxjs';
-import {toSignal} from '@angular/core/rxjs-interop';
+import {switchMap, take} from 'rxjs';
 
 type SortColumn = 'name' | 'slug' | 'productType' | 'price' | 'audience' | 'visibility';
 
@@ -108,7 +107,7 @@ export class ProductList {
     },
     {
       labelKey: 'products.uploadToWix',
-      onClick: (product) => this.uploadToWix(product),
+      onClick: (product) => this.uploadToWix(product.productId!!),
       isDisabled: (product) => this.isLinkedWithWix(product),
       stopPropagation: true,
     }
@@ -194,13 +193,19 @@ export class ProductList {
     return product.productId || `index-${index}`;
   }
 
-  private uploadToWix(product: ProductView) {
-    console.warn('Linking with WIX is not yet implemented', product);
+  private uploadToWix(productId: string) {
+    this.productService.uploadToWix(productId)
+      .pipe(
+        switchMap(() => this.productService.getAllProducts()),
+        take(1))
+      .subscribe((products)=>this.allProducts.set(products));
   }
 
   private downloadFromWix() {
     this.productService.downloadFromWix()
-      .pipe(switchMap(() => this.productService.getAllProducts()))
+      .pipe(
+        switchMap(() => this.productService.getAllProducts()),
+        take(1))
       .subscribe((products)=>this.allProducts.set(products));
 
   }
