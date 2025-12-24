@@ -212,11 +212,12 @@ class WixSyncService(
                 logger.debug("Product with Wix ID $wixPlanId already exists, checking for changes")
                 val remoteHash = computeWixPlanHash(wixPlan)
                 val wixPlatform = existingProduct.linkedPlatforms?.find { it.platformName == "wix" }
-                val localHash = wixPlatform?.remoteHash
+                val storedRemoteHash = wixPlatform?.remoteHash
 
-                if (remoteHash != localHash) {
-                    logger.debug("Detected changes from Wix for product $wixPlanId")
-                    updateProductFromWixPlan(wixPlan, existingProduct, remoteHash)
+                if (remoteHash != storedRemoteHash) {
+                    logger.info("Detected changes from Wix for product $wixPlanId - marking as having incoming changes")
+                    // Just mark that there are incoming changes, don't apply them automatically
+                    markProductWithIncomingChanges(wixPlan, existingProduct, remoteHash)
                 } else {
                     logger.debug("No changes detected for product $wixPlanId")
                 }
@@ -227,6 +228,48 @@ class WixSyncService(
         } catch (e: Exception) {
             logger.error("Failed to sync Wix plan $wixPlanId: ${e.message}", e)
         }
+    }
+
+    private fun markProductWithIncomingChanges(
+        wixPlan: WixPlan,
+        existingProduct: ProductVariantEntity,
+        remoteHash: String,
+    ) {
+        val wixPlatform = existingProduct.linkedPlatforms?.find { it.platformName == "wix" }
+
+        val linkedPlatforms =
+            (existingProduct.linkedPlatforms?.toMutableList() ?: mutableListOf()).apply {
+                removeIf { it.platformName == "wix" }
+                add(
+                    wixPlatform?.copy(
+                        hasIncomingChanges = true,
+                        remoteHash = remoteHash,
+                        lastSyncedAt = Instant.now(),
+                    ) ?: LinkedPlatformSync(
+                        platformName = "wix",
+                        idOnPlatform = wixPlan.id,
+                        revision = wixPlan.revision,
+                        visibilityOnPlatform = mapWixVisibility(wixPlan.visibility),
+                        isSynced = true,
+                        isSourceOfTruth = false,
+                        lastSyncedAt = Instant.now(),
+                        syncError = null,
+                        hasLocalChanges = wixPlatform?.hasLocalChanges ?: false,
+                        hasIncomingChanges = true,
+                        localHash = wixPlatform?.localHash,
+                        remoteHash = remoteHash,
+                    ),
+                )
+            }
+
+        val updateCommand =
+            AddLinkedPlatformCommand(
+                productId = ProductVariantId(existingProduct.productId),
+                linkedPlatforms = linkedPlatforms,
+            )
+
+        commandGateway.sendAndWait<Unit>(updateCommand)
+        logger.info("Marked product ${existingProduct.productId} as having incoming changes from Wix")
     }
 
     fun findProductByWixId(wixId: String): ProductVariantEntity? =
