@@ -135,9 +135,8 @@ class MembershipSignUpService(
                     CustomerEntity::class.java,
                 ).get()
 
-        when (customer) {
-            null -> throw IllegalArgumentException("Customer not found")
-            else -> customer
+        if (customer == null) {
+            throw IllegalArgumentException("Customer not found")
         }
     }
 
@@ -145,7 +144,6 @@ class MembershipSignUpService(
         startDate: LocalDate,
         durationInMonths: Int?,
     ): DateRange? {
-        val durationInMonths = durationInMonths
         return when {
             durationInMonths != null -> DateRange.toRange(startDate, durationInMonths)
             else -> null

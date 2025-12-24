@@ -177,6 +177,25 @@ paths:
       responses:
         '200':
           description: Product updated successfully
+  /api/products/{productId}/uploadToWix:
+    post:
+      tags:
+        - Products
+      operationId: uploadToWix
+      summary: upload a product to wix
+      parameters:
+        - name: productId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: Product successfully uploaded to wix
+        '404':
+          description: Product not found
+        '500':
+          description: Error uploading product to wix
   /api/products/memberships:
     get:
       tags:

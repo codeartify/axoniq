@@ -72,6 +72,12 @@ class ProductController(
         return ResponseEntity.ok().build()
     }
 
+    override fun uploadToWix(productId: String): ResponseEntity<Unit> {
+
+        wixSyncService.uploadProduct(productId)
+        return ResponseEntity.ok().build()
+    }
+
     override fun updateProduct(
         productId: String,
         updateProductRequest: UpdateProductRequest,

@@ -59,7 +59,7 @@ class BexioInvoiceService(
                 positions =
                     listOf(
                         BexioInvoicePosition(
-                            text = product.name ?: "Product",
+                            text = product.name,
                             unitPrice = amount,
                             accountId = 128, // Revenue account - TODO: Configure with actual Bexio account ID
                             taxId = 14, // Tax rate ID - TODO: Configure with actual Bexio tax ID (e.g., 22 = 8.1% VAT in CH)

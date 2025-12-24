@@ -177,9 +177,9 @@ class WixSyncService(
         // Map duration (for fixed-duration plans)
         val duration =
             if (pricingVariant.billingTerms?.endType == "CYCLES_COMPLETED") {
-                val cycleCount = pricingVariant.billingTerms?.cyclesCompletedDetails?.billingCycleCount ?: 1
-                val period = pricingVariant.billingTerms?.billingCycle?.period
-                val count = (pricingVariant.billingTerms?.billingCycle?.count ?: 1) * cycleCount
+                val cycleCount = pricingVariant.billingTerms.cyclesCompletedDetails?.billingCycleCount ?: 1
+                val period = pricingVariant.billingTerms.billingCycle?.period
+                val count = (pricingVariant.billingTerms.billingCycle?.count ?: 1) * cycleCount
                 PricingDuration(
                     interval = mapWixPeriodToInterval(period),
                     count = count,
@@ -239,4 +239,8 @@ class WixSyncService(
             .replace(Regex("[^a-z0-9\\s-]"), "")
             .replace(Regex("\\s+"), "-")
             .trim('-')
+
+    fun uploadProduct(productId: String) {
+        this.productRepository.findById(UUID.fromString(productId)).let { product -> }
+    }
 }
