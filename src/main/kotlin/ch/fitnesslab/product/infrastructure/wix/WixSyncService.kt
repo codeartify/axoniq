@@ -174,13 +174,21 @@ class WixSyncService(
         }
     }
 
-    fun syncWixProducts() {
+    fun checkForWixUpdatesForAll() {
         try {
             val wixPlans = fetchWixPlans()
-
-            createProductsFrom(wixPlans)
+            checkForUpdatesFrom(wixPlans)
         } catch (e: Exception) {
-            logger.error("Wix sync failed: ${e.message}", e)
+            logger.error("Wix check for updates failed: ${e.message}", e)
+        }
+    }
+
+    fun applyAllWixUpdates() {
+        try {
+            val wixPlans = fetchWixPlans()
+            applyUpdatesFrom(wixPlans)
+        } catch (e: Exception) {
+            logger.error("Wix apply updates failed: ${e.message}", e)
         }
     }
 
@@ -258,11 +266,81 @@ class WixSyncService(
         return wixPlans
     }
 
-    private fun createProductsFrom(wixPlans: List<WixPlan>) {
+    private fun checkForUpdatesFrom(wixPlans: List<WixPlan>) {
         wixPlans.forEach { wixPlan ->
-            syncWixPlan(wixPlan)
+            checkForUpdatesForPlan(wixPlan)
         }
-        logger.info("Wix sync completed successfully")
+        logger.info("Wix check for updates completed successfully")
+    }
+
+    private fun applyUpdatesFrom(wixPlans: List<WixPlan>) {
+        wixPlans.forEach { wixPlan ->
+            applyUpdatesForPlan(wixPlan)
+        }
+        logger.info("Wix apply updates completed successfully")
+    }
+
+    private fun checkForUpdatesForPlan(wixPlan: WixPlan) {
+        val wixPlanId = wixPlan.id
+
+        try {
+            if (wixPlanId.isNullOrBlank()) {
+                logger.warn("Skipping Wix plan without ID: ${wixPlan.name}")
+                return
+            }
+
+            val existingProduct = findProductByWixId(wixPlanId)
+
+            if (existingProduct != null) {
+                logger.debug("Checking for updates for product with Wix ID $wixPlanId")
+                val remoteHash = computeWixPlanHash(wixPlan)
+                val wixPlatform = existingProduct.linkedPlatforms?.find { it.platformName == "wix" }
+                val storedRemoteHash = wixPlatform?.remoteHash
+
+                if (remoteHash != storedRemoteHash) {
+                    logger.info("Detected changes from Wix for product $wixPlanId - marking as having incoming changes")
+                    markProductWithIncomingChanges(wixPlan, existingProduct, remoteHash)
+                } else {
+                    logger.debug("No changes detected for product $wixPlanId")
+                }
+            } else {
+                logger.debug("Product with Wix ID $wixPlanId does not exist locally, skipping")
+            }
+        } catch (e: Exception) {
+            logger.error("Failed to check for updates for Wix plan $wixPlanId: ${e.message}", e)
+        }
+    }
+
+    private fun applyUpdatesForPlan(wixPlan: WixPlan) {
+        val wixPlanId = wixPlan.id
+
+        try {
+            if (wixPlanId.isNullOrBlank()) {
+                logger.warn("Skipping Wix plan without ID: ${wixPlan.name}")
+                return
+            }
+
+            val existingProduct = findProductByWixId(wixPlanId)
+
+            if (existingProduct != null) {
+                logger.debug("Applying updates for product with Wix ID $wixPlanId")
+                val remoteHash = computeWixPlanHash(wixPlan)
+                val wixPlatform = existingProduct.linkedPlatforms?.find { it.platformName == "wix" }
+                val storedRemoteHash = wixPlatform?.remoteHash
+
+                if (remoteHash != storedRemoteHash) {
+                    logger.info("Applying changes from Wix for product $wixPlanId")
+                    updateProductFromWixPlan(wixPlan, existingProduct, remoteHash)
+                } else {
+                    logger.debug("No changes to apply for product $wixPlanId")
+                }
+            } else {
+                logger.debug("Product with Wix ID $wixPlanId does not exist yet, creating")
+                createProductFromWixPlan(wixPlan)
+            }
+        } catch (e: Exception) {
+            logger.error("Failed to apply updates for Wix plan $wixPlanId: ${e.message}", e)
+        }
     }
 
     private fun syncWixPlan(wixPlan: WixPlan) {

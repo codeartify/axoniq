@@ -138,6 +138,8 @@
   "products.uploadToWix": "⤒ nach Wix (versteckt)",
   "products.checkForWixUpdates": "Auf Wix-Updates prüfen",
   "products.downloadFromWix": "⬇ von Wix",
+  "button.checkForWixUpdatesForAll": "Auf Wix-Updates prüfen (Alle)",
+  "button.downloadFromWix": "Wix-Updates anwenden (Alle)",
 
   "form.required": "*",
   "form.customerId": "Kunden-ID:",

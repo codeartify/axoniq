@@ -172,6 +172,11 @@ export class ProductList {
       show: this.canAddProducts()
     },
     {
+      labelKey: 'button.checkForWixUpdatesForAll',
+      onClick: () => this.checkForWixUpdatesForAll(),
+      show: this.canAddProducts()
+    },
+    {
       labelKey: 'button.downloadFromWix',
       onClick: () => this.downloadFromWix(),
       show: this.canAddProducts()
@@ -259,6 +264,14 @@ export class ProductList {
 
   private downloadProductFromWix(productId: string) {
     this.productService.downloadFromWixForProduct(productId)
+      .pipe(
+        switchMap(() => this.productService.getAllProducts()),
+        take(1))
+      .subscribe((products)=>this.allProducts.set(products));
+  }
+
+  private checkForWixUpdatesForAll() {
+    this.productService.checkForWixUpdatesForAll()
       .pipe(
         switchMap(() => this.productService.getAllProducts()),
         take(1))

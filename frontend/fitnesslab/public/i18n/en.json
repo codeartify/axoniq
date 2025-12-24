@@ -138,6 +138,8 @@
   "products.uploadToWix": "⤒ to Wix (hidden)",
   "products.checkForWixUpdates": "Check for Wix Updates",
   "products.downloadFromWix": "⬇ from Wix",
+  "button.checkForWixUpdatesForAll": "Check for Wix Updates (All)",
+  "button.downloadFromWix": "Apply Wix Updates (All)",
 
   "form.required": "*",
   "form.customerId": "Customer ID:",

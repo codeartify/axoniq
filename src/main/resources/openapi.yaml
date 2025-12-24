@@ -130,12 +130,23 @@ paths:
       tags:
         - Products
       operationId: downloadFromWix
-      summary: download all the products from wix and store them in the database
+      summary: Apply all pending Wix updates to local products
       responses:
-        '201':
-          description: Products downloaded successfully
+        '200':
+          description: All Wix updates applied successfully
         '500':
-          description: Error downloading products
+          description: Error applying Wix updates
+  /api/products/checkForWixUpdatesForAll:
+    post:
+      tags:
+        - Products
+      operationId: checkForWixUpdatesForAll
+      summary: Check for updates from Wix for all linked products without applying them
+      responses:
+        '200':
+          description: Check completed successfully
+        '500':
+          description: Error checking for Wix updates
   /api/products/{productId}:
     get:
       tags:
