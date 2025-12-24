@@ -90,6 +90,85 @@ class WixSyncService(
                     logger.error("Failed to upload product to Wix: ${e.message}", e)
                     throw WixSyncException("Failed to upload product to Wix", e)
                 }
+            } else {
+                // Product is already linked to Wix, perform update
+                try {
+                    val wixPlanId = wixPlatform?.idOnPlatform
+                    val revision = wixPlatform?.revision
+
+                    if (wixPlanId == null) {
+                        logger.warn("Product is linked to Wix but has no Wix plan ID")
+                        return
+                    }
+
+                    val wixResponse = this.wixClient.updatePricingPlanOnWix(actualProduct, wixPlanId, revision)
+
+                    // After successful update, update the linked platform info
+                    val linkedPlatforms =
+                        (actualProduct.linkedPlatforms?.toMutableList() ?: mutableListOf()).apply {
+                            removeIf { it.platformName == "wix" }
+                            add(
+                                LinkedPlatformSync(
+                                    platformName = "wix",
+                                    idOnPlatform = wixResponse?.id,
+                                    revision = wixResponse?.revision,
+                                    visibilityOnPlatform = mapWixVisibility(wixResponse?.visibility),
+                                    isSynced = true,
+                                    isSourceOfTruth = false,
+                                    lastSyncedAt = Instant.now(),
+                                    syncError = null,
+                                    hasLocalChanges = false, // Reset after successful upload
+                                    hasIncomingChanges = false, // Reset after successful upload
+                                    localHash = null,
+                                    remoteHash = computeWixPlanHash(
+                                        WixPlan(
+                                            id = wixResponse?.id,
+                                            revision = wixResponse?.revision,
+                                            name = wixResponse?.name,
+                                            slug = wixResponse?.slug,
+                                            description = wixResponse?.description,
+                                            visibility = wixResponse?.visibility,
+                                            buyable = wixResponse?.buyable,
+                                            buyerCanCancel = wixResponse?.buyerCanCancel,
+                                            maxPurchasesPerBuyer = wixResponse?.maxPurchasesPerBuyer,
+                                            perks = wixResponse?.perks ?: emptyList(),
+                                            pricingVariants = wixResponse?.pricingVariants ?: emptyList(),
+                                            createdDate = wixResponse?.createdDate,
+                                            updatedDate = wixResponse?.updatedDate,
+                                            status = wixResponse?.status,
+                                            archived = wixResponse?.archived,
+                                            primary = wixResponse?.primary,
+                                            currency = wixResponse?.currency
+                                        )
+                                    ),
+                                ),
+                            )
+                        }
+
+                    val updateCommand =
+                        AddLinkedPlatformCommand(
+                            productId = ProductVariantId(actualProduct.productId),
+                            linkedPlatforms = linkedPlatforms,
+                        )
+
+                    val subscriptionQuery =
+                        queryGateway.subscriptionQuery(
+                            FindAllProductsQuery(),
+                            ResponseTypes.multipleInstancesOf(ProductView::class.java),
+                            ResponseTypes.instanceOf(ProductUpdatedUpdate::class.java),
+                        )
+
+                    try {
+                        commandGateway.sendAndWait<Unit>(updateCommand)
+                        waitForUpdateOf(subscriptionQuery)
+                        logger.info("Successfully updated product on Wix: ${wixResponse?.id}")
+                    } finally {
+                        subscriptionQuery.close()
+                    }
+                } catch (e: Exception) {
+                    logger.error("Failed to update product on Wix: ${e.message}", e)
+                    throw WixSyncException("Failed to update product on Wix", e)
+                }
             }
         }
     }

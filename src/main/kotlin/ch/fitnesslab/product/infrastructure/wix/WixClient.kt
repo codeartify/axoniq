@@ -20,9 +20,14 @@ class WixClient(
     @Value("\${wix.token}") private val wixToken: String,
     @Value("\${wix.site.id:}") private val wixSiteId: String,
     @Value("\${wix.api.url:}") private val wixApiUrl: String,
-    private val restTemplate: RestTemplate = RestTemplate(),
 ) {
     private val logger = LoggerFactory.getLogger(WixClient::class.java)
+
+    private val restTemplate: RestTemplate = RestTemplate().apply {
+        requestFactory = org.springframework.http.client.HttpComponentsClientHttpRequestFactory(
+            org.apache.hc.client5.http.impl.classic.HttpClients.createDefault()
+        )
+    }
 
     fun fetchPricingPlans(): List<WixPlan> {
         if (wixToken.isBlank() || wixSiteId.isBlank()) {
@@ -212,6 +217,115 @@ class WixClient(
         return restTemplate.exchange(
             createPlanUrl,
             HttpMethod.POST,
+            requestEntity,
+            WixCreatePlanResponse::class.java,
+        )
+    }
+
+    fun updatePricingPlanOnWix(product: ProductVariantEntity, wixPlanId: String, revision: String?): WixPlan? {
+        if (wixToken.isBlank() || wixSiteId.isBlank()) {
+            logger.warn("Wix credentials not configured. Skipping Wix update.")
+            return null
+        }
+
+        try {
+            // First fetch the existing plan to get perk IDs and other Wix-managed fields
+            logger.info("Fetching existing Wix plan: $wixPlanId")
+            val existingPlan = fetchPlanById(wixPlanId)
+            logger.info("Existing plan fetched. Perks: ${existingPlan?.perks?.size}, Variant ID: ${existingPlan?.pricingVariants?.firstOrNull()?.id}")
+
+            // Map local product to Wix plan structure
+            val updatedPlan = mapProductToWixPlanForUpdate(product, existingPlan)
+            logger.info("Mapped updated plan. Perks: ${updatedPlan.perks.size}, Variant ID: ${updatedPlan.pricingVariants.firstOrNull()?.id}")
+
+            val response = sendUpdatePlanRequest(updatedPlan, wixPlanId)
+
+            logger.info("Successfully updated pricing plan on Wix: ${response.body?.plan?.id}")
+            return response.body?.plan
+        } catch (e: Exception) {
+            logger.error("Failed to update pricing plan on Wix: ${e.message}", e)
+            throw WixSyncException("Failed to update pricing plan on Wix", e)
+        }
+    }
+
+    private fun fetchPlanById(planId: String): WixPlan? {
+        val url = wixApiUrl.replace("/query", "/$planId")
+        val headers = wixHeaders()
+        val requestEntity = HttpEntity<Void>(headers)
+
+        val response = restTemplate.exchange(
+            url,
+            HttpMethod.GET,
+            requestEntity,
+            WixPlanResponse::class.java
+        )
+
+        return response.body?.plan
+    }
+
+    private fun mapProductToWixPlanForUpdate(product: ProductVariantEntity, existingPlan: WixPlan?): WixPlan {
+        // Preserve existing pricing variant ID
+        val existingVariantId = existingPlan?.pricingVariants?.firstOrNull()?.id
+        val pricingVariant = mapProductToPricingVariant(product).copy(
+            id = existingVariantId
+        )
+
+        // Preserve existing perk IDs or generate new ones for new perks
+        val existingPerks = existingPlan?.perks ?: emptyList()
+        val wixPerks = product.perks?.mapIndexed { index, perkDescription ->
+            // Try to reuse existing perk ID if available, otherwise create new UUID
+            val existingPerk = existingPerks.getOrNull(index)
+            WixPerk(
+                id = existingPerk?.id ?: UUID.randomUUID().toString(),
+                description = perkDescription,
+            )
+        } ?: emptyList()
+
+        return WixPlan(
+            id = existingPlan?.id,
+            revision = existingPlan?.revision,
+            createdDate = null, // Don't send read-only fields in update
+            updatedDate = null, // Don't send read-only fields in update
+            name = product.name,
+            slug = product.slug,
+            description = product.description,
+            maxPurchasesPerBuyer = product.maxPurchasesPerBuyer,
+            pricingVariants = listOf(pricingVariant),
+            perks = wixPerks,
+            visibility = mapProductVisibilityToWix(product.visibility),
+            buyable = product.buyable,
+            status = existingPlan?.status ?: "ACTIVE",
+            buyerCanCancel = product.buyerCanCancel,
+            archived = existingPlan?.archived ?: false,
+            primary = existingPlan?.primary ?: false,
+            currency = existingPlan?.currency ?: "EUR",
+        )
+    }
+
+    private fun sendUpdatePlanRequest(wixPlan: WixPlan, planId: String): ResponseEntity<WixCreatePlanResponse?> {
+        val headers =
+            wixHeaders().apply {
+                set("Content-Type", "application/json")
+            }
+
+        val body = mapOf("plan" to wixPlan)
+        val requestEntity = HttpEntity(body, headers)
+
+        val updatePlanUrl = wixApiUrl.replace("/query", "/$planId")
+
+        // Log the full request payload for debugging
+        try {
+            val objectMapper = com.fasterxml.jackson.databind.ObjectMapper()
+            objectMapper.findAndRegisterModules()
+            val jsonPayload = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(body)
+            logger.info("PATCH request to $updatePlanUrl with payload:\n$jsonPayload")
+        } catch (e: Exception) {
+            logger.warn("Failed to serialize request for logging: ${e.message}")
+        }
+
+        return restTemplate.exchange(
+            updatePlanUrl,
+            HttpMethod.PATCH,
             requestEntity,
             WixCreatePlanResponse::class.java,
         )

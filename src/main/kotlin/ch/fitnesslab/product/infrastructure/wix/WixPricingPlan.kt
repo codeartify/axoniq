@@ -12,6 +12,9 @@ data class WixCreatePlanResponse(
     val plan: WixPlan? = null,
 )
 
+// Alias for GET plan by ID response (same structure as create)
+typealias WixPlanResponse = WixCreatePlanResponse
+
 // =====================
 // Top-level response
 // =====================
