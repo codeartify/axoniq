@@ -47,21 +47,23 @@ class WixClient(
         return restTemplate.exchange(wixApiUrl, HttpMethod.POST, requestEntity, WixQueryPlansResponse::class.java)
     }
 
-    private fun queryBody(): String = """
-                    {
-                      "query": {
-                        "cursorPaging": {
-                          "limit": 100
-                        }
-                      }
-                    }
-                    """.trimIndent()
+    private fun queryBody(): String =
+        """
+        {
+          "query": {
+            "cursorPaging": {
+              "limit": 100
+            }
+          }
+        }
+        """.trimIndent()
 
-    private fun wixHeaders(): HttpHeaders = HttpHeaders().apply {
-        set("Authorization", wixToken)
-        set("wix-site-id", wixSiteId)
-        set("Content-Type", "application/json")
-    }
+    private fun wixHeaders(): HttpHeaders =
+        HttpHeaders().apply {
+            set("Authorization", wixToken)
+            set("wix-site-id", wixSiteId)
+            set("Content-Type", "application/json")
+        }
 
     fun uploadPricingPlanToWix(product: ProductVariantEntity): WixPlan? {
         if (wixToken.isBlank() || wixSiteId.isBlank()) {
@@ -84,15 +86,16 @@ class WixClient(
     private fun mapProductToWixPlan(product: ProductVariantEntity): WixPlan {
         val pricingVariant = mapProductToPricingVariant(product)
 
-        val wixPerks = product.perks?.map { perkDescription ->
-            WixPerk(
-                id = null,
-                description = perkDescription
-            )
-        } ?: emptyList()
+        val wixPerks =
+            product.perks?.map { perkDescription ->
+                WixPerk(
+                    id = null,
+                    description = perkDescription,
+                )
+            } ?: emptyList()
 
         return WixPlan(
-            id = null,  // New plan, no ID yet
+            id = null, // New plan, no ID yet
             revision = null,
             createdDate = null,
             updatedDate = null,
@@ -108,28 +111,31 @@ class WixClient(
             buyerCanCancel = product.buyerCanCancel,
             archived = false,
             primary = false,
-            currency = "EUR"  // Default, consider making configurable
+            currency = "EUR", // Default, consider making configurable
         )
     }
 
     private fun mapProductToPricingVariant(product: ProductVariantEntity): WixPricingVariantV3 {
         val billingTerms = buildBillingTerms(product)
-        val pricingStrategies = listOf(
-            WixPricingStrategy(
-                flatRate = WixFlatRate(
-                    amount = product.flatRate.toPlainString()
-                )
+        val pricingStrategies =
+            listOf(
+                WixPricingStrategy(
+                    flatRate =
+                        WixFlatRate(
+                            amount = product.flatRate.toPlainString(),
+                        ),
+                ),
             )
-        )
-        
-        val freeTrialDays = product.freeTrialInterval?.let {
-            when (it) {
-                BillingInterval.DAY -> product.freeTrialCount ?: 0
-                BillingInterval.WEEK -> (product.freeTrialCount ?: 0) * 7
-                BillingInterval.MONTH -> (product.freeTrialCount ?: 0) * 30
-                BillingInterval.YEAR -> (product.freeTrialCount ?: 0) * 365
+
+        val freeTrialDays =
+            product.freeTrialInterval?.let {
+                when (it) {
+                    BillingInterval.DAY -> product.freeTrialCount ?: 0
+                    BillingInterval.WEEK -> (product.freeTrialCount ?: 0) * 7
+                    BillingInterval.MONTH -> (product.freeTrialCount ?: 0) * 30
+                    BillingInterval.YEAR -> (product.freeTrialCount ?: 0) * 365
+                }
             }
-        }
 
         return WixPricingVariantV3(
             id = UUID.randomUUID().toString(),
@@ -137,7 +143,7 @@ class WixClient(
             freeTrialDays = freeTrialDays,
             fees = emptyList(),
             billingTerms = billingTerms,
-            pricingStrategies = pricingStrategies
+            pricingStrategies = pricingStrategies,
         )
     }
 
@@ -147,54 +153,56 @@ class WixClient(
             return null
         }
 
-        val billingCycle = product.billingCycleInterval?.let { interval ->
-            WixBillingCycle(
-                period = mapBillingIntervalToWixPeriod(interval),
-                count = product.billingCycleCount ?: 1
-            )
-        }
+        val billingCycle =
+            product.billingCycleInterval?.let { interval ->
+                WixBillingCycle(
+                    period = mapBillingIntervalToWixPeriod(interval),
+                    count = product.billingCycleCount ?: 1,
+                )
+            }
 
-        val cyclesCompletedDetails = product.durationInterval?.let { _ ->
-            WixCyclesCompletedDetails(
-                billingCycleCount = product.durationCount
-            )
-        }
+        val cyclesCompletedDetails =
+            product.durationInterval?.let { _ ->
+                WixCyclesCompletedDetails(
+                    billingCycleCount = product.durationCount,
+                )
+            }
 
-        val endType = if (product.durationCount != null) {
-            "CYCLES_COMPLETED"
-        } else {
-            "UNTIL_CANCELLED"
-        }
+        val endType =
+            if (product.durationCount != null) {
+                "CYCLES_COMPLETED"
+            } else {
+                "UNTIL_CANCELLED"
+            }
 
         return WixBillingTerms(
             billingCycle = billingCycle,
             startType = "ON_PURCHASE",
             endType = endType,
-            cyclesCompletedDetails = cyclesCompletedDetails
+            cyclesCompletedDetails = cyclesCompletedDetails,
         )
     }
 
-    private fun mapBillingIntervalToWixPeriod(interval: BillingInterval): String {
-        return when (interval) {
+    private fun mapBillingIntervalToWixPeriod(interval: BillingInterval): String =
+        when (interval) {
             BillingInterval.DAY -> "DAY"
             BillingInterval.WEEK -> "WEEK"
             BillingInterval.MONTH -> "MONTH"
             BillingInterval.YEAR -> "YEAR"
         }
-    }
 
-    private fun mapProductVisibilityToWix(visibility: ProductVisibility): String {
-        return when (visibility) {
+    private fun mapProductVisibilityToWix(visibility: ProductVisibility): String =
+        when (visibility) {
             ProductVisibility.PUBLIC -> "PUBLIC"
             ProductVisibility.HIDDEN -> "HIDDEN"
             ProductVisibility.ARCHIVED -> "ARCHIVED"
         }
-    }
 
     private fun sendCreatePlanRequest(wixPlan: WixPlan): ResponseEntity<WixCreatePlanResponse?> {
-        val headers = wixHeaders().apply {
-            set("Content-Type", "application/json")
-        }
+        val headers =
+            wixHeaders().apply {
+                set("Content-Type", "application/json")
+            }
 
         val body = mapOf("plan" to wixPlan)
         val requestEntity = HttpEntity(body, headers)
@@ -205,7 +213,7 @@ class WixClient(
             createPlanUrl,
             HttpMethod.POST,
             requestEntity,
-            WixCreatePlanResponse::class.java
+            WixCreatePlanResponse::class.java,
         )
     }
 }

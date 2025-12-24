@@ -1,4 +1,4 @@
- package ch.fitnesslab.membership.adapter.http
+package ch.fitnesslab.membership.adapter.http
 
 import ch.fitnesslab.domain.value.CustomerId
 import ch.fitnesslab.domain.value.ProductVariantId
@@ -13,10 +13,10 @@ import org.springframework.web.bind.annotation.RestController
 import java.time.LocalDate
 
 @RestController
- class MembershipsController(
+class MembershipsController(
     private val membershipSignUpService: MembershipSignUpService,
 ) : MembershipsApi {
-     override fun signUp(membershipSignUpRequestDto: MembershipSignUpRequestDto): ResponseEntity<MembershipSignUpResultDto> {
+    override fun signUp(membershipSignUpRequestDto: MembershipSignUpRequestDto): ResponseEntity<MembershipSignUpResultDto> {
         val result =
             membershipSignUpService.signUp(
                 MembershipSignUpRequest(

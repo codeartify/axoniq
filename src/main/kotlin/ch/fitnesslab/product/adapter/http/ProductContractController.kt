@@ -30,9 +30,7 @@ class ProductContractController(
     private val commandGateway: CommandGateway,
     private val queryGateway: QueryGateway,
 ) : ProductContractsApi {
-    override fun getContractById(
-        contractId: String,
-    ): ResponseEntity<ProductContractDetailDto> {
+    override fun getContractById(contractId: String): ResponseEntity<ProductContractDetailDto> {
         val productContractId = ProductContractId.from(contractId)
 
         val contract = productContractProjection.findById(productContractId)
@@ -63,9 +61,7 @@ class ProductContractController(
         }
     }
 
-    override fun resumeContract(
-        contractId: String,
-    ): ResponseEntity<Unit> {
+    override fun resumeContract(contractId: String): ResponseEntity<Unit> {
         val resumeSubscriptionQuery = createResumeSubscriptionQuery()
 
         try {

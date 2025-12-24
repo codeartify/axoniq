@@ -5,7 +5,4 @@ import org.springframework.stereotype.Repository
 import java.util.*
 
 @Repository
-interface ProductRepository : JpaRepository<ProductVariantEntity, UUID> {
-
-
-}
+interface ProductRepository : JpaRepository<ProductVariantEntity, UUID>

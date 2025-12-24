@@ -48,7 +48,8 @@ class CustomerController(
         )
 
     override fun updateCustomer(
-        customerId: String, updateCustomerRequest: UpdateCustomerRequest,
+        customerId: String,
+        updateCustomerRequest: UpdateCustomerRequest,
     ): ResponseEntity<Unit> {
         val command = toUpdateCustomerCommand(customerId, updateCustomerRequest)
 

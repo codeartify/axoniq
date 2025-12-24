@@ -41,33 +41,36 @@ class WixSyncService(
             if (isNotPresentOnPlatformYet) {
                 try {
                     val wixResponse = this.wixClient.uploadPricingPlanToWix(actualProduct)
-                    
+
                     // After successful upload, create an UpdateProductCommand with the Wix linked platform
-                    val linkedPlatforms = (actualProduct.linkedPlatforms?.toMutableList() ?: mutableListOf()).apply {
-                        add(
-                            LinkedPlatformSync(
-                                platformName = "wix",
-                                idOnPlatform = wixResponse?.id,
-                                revision = wixResponse?.revision,
-                                visibilityOnPlatform = mapWixVisibility(wixResponse?.visibility),
-                                isSynced = true,
-                                isSourceOfTruth = false,
-                                lastSyncedAt = Instant.now(),
-                                syncError = null,
+                    val linkedPlatforms =
+                        (actualProduct.linkedPlatforms?.toMutableList() ?: mutableListOf()).apply {
+                            add(
+                                LinkedPlatformSync(
+                                    platformName = "wix",
+                                    idOnPlatform = wixResponse?.id,
+                                    revision = wixResponse?.revision,
+                                    visibilityOnPlatform = mapWixVisibility(wixResponse?.visibility),
+                                    isSynced = true,
+                                    isSourceOfTruth = false,
+                                    lastSyncedAt = Instant.now(),
+                                    syncError = null,
+                                ),
                             )
+                        }
+
+                    val updateCommand =
+                        AddLinkedPlatformCommand(
+                            productId = ProductVariantId(actualProduct.productId),
+                            linkedPlatforms = linkedPlatforms,
                         )
-                    }
 
-                    val updateCommand = AddLinkedPlatformCommand(
-                        productId = ProductVariantId(actualProduct.productId),
-                        linkedPlatforms = linkedPlatforms
-                    )
-
-                    val subscriptionQuery = queryGateway.subscriptionQuery(
-                        FindAllProductsQuery(),
-                        ResponseTypes.multipleInstancesOf(ProductView::class.java),
-                        ResponseTypes.instanceOf(ProductUpdatedUpdate::class.java),
-                    )
+                    val subscriptionQuery =
+                        queryGateway.subscriptionQuery(
+                            FindAllProductsQuery(),
+                            ResponseTypes.multipleInstancesOf(ProductView::class.java),
+                            ResponseTypes.instanceOf(ProductUpdatedUpdate::class.java),
+                        )
 
                     try {
                         commandGateway.sendAndWait<Unit>(updateCommand)
@@ -107,7 +110,6 @@ class WixSyncService(
         logger.info("Wix sync completed successfully")
     }
 
-
     private fun syncWixPlan(wixPlan: WixPlan) {
         val wixPlanId = wixPlan.id
 
@@ -131,17 +133,23 @@ class WixSyncService(
         }
     }
 
-    fun findProductByWixId(wixId: String): ProductVariantEntity? = productRepository.findAll()
-        .firstOrNull { product -> isWixProductWithWixId(product, wixId) }
+    fun findProductByWixId(wixId: String): ProductVariantEntity? =
+        productRepository
+            .findAll()
+            .firstOrNull { product -> isWixProductWithWixId(product, wixId) }
 
     private fun isWixProductWithWixId(
         product: ProductVariantEntity?,
-        id: String
-    ): Boolean = product?.linkedPlatforms?.any {
-        it.platformName == "wix" && it.idOnPlatform == id
-    } == true
+        id: String,
+    ): Boolean =
+        product?.linkedPlatforms?.any {
+            it.platformName == "wix" && it.idOnPlatform == id
+        } == true
 
-    private fun updateProductFromWixPlan(wixPlan: WixPlan, existingProduct: ProductVariantEntity) {
+    private fun updateProductFromWixPlan(
+        wixPlan: WixPlan,
+        existingProduct: ProductVariantEntity,
+    ) {
         val subscriptionQuery =
             queryGateway.subscriptionQuery(
                 FindAllProductsQuery(),
@@ -164,24 +172,25 @@ class WixSyncService(
 
     private fun mapWixPlanToUpdateCommand(
         wixPlan: WixPlan,
-        existingProduct: ProductVariantEntity
+        existingProduct: ProductVariantEntity,
     ): UpdateProductCommand {
-        val linkedPlatforms = (existingProduct.linkedPlatforms?.toMutableList() ?: mutableListOf()).apply {
-            // Update or add the Wix platform sync info
-            removeIf { it.platformName == "wix" }
-            add(
-                LinkedPlatformSync(
-                    platformName = "wix",
-                    idOnPlatform = wixPlan.id,
-                    revision = wixPlan.revision,
-                    visibilityOnPlatform = mapWixVisibility(wixPlan.visibility),
-                    isSynced = true,
-                    isSourceOfTruth = false,
-                    lastSyncedAt = Instant.now(),
-                    syncError = null,
+        val linkedPlatforms =
+            (existingProduct.linkedPlatforms?.toMutableList() ?: mutableListOf()).apply {
+                // Update or add the Wix platform sync info
+                removeIf { it.platformName == "wix" }
+                add(
+                    LinkedPlatformSync(
+                        platformName = "wix",
+                        idOnPlatform = wixPlan.id,
+                        revision = wixPlan.revision,
+                        visibilityOnPlatform = mapWixVisibility(wixPlan.visibility),
+                        isSynced = true,
+                        isSourceOfTruth = false,
+                        lastSyncedAt = Instant.now(),
+                        syncError = null,
+                    ),
                 )
-            )
-        }
+            }
 
         val pricingVariant = wixPlan.pricingVariants.firstOrNull()
 
@@ -309,35 +318,35 @@ class WixSyncService(
         )
     }
 
-    private fun freeTrialFrom(pricingVariant: WixPricingVariantV3): PricingDuration? = when {
-        hasFreeTrialPeriod(pricingVariant) -> PricingDuration(
-            interval = BillingInterval.DAY,
-            count = pricingVariant.freeTrialDays!!,
-        )
+    private fun freeTrialFrom(pricingVariant: WixPricingVariantV3): PricingDuration? =
+        when {
+            hasFreeTrialPeriod(pricingVariant) ->
+                PricingDuration(
+                    interval = BillingInterval.DAY,
+                    count = pricingVariant.freeTrialDays!!,
+                )
 
-        else -> null
-    }
+            else -> null
+        }
 
-    private fun hasFreeTrialPeriod(pricingVariant: WixPricingVariantV3): Boolean =
-        (pricingVariant.freeTrialDays ?: 0) > 0
+    private fun hasFreeTrialPeriod(pricingVariant: WixPricingVariantV3): Boolean = (pricingVariant.freeTrialDays ?: 0) > 0
 
-    private fun durationFrom(pricingVariant: WixPricingVariantV3): PricingDuration? = when {
-        isCyclic(pricingVariant) -> PricingDuration(
-            interval = mapWixPeriodToInterval(pricingVariant.billingTerms?.billingCycle?.period),
-            count = countFrom(pricingVariant.billingTerms),
-        )
+    private fun durationFrom(pricingVariant: WixPricingVariantV3): PricingDuration? =
+        when {
+            isCyclic(pricingVariant) ->
+                PricingDuration(
+                    interval = mapWixPeriodToInterval(pricingVariant.billingTerms?.billingCycle?.period),
+                    count = countFrom(pricingVariant.billingTerms),
+                )
 
-        else -> null
-    }
+            else -> null
+        }
 
-    private fun isCyclic(pricingVariant: WixPricingVariantV3): Boolean =
-        pricingVariant.billingTerms?.endType == "CYCLES_COMPLETED"
+    private fun isCyclic(pricingVariant: WixPricingVariantV3): Boolean = pricingVariant.billingTerms?.endType == "CYCLES_COMPLETED"
 
-    private fun countFrom(billingTerms: WixBillingTerms?): Int =
-        (billingTerms?.billingCycle?.count ?: 1) * cycleCountFrom(billingTerms)
+    private fun countFrom(billingTerms: WixBillingTerms?): Int = (billingTerms?.billingCycle?.count ?: 1) * cycleCountFrom(billingTerms)
 
-    private fun cycleCountFrom(billingTerms: WixBillingTerms?): Int =
-        billingTerms?.cyclesCompletedDetails?.billingCycleCount ?: 1
+    private fun cycleCountFrom(billingTerms: WixBillingTerms?): Int = billingTerms?.cyclesCompletedDetails?.billingCycleCount ?: 1
 
     private fun billingCycleFrom(pricingVariant: WixPricingVariantV3): PricingDuration? =
         pricingVariant.billingTerms?.billingCycle?.let { cycle ->
@@ -347,11 +356,12 @@ class WixSyncService(
             )
         }
 
-    private fun flatRateFrom(pricingVariant: WixPricingVariantV3): BigDecimal = pricingVariant.pricingStrategies
-        .firstOrNull()
-        ?.flatRate
-        ?.amount
-        ?.toBigDecimalOrNull() ?: BigDecimal.ZERO
+    private fun flatRateFrom(pricingVariant: WixPricingVariantV3): BigDecimal =
+        pricingVariant.pricingStrategies
+            .firstOrNull()
+            ?.flatRate
+            ?.amount
+            ?.toBigDecimalOrNull() ?: BigDecimal.ZERO
 
     private fun pricingModelFrom(billingTerms: WixBillingTerms?): PricingModel =
         when (billingTerms?.endType?.uppercase()) {

@@ -15,16 +15,18 @@ import java.time.format.DateTimeFormatter
 
 @RestController
 class InvoicesController(
-    private val bexioInvoiceService: BexioInvoiceService, private val bexioContactService: BexioContactService
+    private val bexioInvoiceService: BexioInvoiceService,
+    private val bexioContactService: BexioContactService,
 ) : InvoicesApi {
     override fun getInvoices(status: String?): ResponseEntity<List<InvoiceDto>> {
         val invoices = bexioInvoiceService.fetchAllInvoices()
         val filtered =
             if (status != null) {
                 invoices.filter {
-                    BexioInvoiceService.mapBexioStatusToInvoiceStatus(it.kbItemStatusId) == InvoiceStatus.valueOf(
-                        status
-                    )
+                    BexioInvoiceService.mapBexioStatusToInvoiceStatus(it.kbItemStatusId) ==
+                        InvoiceStatus.valueOf(
+                            status,
+                        )
                 }
             } else {
                 invoices
@@ -33,16 +35,12 @@ class InvoicesController(
         return ResponseEntity.ok(filtered.map { toDto(it) })
     }
 
-    override fun getInvoicesByCustomerId(
-        customerId: String,
-    ): ResponseEntity<List<InvoiceDto>> {
+    override fun getInvoicesByCustomerId(customerId: String): ResponseEntity<List<InvoiceDto>> {
         val invoices = bexioInvoiceService.fetchInvoicesByCustomerId(CustomerId.from(customerId))
         return ResponseEntity.ok(invoices.map { toDto(it) })
     }
 
-    override fun getInvoiceById(
-        invoiceId: String,
-    ): ResponseEntity<InvoiceDto> {
+    override fun getInvoiceById(invoiceId: String): ResponseEntity<InvoiceDto> {
         // Assuming invoiceId is the Bexio invoice ID
         val invoice =
             bexioInvoiceService.fetchInvoiceById(invoiceId.toInt())
@@ -51,18 +49,14 @@ class InvoicesController(
         return ResponseEntity.ok(toDto(invoice))
     }
 
-    override fun markAsPaid(
-        invoiceId: String,
-    ): ResponseEntity<Unit> {
+    override fun markAsPaid(invoiceId: String): ResponseEntity<Unit> {
         // Payment status is now managed in Bexio
         // This endpoint would need to call Bexio API to mark invoice as paid
         // For now, return not implemented
         return ResponseEntity.status(501).build()
     }
 
-    override fun markAsOverdue(
-        invoiceId: String,
-    ): ResponseEntity<Unit> {
+    override fun markAsOverdue(invoiceId: String): ResponseEntity<Unit> {
         // Overdue status is now managed in Bexio
         // This endpoint would need to call Bexio API
         return ResponseEntity.status(501).build()

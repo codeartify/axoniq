@@ -86,8 +86,8 @@ class Product() {
         apply(
             LinkedPlatformAddedEvent(
                 productId = event.productId,
-                linkedPlatforms = event.linkedPlatforms
-            )
+                linkedPlatforms = event.linkedPlatforms,
+            ),
         )
     }
 

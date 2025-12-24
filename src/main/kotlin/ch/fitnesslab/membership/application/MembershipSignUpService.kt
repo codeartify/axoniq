@@ -143,10 +143,9 @@ class MembershipSignUpService(
     private fun createValidity(
         startDate: LocalDate,
         durationInMonths: Int?,
-    ): DateRange? {
-        return when {
+    ): DateRange? =
+        when {
             durationInMonths != null -> DateRange.toRange(startDate, durationInMonths)
             else -> null
         }
-    }
 }
