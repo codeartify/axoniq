@@ -7,6 +7,8 @@ import ch.fitnesslab.product.application.ProductUpdatedUpdate
 import ch.fitnesslab.product.domain.*
 import ch.fitnesslab.product.domain.commands.CreateProductCommand
 import ch.fitnesslab.product.infrastructure.ProductRepository
+import ch.fitnesslab.product.infrastructure.ProductVariantEntity
+import ch.fitnesslab.product.infrastructure.wix.v3.WixBillingTerms
 import ch.fitnesslab.product.infrastructure.wix.v3.WixPlan
 import ch.fitnesslab.product.infrastructure.wix.v3.WixPricingVariantV3
 import ch.fitnesslab.utils.waitForUpdateOf
@@ -28,65 +30,86 @@ class WixSyncService(
 ) {
     private val logger = LoggerFactory.getLogger(WixSyncService::class.java)
 
+    fun uploadProduct(productId: String) {
+        this.productRepository.findById(UUID.fromString(productId)).let { product -> }
+    }
+
     fun syncWixProducts() {
         try {
-            val wixPlans = wixClient.fetchPricingPlans()
-            logger.info("Fetched ${wixPlans.size} Wix pricing plans")
+            val wixPlans = fetchWixPlans()
 
-            wixPlans.forEach { wixPlan ->
-                syncWixPlan(wixPlan)
-            }
-
-            logger.info("Wix sync completed successfully")
+            createProductsFrom(wixPlans)
         } catch (e: Exception) {
             logger.error("Wix sync failed: ${e.message}", e)
         }
     }
 
+    private fun fetchWixPlans(): List<WixPlan> {
+        val wixPlans = wixClient.fetchPricingPlans()
+        logger.info("Fetched ${wixPlans.size} Wix pricing plans")
+        return wixPlans
+    }
+
+    private fun createProductsFrom(wixPlans: List<WixPlan>) {
+        wixPlans.forEach { wixPlan ->
+            syncWixPlan(wixPlan)
+        }
+        logger.info("Wix sync completed successfully")
+    }
+
     private fun syncWixPlan(wixPlan: WixPlan) {
+        val wixPlanId = wixPlan.id
+
         try {
-            // Skip if no ID
-            if (wixPlan.id.isNullOrBlank()) {
+            if (wixPlanId.isNullOrBlank()) {
                 logger.warn("Skipping Wix plan without ID: ${wixPlan.name}")
                 return
             }
 
-            // Check if product with this Wix ID already exists
-            val existingProduct =
-                productRepository
-                    .findAll()
-                    .firstOrNull { product ->
-                        product.linkedPlatforms?.any {
-                            it.platformName == "wix" && it.idOnPlatform == wixPlan.id
-                        } == true
-                    }
-
-            if (existingProduct != null) {
-                logger.debug("Product with Wix ID ${wixPlan.id} already exists, skipping")
+            if (productWithWixIdExistsAlready(wixPlanId)) {
+                logger.debug("Product with Wix ID $wixPlanId already exists, skipping")
                 return
             }
 
-            val subscriptionQuery =
-                queryGateway.subscriptionQuery(
-                    FindAllProductsQuery(),
-                    ResponseTypes.multipleInstancesOf(ProductView::class.java),
-                    ResponseTypes.instanceOf(ProductUpdatedUpdate::class.java),
-                )
-
-            try {
-                val command = mapWixPlanToCommand(wixPlan)
-                commandGateway.sendAndWait<Unit>(command)
-
-                waitForUpdateOf(subscriptionQuery)
-
-                logger.info("Created product from Wix plan: ${wixPlan.name} (${wixPlan.id})")
-            } finally {
-                subscriptionQuery.close()
-            }
+            createProductFromWixPlan(wixPlan)
         } catch (e: Exception) {
-            logger.error("Failed to sync Wix plan ${wixPlan.id}: ${e.message}", e)
+            logger.error("Failed to sync Wix plan $wixPlanId: ${e.message}", e)
         }
     }
+
+    private fun createProductFromWixPlan(wixPlan: WixPlan) {
+        val subscriptionQuery =
+            queryGateway.subscriptionQuery(
+                FindAllProductsQuery(),
+                ResponseTypes.multipleInstancesOf(ProductView::class.java),
+                ResponseTypes.instanceOf(ProductUpdatedUpdate::class.java),
+            )
+
+        try {
+            val command = mapWixPlanToCommand(wixPlan)
+
+            commandGateway.sendAndWait<Unit>(command)
+
+            waitForUpdateOf(subscriptionQuery)
+
+            logger.info("Created product from Wix plan: ${wixPlan.name} (${wixPlan.id})")
+        } finally {
+            subscriptionQuery.close()
+        }
+    }
+
+    private fun productWithWixIdExistsAlready(id: String): Boolean {
+        return productRepository
+            .findAll()
+            .firstOrNull { product -> productExistsAlready(product, id) } != null
+    }
+
+    private fun productExistsAlready(
+        product: ProductVariantEntity?,
+        id: String
+    ): Boolean = product?.linkedPlatforms?.any {
+        it.platformName == "wix" && it.idOnPlatform == id
+    } == true
 
     private fun mapWixPlanToCommand(wixPlan: WixPlan): CreateProductCommand {
         val linkedPlatformSync =
@@ -101,7 +124,6 @@ class WixSyncService(
                 syncError = null,
             )
 
-        // Get first pricing variant
         val pricingVariant = wixPlan.pricingVariants.firstOrNull()
 
         return CreateProductCommand(
@@ -154,61 +176,60 @@ class WixSyncService(
             return createDefaultPricing()
         }
 
-        // Extract flat rate from first pricing strategy
-        val flatRate =
-            pricingVariant.pricingStrategies
-                .firstOrNull()
-                ?.flatRate
-                ?.amount
-                ?.toBigDecimalOrNull() ?: BigDecimal.ZERO
-
-        // Determine pricing model from billing terms
-        val pricingModel = determinePricingModel(pricingVariant.billingTerms)
-
-        // Map billing cycle
-        val billingCycle =
-            pricingVariant.billingTerms?.billingCycle?.let { cycle ->
-                PricingDuration(
-                    interval = mapWixPeriodToInterval(cycle.period),
-                    count = cycle.count ?: 1,
-                )
-            }
-
-        // Map duration (for fixed-duration plans)
-        val duration =
-            if (pricingVariant.billingTerms?.endType == "CYCLES_COMPLETED") {
-                val cycleCount = pricingVariant.billingTerms.cyclesCompletedDetails?.billingCycleCount ?: 1
-                val period = pricingVariant.billingTerms.billingCycle?.period
-                val count = (pricingVariant.billingTerms.billingCycle?.count ?: 1) * cycleCount
-                PricingDuration(
-                    interval = mapWixPeriodToInterval(period),
-                    count = count,
-                )
-            } else {
-                null
-            }
-
-        // Map free trial
-        val freeTrial =
-            if ((pricingVariant.freeTrialDays ?: 0) > 0) {
-                PricingDuration(
-                    interval = BillingInterval.DAY,
-                    count = pricingVariant.freeTrialDays!!,
-                )
-            } else {
-                null
-            }
-
         return PricingVariantConfig(
-            pricingModel = pricingModel,
-            flatRate = flatRate,
-            billingCycle = billingCycle,
-            duration = duration,
-            freeTrial = freeTrial,
+            pricingModel = pricingModelFrom(pricingVariant.billingTerms),
+            flatRate = flatRateFrom(pricingVariant),
+            billingCycle = billingCycleFrom(pricingVariant),
+            duration = durationFrom(pricingVariant),
+            freeTrial = freeTrialFrom(pricingVariant),
         )
     }
 
-    private fun determinePricingModel(billingTerms: ch.fitnesslab.product.infrastructure.wix.v3.WixBillingTerms?): PricingModel =
+    private fun freeTrialFrom(pricingVariant: WixPricingVariantV3): PricingDuration? = when {
+        hasFreeTrialPeriod(pricingVariant) -> PricingDuration(
+            interval = BillingInterval.DAY,
+            count = pricingVariant.freeTrialDays!!,
+        )
+
+        else -> null
+    }
+
+    private fun hasFreeTrialPeriod(pricingVariant: WixPricingVariantV3): Boolean =
+        (pricingVariant.freeTrialDays ?: 0) > 0
+
+    private fun durationFrom(pricingVariant: WixPricingVariantV3): PricingDuration? = when {
+        isCyclic(pricingVariant) -> PricingDuration(
+            interval = mapWixPeriodToInterval(pricingVariant.billingTerms?.billingCycle?.period),
+            count = countFrom(pricingVariant.billingTerms),
+        )
+
+        else -> null
+    }
+
+    private fun isCyclic(pricingVariant: WixPricingVariantV3): Boolean =
+        pricingVariant.billingTerms?.endType == "CYCLES_COMPLETED"
+
+    private fun countFrom(billingTerms: WixBillingTerms?): Int =
+        (billingTerms?.billingCycle?.count ?: 1) * cycleCountFrom(billingTerms)
+
+    private fun cycleCountFrom(billingTerms: WixBillingTerms?): Int =
+        billingTerms?.cyclesCompletedDetails?.billingCycleCount ?: 1
+
+    private fun billingCycleFrom(pricingVariant: WixPricingVariantV3): PricingDuration? =
+        pricingVariant.billingTerms?.billingCycle?.let { cycle ->
+            PricingDuration(
+                interval = mapWixPeriodToInterval(cycle.period),
+                count = cycle.count ?: 1,
+            )
+        }
+
+    private fun flatRateFrom(pricingVariant: WixPricingVariantV3): BigDecimal = pricingVariant.pricingStrategies
+        .firstOrNull()
+        ?.flatRate
+        ?.amount
+        ?.toBigDecimalOrNull() ?: BigDecimal.ZERO
+
+    private fun pricingModelFrom(billingTerms: WixBillingTerms?): PricingModel =
         when (billingTerms?.endType?.uppercase()) {
             "UNTIL_CANCELLED" -> PricingModel.SUBSCRIPTION
             "CYCLES_COMPLETED" -> PricingModel.SINGLE_PAYMENT_FOR_DURATION
@@ -239,8 +260,4 @@ class WixSyncService(
             .replace(Regex("[^a-z0-9\\s-]"), "")
             .replace(Regex("\\s+"), "-")
             .trim('-')
-
-    fun uploadProduct(productId: String) {
-        this.productRepository.findById(UUID.fromString(productId)).let { product -> }
-    }
 }
