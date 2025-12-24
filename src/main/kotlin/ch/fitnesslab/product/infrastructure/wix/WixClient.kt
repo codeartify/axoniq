@@ -259,7 +259,7 @@ class WixClient(
         }
     }
 
-    private fun fetchPlanById(planId: String): WixPlan? {
+    fun fetchPlanById(planId: String): WixPlan? {
         val url = wixApiUrl.replace("/query", "/$planId")
         val headers = wixHeaders()
         val requestEntity = HttpEntity<Void>(headers)

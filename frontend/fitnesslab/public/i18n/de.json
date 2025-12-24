@@ -136,6 +136,8 @@
   "product.fields.renewalLeadTime": "Erneuerungszeit (Tage)",
   "product.fields.addPerk": "Vorteil hinzufügen",
   "products.uploadToWix": "⤒ nach Wix (versteckt)",
+  "products.checkForWixUpdates": "Auf Wix-Updates prüfen",
+  "products.downloadFromWix": "⬇ von Wix",
 
   "form.required": "*",
   "form.customerId": "Kunden-ID:",

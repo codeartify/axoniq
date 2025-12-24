@@ -107,6 +107,18 @@ export class ProductList {
       stopPropagation: true
     },
     {
+      labelKey: 'products.checkForWixUpdates',
+      onClick: (product) => this.checkForWixUpdates(product.productId!!),
+      isDisabled: (product) => !this.isLinkedWithWix(product),
+      stopPropagation: true,
+    },
+    {
+      labelKey: 'products.downloadFromWix',
+      onClick: (product) => this.downloadProductFromWix(product.productId!!),
+      isDisabled: (product) => !this.hasIncomingWixChanges(product),
+      stopPropagation: true,
+    },
+    {
       labelKey: 'products.uploadToWix',
       onClick: (product) => this.uploadToWix(product.productId!!),
       isDisabled: (product) => !this.hasLocalChanges(product) || this.hasIncomingWixChanges(product),
@@ -231,6 +243,22 @@ export class ProductList {
 
   private uploadToWix(productId: string) {
     this.productService.uploadToWix(productId)
+      .pipe(
+        switchMap(() => this.productService.getAllProducts()),
+        take(1))
+      .subscribe((products)=>this.allProducts.set(products));
+  }
+
+  private checkForWixUpdates(productId: string) {
+    this.productService.checkForWixUpdates(productId)
+      .pipe(
+        switchMap(() => this.productService.getAllProducts()),
+        take(1))
+      .subscribe((products)=>this.allProducts.set(products));
+  }
+
+  private downloadProductFromWix(productId: string) {
+    this.productService.downloadFromWixForProduct(productId)
       .pipe(
         switchMap(() => this.productService.getAllProducts()),
         take(1))

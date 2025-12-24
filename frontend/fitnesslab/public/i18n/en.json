@@ -136,6 +136,8 @@
   "product.fields.renewalLeadTime": "Renewal Lead Time (Days)",
   "product.fields.addPerk": "Add Perk",
   "products.uploadToWix": "⤒ to Wix (hidden)",
+  "products.checkForWixUpdates": "Check for Wix Updates",
+  "products.downloadFromWix": "⬇ from Wix",
 
   "form.required": "*",
   "form.customerId": "Customer ID:",

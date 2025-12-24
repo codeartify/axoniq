@@ -68,6 +68,16 @@ class ProductController(
         return ResponseEntity.ok().build()
     }
 
+    override fun downloadFromWixForProduct(productId: String): ResponseEntity<Unit> {
+        wixSyncService.downloadProductFromWix(productId)
+        return ResponseEntity.ok().build()
+    }
+
+    override fun checkForWixUpdates(productId: String): ResponseEntity<Unit> {
+        wixSyncService.checkForWixUpdates(productId)
+        return ResponseEntity.ok().build()
+    }
+
     override fun uploadToWix(productId: String): ResponseEntity<Unit> {
         wixSyncService.uploadProduct(productId)
         return ResponseEntity.ok().build()

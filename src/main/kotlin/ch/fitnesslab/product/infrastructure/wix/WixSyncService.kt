@@ -184,6 +184,74 @@ class WixSyncService(
         }
     }
 
+    fun checkForWixUpdates(productId: String) {
+        val product = this.productRepository.findById(UUID.fromString(productId))
+
+        if (product.isEmpty) {
+            logger.warn("Product not found: $productId")
+            return
+        }
+
+        val actualProduct = product.get()
+        val wixPlatform = actualProduct.linkedPlatforms?.find { it.platformName == "wix" }
+
+        if (wixPlatform == null || wixPlatform.idOnPlatform == null) {
+            logger.warn("Product $productId is not linked to Wix")
+            return
+        }
+
+        try {
+            val wixPlanId = wixPlatform.idOnPlatform
+            val wixPlan = wixClient.fetchPlanById(wixPlanId)
+
+            if (wixPlan != null) {
+                val remoteHash = computeWixPlanHash(wixPlan)
+                val storedRemoteHash = wixPlatform.remoteHash
+
+                if (remoteHash != storedRemoteHash) {
+                    logger.info("Found updates on Wix for product $productId")
+                    markProductWithIncomingChanges(wixPlan, actualProduct, remoteHash)
+                } else {
+                    logger.info("No updates found on Wix for product $productId")
+                }
+            }
+        } catch (e: Exception) {
+            logger.error("Failed to check for Wix updates for product $productId: ${e.message}", e)
+            throw WixSyncException("Failed to check for Wix updates", e)
+        }
+    }
+
+    fun downloadProductFromWix(productId: String) {
+        val product = this.productRepository.findById(UUID.fromString(productId))
+
+        if (product.isEmpty) {
+            logger.warn("Product not found: $productId")
+            return
+        }
+
+        val actualProduct = product.get()
+        val wixPlatform = actualProduct.linkedPlatforms?.find { it.platformName == "wix" }
+
+        if (wixPlatform == null || wixPlatform.idOnPlatform == null) {
+            logger.warn("Product $productId is not linked to Wix")
+            return
+        }
+
+        try {
+            val wixPlanId = wixPlatform.idOnPlatform
+            val wixPlan = wixClient.fetchPlanById(wixPlanId)
+
+            if (wixPlan != null) {
+                val remoteHash = computeWixPlanHash(wixPlan)
+                updateProductFromWixPlan(wixPlan, actualProduct, remoteHash)
+                logger.info("Successfully downloaded and applied Wix changes for product $productId")
+            }
+        } catch (e: Exception) {
+            logger.error("Failed to download product from Wix for product $productId: ${e.message}", e)
+            throw WixSyncException("Failed to download product from Wix", e)
+        }
+    }
+
     private fun fetchWixPlans(): List<WixPlan> {
         val wixPlans = wixClient.fetchPricingPlans()
         logger.info("Fetched ${wixPlans.size} Wix pricing plans")
@@ -315,9 +383,6 @@ class WixSyncService(
         existingProduct: ProductVariantEntity,
         remoteHash: String? = null,
     ): UpdateProductCommand {
-        val existingWixPlatform = existingProduct.linkedPlatforms?.find { it.platformName == "wix" }
-        val hasLocalChanges = existingWixPlatform?.hasLocalChanges ?: false
-
         val linkedPlatforms =
             (existingProduct.linkedPlatforms?.toMutableList() ?: mutableListOf()).apply {
                 // Update or add the Wix platform sync info
@@ -332,8 +397,8 @@ class WixSyncService(
                         isSourceOfTruth = false,
                         lastSyncedAt = Instant.now(),
                         syncError = null,
-                        hasLocalChanges = false, // Reset local changes when syncing from Wix
-                        hasIncomingChanges = hasLocalChanges, // Mark as having incoming changes if local changes exist
+                        hasLocalChanges = false, // Reset local changes when downloading from Wix
+                        hasIncomingChanges = false, // Reset incoming changes when downloading from Wix
                         localHash = null,
                         remoteHash = remoteHash ?: computeWixPlanHash(wixPlan),
                     ),

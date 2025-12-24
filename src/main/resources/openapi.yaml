@@ -192,10 +192,42 @@ paths:
       responses:
         '201':
           description: Product successfully uploaded to wix
+  /api/products/{productId}/downloadFromWix:
+    post:
+      tags:
+        - Products
+      operationId: downloadFromWixForProduct
+      summary: Download and apply changes from Wix for a specific product
+      parameters:
+        - name: productId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Product successfully downloaded from Wix
+        '500':
+          description: Error downloading product from Wix
+  /api/products/{productId}/checkForWixUpdates:
+    post:
+      tags:
+        - Products
+      operationId: checkForWixUpdates
+      summary: Check if there are updates on Wix for a specific product without applying them
+      parameters:
+        - name: productId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Check completed successfully
         '404':
           description: Product not found
         '500':
-          description: Error uploading product to wix
+          description: Error checking for Wix updates
   /api/products/memberships:
     get:
       tags:
