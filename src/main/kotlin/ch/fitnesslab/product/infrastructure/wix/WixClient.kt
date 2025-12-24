@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
+import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestTemplate
 
@@ -14,10 +15,10 @@ import org.springframework.web.client.RestTemplate
 class WixClient(
     @Value("\${wix.token}") private val wixToken: String,
     @Value("\${wix.site.id:}") private val wixSiteId: String,
+    @Value("\${wix.api.url:}") private val wixApiUrl: String,
     private val restTemplate: RestTemplate = RestTemplate(),
 ) {
     private val logger = LoggerFactory.getLogger(WixClient::class.java)
-    private val wixApiUrl = "https://www.wixapis.com/pricing-plans/v3/plans/query"
 
     fun fetchPricingPlans(): List<WixPlan> {
         if (wixToken.isBlank() || wixSiteId.isBlank()) {
@@ -26,35 +27,7 @@ class WixClient(
         }
 
         return try {
-            val headers =
-                HttpHeaders().apply {
-                    set("Authorization", wixToken) // assuming you already include "Bearer ..." in the property
-                    set("wix-site-id", wixSiteId)
-                    set("Content-Type", "application/json")
-                }
-
-            // Basic v3 query with cursorPaging (filter is optional; you can extend it later)
-            val body =
-                """
-                {
-                  "query": {
-                    "cursorPaging": {
-                      "limit": 100
-                    }
-                  }
-                }
-                """.trimIndent()
-
-            val request = HttpEntity<String>(body, headers)
-
-            val response =
-                restTemplate.exchange(
-                    wixApiUrl,
-                    HttpMethod.POST,
-                    request,
-                    WixQueryPlansResponse::class.java,
-                )
-
+            val response = fetchAllWixPlans()
             logger.info("Successfully fetched ${response.body?.plans?.size ?: 0} pricing plans from Wix")
             response.body?.plans ?: emptyList()
         } catch (e: Exception) {
@@ -62,9 +35,28 @@ class WixClient(
             throw WixSyncException("Failed to fetch pricing plans from Wix", e)
         }
     }
+
+    private fun fetchAllWixPlans(): ResponseEntity<WixQueryPlansResponse?> {
+        val body = queryBody()
+        val headers = wixHeaders()
+        val requestEntity = HttpEntity(body, headers)
+        return restTemplate.exchange(wixApiUrl, HttpMethod.POST, requestEntity, WixQueryPlansResponse::class.java)
+    }
+
+    private fun queryBody(): String = """
+                    {
+                      "query": {
+                        "cursorPaging": {
+                          "limit": 100
+                        }
+                      }
+                    }
+                    """.trimIndent()
+
+    private fun wixHeaders(): HttpHeaders = HttpHeaders().apply {
+        set("Authorization", wixToken)
+        set("wix-site-id", wixSiteId)
+        set("Content-Type", "application/json")
+    }
 }
 
-class WixSyncException(
-    message: String,
-    cause: Throwable? = null,
-) : RuntimeException(message, cause)

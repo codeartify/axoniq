@@ -35,6 +35,8 @@ wix:
   token: ${WIX_TOKEN:default-token-here}
   site:
     id: ${WIX_SITE_ID:default-site-id-here}
+  api:
+    url: "https://www.wixapis.com/pricing-plans/v3/plans/query"
 bexio:
   api:
     token: ${BEXIO_API_TOKEN:default-token-here}
