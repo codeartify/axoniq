@@ -11,6 +11,10 @@ data class LinkedPlatformSync(
     val isSourceOfTruth: Boolean = false,
     val lastSyncedAt: Instant?,
     val syncError: String?,
+    val hasLocalChanges: Boolean = false,
+    val hasIncomingChanges: Boolean = false,
+    val localHash: String? = null,
+    val remoteHash: String? = null,
 )
 
 enum class PlatformVisibility {

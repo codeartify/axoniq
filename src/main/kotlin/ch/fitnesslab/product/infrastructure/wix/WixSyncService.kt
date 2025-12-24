@@ -20,6 +20,7 @@ import org.axonframework.queryhandling.QueryGateway
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
+import java.security.MessageDigest
 import java.time.Instant
 import java.util.*
 
@@ -37,7 +38,9 @@ class WixSyncService(
 
         if (product.isPresent) {
             val actualProduct = product.get()
-            val isNotPresentOnPlatformYet = actualProduct.linkedPlatforms?.find { it.platformName == "wix" } == null
+            val wixPlatform = actualProduct.linkedPlatforms?.find { it.platformName == "wix" }
+            val isNotPresentOnPlatformYet = wixPlatform == null
+
             if (isNotPresentOnPlatformYet) {
                 try {
                     val wixResponse = this.wixClient.uploadPricingPlanToWix(actualProduct)
@@ -55,6 +58,10 @@ class WixSyncService(
                                     isSourceOfTruth = false,
                                     lastSyncedAt = Instant.now(),
                                     syncError = null,
+                                    hasLocalChanges = false,
+                                    hasIncomingChanges = false,
+                                    localHash = null,
+                                    remoteHash = null, // Will be computed on next sync
                                 ),
                             )
                         }
@@ -122,8 +129,17 @@ class WixSyncService(
             val existingProduct = findProductByWixId(wixPlanId)
 
             if (existingProduct != null) {
-                logger.debug("Product with Wix ID $wixPlanId already exists, updating")
-                updateProductFromWixPlan(wixPlan, existingProduct)
+                logger.debug("Product with Wix ID $wixPlanId already exists, checking for changes")
+                val remoteHash = computeWixPlanHash(wixPlan)
+                val wixPlatform = existingProduct.linkedPlatforms?.find { it.platformName == "wix" }
+                val localHash = wixPlatform?.remoteHash
+
+                if (remoteHash != localHash) {
+                    logger.debug("Detected changes from Wix for product $wixPlanId")
+                    updateProductFromWixPlan(wixPlan, existingProduct, remoteHash)
+                } else {
+                    logger.debug("No changes detected for product $wixPlanId")
+                }
             } else {
                 logger.debug("Product with Wix ID $wixPlanId does not exist yet, creating")
                 createProductFromWixPlan(wixPlan)
@@ -149,6 +165,7 @@ class WixSyncService(
     private fun updateProductFromWixPlan(
         wixPlan: WixPlan,
         existingProduct: ProductVariantEntity,
+        remoteHash: String? = null,
     ) {
         val subscriptionQuery =
             queryGateway.subscriptionQuery(
@@ -173,7 +190,11 @@ class WixSyncService(
     private fun mapWixPlanToUpdateCommand(
         wixPlan: WixPlan,
         existingProduct: ProductVariantEntity,
+        remoteHash: String? = null,
     ): UpdateProductCommand {
+        val existingWixPlatform = existingProduct.linkedPlatforms?.find { it.platformName == "wix" }
+        val hasLocalChanges = existingWixPlatform?.hasLocalChanges ?: false
+
         val linkedPlatforms =
             (existingProduct.linkedPlatforms?.toMutableList() ?: mutableListOf()).apply {
                 // Update or add the Wix platform sync info
@@ -188,6 +209,10 @@ class WixSyncService(
                         isSourceOfTruth = false,
                         lastSyncedAt = Instant.now(),
                         syncError = null,
+                        hasLocalChanges = false, // Reset local changes when syncing from Wix
+                        hasIncomingChanges = hasLocalChanges, // Mark as having incoming changes if local changes exist
+                        localHash = null,
+                        remoteHash = remoteHash ?: computeWixPlanHash(wixPlan),
                     ),
                 )
             }
@@ -255,6 +280,10 @@ class WixSyncService(
                 isSourceOfTruth = false,
                 lastSyncedAt = Instant.now(),
                 syncError = null,
+                hasLocalChanges = false,
+                hasIncomingChanges = false,
+                localHash = null,
+                remoteHash = computeWixPlanHash(wixPlan),
             )
 
         val pricingVariant = wixPlan.pricingVariants.firstOrNull()
@@ -394,4 +423,28 @@ class WixSyncService(
             .replace(Regex("[^a-z0-9\\s-]"), "")
             .replace(Regex("\\s+"), "-")
             .trim('-')
+
+    private fun computeWixPlanHash(wixPlan: WixPlan): String {
+        val data = buildString {
+            append(wixPlan.slug ?: "")
+            append(wixPlan.name ?: "")
+            append(wixPlan.description ?: "")
+            append(wixPlan.visibility ?: "")
+            append(wixPlan.buyable ?: false)
+            append(wixPlan.buyerCanCancel ?: false)
+            append(wixPlan.maxPurchasesPerBuyer ?: "")
+            append(wixPlan.perks.mapNotNull { it.description }.joinToString(","))
+            val pricingVariant = wixPlan.pricingVariants.firstOrNull()
+            if (pricingVariant != null) {
+                append(pricingVariant.billingTerms?.endType ?: "")
+                append(pricingVariant.billingTerms?.billingCycle?.period ?: "")
+                append(pricingVariant.billingTerms?.billingCycle?.count ?: "")
+                append(pricingVariant.freeTrialDays ?: "")
+                append(pricingVariant.pricingStrategies.firstOrNull()?.flatRate?.amount ?: "")
+            }
+        }
+        return MessageDigest.getInstance("SHA-256")
+            .digest(data.toByteArray())
+            .joinToString("") { "%02x".format(it) }
+    }
 }

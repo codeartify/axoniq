@@ -62,6 +62,19 @@ class ProductProjection(
     @EventHandler
     fun on(event: ProductUpdatedEvent) {
         productRepository.findById(event.productId.value).ifPresent { existing ->
+            val updatedLinkedPlatforms = event.linkedPlatforms?.map { platform ->
+                if (platform.platformName == "wix" && !platform.hasLocalChanges) {
+                    // Mark as having local changes if this is a local update (not from sync)
+                    val isFromWixSync = platform.isSynced && platform.lastSyncedAt != null
+                    platform.copy(
+                        hasLocalChanges = !isFromWixSync,
+                        localHash = if (!isFromWixSync) platform.localHash else null
+                    )
+                } else {
+                    platform
+                }
+            }
+
             val updated =
                 ProductVariantEntity(
                     productId = existing.productId,
@@ -89,7 +102,7 @@ class ProductProjection(
                     buyable = event.buyable,
                     buyerCanCancel = event.buyerCanCancel,
                     perks = event.perks,
-                    linkedPlatforms = event.linkedPlatforms,
+                    linkedPlatforms = updatedLinkedPlatforms,
                 )
             productRepository.save(updated)
 
@@ -239,5 +252,9 @@ class ProductProjection(
             isSourceOfTruth = domain.isSourceOfTruth,
             lastSyncedAt = domain.lastSyncedAt?.atOffset(java.time.ZoneOffset.UTC),
             syncError = domain.syncError,
+            hasLocalChanges = domain.hasLocalChanges,
+            hasIncomingChanges = domain.hasIncomingChanges,
+            localHash = domain.localHash,
+            remoteHash = domain.remoteHash,
         )
 }

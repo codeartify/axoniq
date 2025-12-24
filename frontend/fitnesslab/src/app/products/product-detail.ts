@@ -22,6 +22,7 @@ export class ProductDetail implements OnInit {
   isSaving = signal<boolean>(false);
   errorMessage = signal<string | null>(null);
   successMessage = signal<string | null>(null);
+  hasIncomingChanges = signal<boolean>(false);
 
   editedProduct: UpdateProductRequest | null = null;
   audiences = ['INTERNAL', 'EXTERNAL', 'BOTH'];
@@ -44,6 +45,7 @@ export class ProductDetail implements OnInit {
     this.productService.getProduct(productId).subscribe({
       next: (product) => {
         this.product.set(product);
+        this.checkIncomingChanges(product);
         this.isLoading.set(false);
       },
       error: () => {
@@ -53,7 +55,17 @@ export class ProductDetail implements OnInit {
     });
   }
 
+  private checkIncomingChanges(product: ProductView): void {
+    const wixPlatform = product.linkedPlatforms?.find(p => p.platformName.toLowerCase() === 'wix');
+    this.hasIncomingChanges.set(wixPlatform?.hasIncomingChanges === true);
+  }
+
   startEdit(): void {
+    if (this.hasIncomingChanges()) {
+      this.errorMessage.set('Cannot edit product with incoming Wix changes. Please download from Wix first.');
+      return;
+    }
+
     const prod = this.product();
     if (prod && prod.slug && prod.name && prod.productType && prod.audience &&
         prod.requiresMembership !== undefined && prod.pricingVariant && prod.behavior) {
@@ -97,6 +109,11 @@ export class ProductDetail implements OnInit {
   }
 
   saveProduct(): void {
+    if (this.hasIncomingChanges()) {
+      this.errorMessage.set('Cannot save product with incoming Wix changes. Please download from Wix first.');
+      return;
+    }
+
     const prod = this.product();
     if (!prod || !prod.productId || !this.editedProduct) return;
 

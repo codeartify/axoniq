@@ -95,7 +95,7 @@ export class ProductList {
       key: 'wix',
       headerKey: 'product.table.wix',
       sortable: false,
-      getValue: (product) => this.isLinkedWithWix(product) ? '🔄' : '✖'
+      getValue: (product) => this.getWixSyncStatus(product)
     }
   ];
 
@@ -103,18 +103,54 @@ export class ProductList {
     {
       labelKey: 'button.viewDetails',
       onClick: (product) => this.viewProduct(product),
+      isDisabled: (product) => this.hasIncomingWixChanges(product),
       stopPropagation: true
     },
     {
       labelKey: 'products.uploadToWix',
       onClick: (product) => this.uploadToWix(product.productId!!),
-      isDisabled: (product) => this.isLinkedWithWix(product),
+      isDisabled: (product) => !this.hasLocalChanges(product) || this.hasIncomingWixChanges(product),
       stopPropagation: true,
     }
   ];
 
   private isLinkedWithWix(product: ProductView) {
     return !!(product.linkedPlatforms && product.linkedPlatforms.find(platform => platform.platformName.toLowerCase() === 'wix'));
+  }
+
+  private getWixPlatform(product: ProductView) {
+    return product.linkedPlatforms?.find(platform => platform.platformName.toLowerCase() === 'wix');
+  }
+
+  private hasLocalChanges(product: ProductView): boolean {
+    const wixPlatform = this.getWixPlatform(product);
+    return wixPlatform?.hasLocalChanges === true;
+  }
+
+  private hasIncomingWixChanges(product: ProductView): boolean {
+    const wixPlatform = this.getWixPlatform(product);
+    return wixPlatform?.hasIncomingChanges === true;
+  }
+
+  private getWixSyncStatus(product: ProductView): string {
+    const wixPlatform = this.getWixPlatform(product);
+
+    if (!wixPlatform) {
+      return '✖'; // Not linked
+    }
+
+    const hasLocal = wixPlatform.hasLocalChanges === true;
+    const hasIncoming = wixPlatform.hasIncomingChanges === true;
+
+    if (hasIncoming && hasLocal) {
+      return '🔄 🔴⬇️ 🟢⬆️'; // Synced + red download + green upload
+    } else if (hasIncoming) {
+      return '🔄 🔴⬇️'; // Synced + red download (incoming changes)
+    } else if (hasLocal) {
+      return '🔄 🟢⬆️'; // Synced + green upload (local changes)
+    } else {
+      return '🔄'; // Synced
+    }
   }
 
   collectionActions: CollectionAction[] = [

@@ -21,7 +21,7 @@
         <h2 class="text-3xl font-bold text-gray-800">{{ isEditing() ? ('product.detail.editTitle' | translate) : ('product.detail.title' | translate) }}</h2>
         <div class="flex gap-2">
           @if (!isEditing()) {
-            <button (click)="startEdit()" class="px-4 py-2 bg-blue-500 text-white rounded border-none cursor-pointer text-sm font-medium hover:bg-blue-600 transition-colors">{{ 'common.edit' | translate }}</button>
+            <button (click)="startEdit()" [disabled]="hasIncomingChanges()" [class]="hasIncomingChanges() ? 'px-4 py-2 bg-gray-300 text-gray-500 rounded border-none cursor-not-allowed text-sm font-medium' : 'px-4 py-2 bg-blue-500 text-white rounded border-none cursor-pointer text-sm font-medium hover:bg-blue-600 transition-colors'">{{ 'common.edit' | translate }}</button>
           }
           <button (click)="goBack()" class="px-4 py-2 bg-gray-500 text-white rounded border-none cursor-pointer text-sm font-medium hover:bg-gray-600 transition-colors">{{ 'button.backToList' | translate }}</button>
         </div>
@@ -579,7 +579,7 @@
             <button
               type="submit"
               class="px-4 py-2 bg-blue-500 text-white rounded border-none cursor-pointer text-sm font-medium hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              [disabled]="isSaving()"
+              [disabled]="isSaving() || hasIncomingChanges()"
             >
               {{ isSaving() ? ('button.saving' | translate) : ('button.saveChanges' | translate) }}
             </button>

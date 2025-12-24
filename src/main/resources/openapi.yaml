@@ -998,3 +998,19 @@ components:
           nullable: true
           description: Last error message when attempting to sync with this platform,
             if any.
+        hasLocalChanges:
+          type: boolean
+          default: false
+          description: True if there are local changes that haven't been pushed to the platform yet.
+        hasIncomingChanges:
+          type: boolean
+          default: false
+          description: True if there are changes on the platform that haven't been pulled locally yet.
+        localHash:
+          type: string
+          nullable: true
+          description: Hash of the local product state for change detection.
+        remoteHash:
+          type: string
+          nullable: true
+          description: Hash of the remote product state for change detection.

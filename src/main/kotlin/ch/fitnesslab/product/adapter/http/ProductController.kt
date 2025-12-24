@@ -85,13 +85,48 @@ class ProductController(
             )
 
         try {
-            val command = toUpdateProductCommand(productId, updateProductRequest)
+            // Mark Wix platform as having local changes
+            val updatedLinkedPlatforms = updateProductRequest.linkedPlatforms?.map { platform ->
+                if (platform.platformName == "wix") {
+                    LinkedPlatformSync(
+                        platformName = platform.platformName,
+                        idOnPlatform = platform.idOnPlatform,
+                        revision = platform.revision,
+                        visibilityOnPlatform = platform.visibilityOnPlatform?.let { PlatformVisibility.valueOf(it.name) },
+                        isSynced = platform.isSynced,
+                        isSourceOfTruth = platform.isSourceOfTruth == true,
+                        lastSyncedAt = platform.lastSyncedAt?.toInstant(),
+                        syncError = platform.syncError,
+                        hasLocalChanges = true, // Mark as having local changes
+                        hasIncomingChanges = platform.hasIncomingChanges == true,
+                        localHash = null,
+                        remoteHash = platform.remoteHash,
+                    )
+                } else {
+                    LinkedPlatformSync(
+                        platformName = platform.platformName,
+                        idOnPlatform = platform.idOnPlatform,
+                        revision = platform.revision,
+                        visibilityOnPlatform = platform.visibilityOnPlatform?.let { PlatformVisibility.valueOf(it.name) },
+                        isSynced = platform.isSynced,
+                        isSourceOfTruth = platform.isSourceOfTruth == true,
+                        lastSyncedAt = platform.lastSyncedAt?.toInstant(),
+                        syncError = platform.syncError,
+                        hasLocalChanges = platform.hasLocalChanges == true,
+                        hasIncomingChanges = platform.hasIncomingChanges == true,
+                        localHash = platform.localHash,
+                        remoteHash = platform.remoteHash,
+                    )
+                }
+            } ?: emptyList()
+
+            val command = toUpdateProductCommand(productId, updateProductRequest).copy(
+                linkedPlatforms = updatedLinkedPlatforms
+            )
 
             commandGateway.sendAndWait<Any>(command)
 
             waitForUpdateOf(subscriptionQuery)
-
-            wixSyncService.uploadProduct(productId)
 
             return ResponseEntity.ok().build()
         } finally {
