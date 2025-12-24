@@ -580,13 +580,13 @@ components:
     UpdateProductRequest:
       type: object
       required:
-      - slug
-      - name
-      - productType
-      - audience
-      - requiresMembership
-      - pricingVariant
-      - behavior
+        - slug
+        - name
+        - productType
+        - audience
+        - requiresMembership
+        - pricingVariant
+        - behavior
       properties:
         slug:
           type: string
@@ -594,7 +594,8 @@ components:
           type: string
         productType:
           type: string
-        audience: *id001
+        audience:
+          $ref: '#/components/schemas/Audience'
         requiresMembership:
           type: boolean
         pricingVariant:
@@ -609,19 +610,24 @@ components:
           nullable: true
         visibility:
           type: string
-          enum:
-          - PUBLIC
-          - HIDDEN
-          - ARCHIVED
+          enum: [PUBLIC, HIDDEN, ARCHIVED]
+          nullable: true
         buyable:
           type: boolean
+          nullable: true
         buyerCanCancel:
           type: boolean
+          nullable: true
         perks:
           type: array
-          nullable: true
           items:
             type: string
+          nullable: true
+        linkedPlatforms:
+          type: array
+          items:
+            $ref: '#/components/schemas/LinkedPlatformSync'
+          nullable: true
     Audience:
       type: string
       enum:

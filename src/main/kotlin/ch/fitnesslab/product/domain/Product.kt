@@ -1,14 +1,18 @@
 package ch.fitnesslab.product.domain
 
 import ch.fitnesslab.domain.value.ProductVariantId
+import ch.fitnesslab.product.domain.commands.AddLinkedPlatformCommand
 import ch.fitnesslab.product.domain.commands.CreateProductCommand
 import ch.fitnesslab.product.domain.commands.UpdateProductCommand
+import ch.fitnesslab.product.domain.events.LinkedPlatformAddedEvent
 import ch.fitnesslab.product.domain.events.ProductCreatedEvent
 import ch.fitnesslab.product.domain.events.ProductUpdatedEvent
 import org.axonframework.commandhandling.CommandHandler
 import org.axonframework.eventsourcing.EventSourcingHandler
+import org.axonframework.modelling.command.AggregateCreationPolicy
 import org.axonframework.modelling.command.AggregateIdentifier
-import org.axonframework.modelling.command.AggregateLifecycle
+import org.axonframework.modelling.command.AggregateLifecycle.*
+import org.axonframework.modelling.command.CreationPolicy
 import org.axonframework.spring.stereotype.Aggregate
 
 @Aggregate
@@ -32,7 +36,7 @@ class Product() {
 
     @CommandHandler
     constructor(command: CreateProductCommand) : this() {
-        AggregateLifecycle.apply(
+        apply(
             ProductCreatedEvent(
                 productId = command.productId,
                 slug = command.slug,
@@ -54,8 +58,9 @@ class Product() {
     }
 
     @CommandHandler
+    @CreationPolicy(AggregateCreationPolicy.CREATE_IF_MISSING)
     fun handle(command: UpdateProductCommand) {
-        AggregateLifecycle.apply(
+        apply(
             ProductUpdatedEvent(
                 productId = command.productId,
                 slug = command.slug,
@@ -73,6 +78,16 @@ class Product() {
                 perks = command.perks,
                 linkedPlatforms = command.linkedPlatforms,
             ),
+        )
+    }
+
+    @CommandHandler
+    fun on(event: AddLinkedPlatformCommand) {
+        apply(
+            LinkedPlatformAddedEvent(
+                productId = event.productId,
+                linkedPlatforms = event.linkedPlatforms
+            )
         )
     }
 
@@ -110,6 +125,11 @@ class Product() {
         this.buyable = event.buyable
         this.buyerCanCancel = event.buyerCanCancel
         this.perks = event.perks
+        this.linkedPlatforms = event.linkedPlatforms
+    }
+
+    @EventSourcingHandler
+    fun on(event: LinkedPlatformAddedEvent) {
         this.linkedPlatforms = event.linkedPlatforms
     }
 }

@@ -5,6 +5,7 @@ import ch.fitnesslab.generated.model.ProductView
 import ch.fitnesslab.product.application.FindAllProductsQuery
 import ch.fitnesslab.product.application.ProductUpdatedUpdate
 import ch.fitnesslab.product.domain.*
+import ch.fitnesslab.product.domain.commands.AddLinkedPlatformCommand
 import ch.fitnesslab.product.domain.commands.CreateProductCommand
 import ch.fitnesslab.product.domain.commands.UpdateProductCommand
 import ch.fitnesslab.product.infrastructure.ProductRepository
@@ -38,7 +39,47 @@ class WixSyncService(
             val actualProduct = product.get()
             val isNotPresentOnPlatformYet = actualProduct.linkedPlatforms?.find { it.platformName == "wix" } == null
             if (isNotPresentOnPlatformYet) {
-                this.wixClient.uploadPricingPlanToWix(actualProduct)
+                try {
+                    val wixResponse = this.wixClient.uploadPricingPlanToWix(actualProduct)
+                    
+                    // After successful upload, create an UpdateProductCommand with the Wix linked platform
+                    val linkedPlatforms = (actualProduct.linkedPlatforms?.toMutableList() ?: mutableListOf()).apply {
+                        add(
+                            LinkedPlatformSync(
+                                platformName = "wix",
+                                idOnPlatform = wixResponse?.id,
+                                revision = wixResponse?.revision,
+                                visibilityOnPlatform = mapWixVisibility(wixResponse?.visibility),
+                                isSynced = true,
+                                isSourceOfTruth = false,
+                                lastSyncedAt = Instant.now(),
+                                syncError = null,
+                            )
+                        )
+                    }
+
+                    val updateCommand = AddLinkedPlatformCommand(
+                        productId = ProductVariantId(actualProduct.productId),
+                        linkedPlatforms = linkedPlatforms
+                    )
+
+                    val subscriptionQuery = queryGateway.subscriptionQuery(
+                        FindAllProductsQuery(),
+                        ResponseTypes.multipleInstancesOf(ProductView::class.java),
+                        ResponseTypes.instanceOf(ProductUpdatedUpdate::class.java),
+                    )
+
+                    try {
+                        commandGateway.sendAndWait<Unit>(updateCommand)
+                        waitForUpdateOf(subscriptionQuery)
+                        logger.info("Successfully uploaded and linked product to Wix: ${wixResponse?.id}")
+                    } finally {
+                        subscriptionQuery.close()
+                    }
+                } catch (e: Exception) {
+                    logger.error("Failed to upload product to Wix: ${e.message}", e)
+                    throw WixSyncException("Failed to upload product to Wix", e)
+                }
             }
         }
     }
@@ -76,7 +117,7 @@ class WixSyncService(
                 return
             }
 
-            val existingProduct = productRepository.findProductByWixId(wixPlanId)
+            val existingProduct = findProductByWixId(wixPlanId)
 
             if (existingProduct != null) {
                 logger.debug("Product with Wix ID $wixPlanId already exists, updating")
@@ -90,6 +131,15 @@ class WixSyncService(
         }
     }
 
+    fun findProductByWixId(wixId: String): ProductVariantEntity? = productRepository.findAll()
+        .firstOrNull { product -> isWixProductWithWixId(product, wixId) }
+
+    private fun isWixProductWithWixId(
+        product: ProductVariantEntity?,
+        id: String
+    ): Boolean = product?.linkedPlatforms?.any {
+        it.platformName == "wix" && it.idOnPlatform == id
+    } == true
 
     private fun updateProductFromWixPlan(wixPlan: WixPlan, existingProduct: ProductVariantEntity) {
         val subscriptionQuery =

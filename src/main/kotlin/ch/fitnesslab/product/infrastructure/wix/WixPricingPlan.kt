@@ -4,6 +4,15 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import java.time.OffsetDateTime
 
 // =====================
+// Create Plan Response
+// =====================
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+data class WixCreatePlanResponse(
+    val plan: WixPlan? = null,
+)
+
+// =====================
 // Top-level response
 // =====================
 

@@ -2,6 +2,7 @@ package ch.fitnesslab.product.application
 
 import ch.fitnesslab.domain.value.ProductVariantId
 import ch.fitnesslab.generated.model.*
+import ch.fitnesslab.product.domain.events.LinkedPlatformAddedEvent
 import ch.fitnesslab.product.domain.events.ProductCreatedEvent
 import ch.fitnesslab.product.domain.events.ProductUpdatedEvent
 import ch.fitnesslab.product.infrastructure.ProductRepository
@@ -91,6 +92,25 @@ class ProductProjection(
                     linkedPlatforms = event.linkedPlatforms,
                 )
             productRepository.save(updated)
+
+            queryUpdateEmitter.emit(
+                FindAllProductsQuery::class.java,
+                { true },
+                ProductUpdatedUpdate(event.productId.value.toString()),
+            )
+            queryUpdateEmitter.emit(
+                FindProductByIdQuery::class.java,
+                { query -> query.productId == event.productId },
+                ProductUpdatedUpdate(event.productId.value.toString()),
+            )
+        }
+    }
+
+    @EventHandler
+    fun on(event: LinkedPlatformAddedEvent) {
+        productRepository.findById(event.productId.value).ifPresent { existing ->
+            existing.linkedPlatforms = event.linkedPlatforms
+            productRepository.save(existing)
 
             queryUpdateEmitter.emit(
                 FindAllProductsQuery::class.java,

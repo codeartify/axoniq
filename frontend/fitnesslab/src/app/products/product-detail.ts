@@ -82,7 +82,8 @@ export class ProductDetail implements OnInit {
         visibility: prod.visibility || 'PUBLIC',
         buyable: prod.buyable ?? true,
         buyerCanCancel: prod.buyerCanCancel ?? true,
-        perks: prod.perks ? [...prod.perks] : null
+        perks: prod.perks ? [...prod.perks] : null,
+        linkedPlatforms: prod.linkedPlatforms ? [...prod.linkedPlatforms] : null
       };
       this.isEditing.set(true);
       this.successMessage.set(null);

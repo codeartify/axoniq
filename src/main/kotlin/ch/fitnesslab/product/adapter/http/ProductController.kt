@@ -62,10 +62,7 @@ class ProductController(
     }
 
 
-    override fun getAllProducts(): ResponseEntity<List<ProductView>> {
-
-        return ResponseEntity.ok(productProjection.findAll())
-    }
+    override fun getAllProducts(): ResponseEntity<List<ProductView>> = ResponseEntity.ok(productProjection.findAll())
 
     override fun downloadFromWix(): ResponseEntity<Unit> {
         wixSyncService.syncWixProducts()
@@ -73,7 +70,6 @@ class ProductController(
     }
 
     override fun uploadToWix(productId: String): ResponseEntity<Unit> {
-
         wixSyncService.uploadProduct(productId)
         return ResponseEntity.ok().build()
     }
@@ -95,6 +91,8 @@ class ProductController(
             commandGateway.sendAndWait<Any>(command)
 
             waitForUpdateOf(subscriptionQuery)
+
+            wixSyncService.uploadProduct(productId)
 
             return ResponseEntity.ok().build()
         } finally {
@@ -236,5 +234,19 @@ class ProductController(
         buyable = updateProductRequest.buyable ?: true,
         buyerCanCancel = updateProductRequest.buyerCanCancel ?: true,
         perks = updateProductRequest.perks,
+        linkedPlatforms = updateProductRequest.linkedPlatforms?.map { 
+            LinkedPlatformSync(
+                platformName = it.platformName,
+                idOnPlatform = it.idOnPlatform,
+                revision = it.revision,
+                visibilityOnPlatform = it.visibilityOnPlatform?.let { visibility ->
+                    PlatformVisibility.valueOf(visibility.name)
+                },
+                isSynced = it.isSynced,
+                isSourceOfTruth = it.isSourceOfTruth == true,
+                lastSyncedAt = it.lastSyncedAt?.toInstant(),
+                syncError = it.syncError,
+            )
+        } ?: emptyList(),
     )
 }

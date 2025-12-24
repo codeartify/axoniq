@@ -63,17 +63,18 @@ class WixClient(
         set("Content-Type", "application/json")
     }
 
-    fun uploadPricingPlanToWix(product: ProductVariantEntity) {
+    fun uploadPricingPlanToWix(product: ProductVariantEntity): WixPlan? {
         if (wixToken.isBlank() || wixSiteId.isBlank()) {
             logger.warn("Wix credentials not configured. Skipping Wix upload.")
-            return
+            return null
         }
 
         try {
             val wixPlan = mapProductToWixPlan(product)
             val response = sendCreatePlanRequest(wixPlan)
 
-            logger.info("Successfully uploaded pricing plan to Wix: ${response.body?.id}")
+            logger.info("Successfully uploaded pricing plan to Wix: ${response.body?.plan?.id}")
+            return response.body?.plan
         } catch (e: Exception) {
             logger.error("Failed to upload pricing plan to Wix: ${e.message}", e)
             throw WixSyncException("Failed to upload pricing plan to Wix", e)
@@ -190,7 +191,7 @@ class WixClient(
         }
     }
 
-    private fun sendCreatePlanRequest(wixPlan: WixPlan): ResponseEntity<WixPlan> {
+    private fun sendCreatePlanRequest(wixPlan: WixPlan): ResponseEntity<WixCreatePlanResponse?> {
         val headers = wixHeaders().apply {
             set("Content-Type", "application/json")
         }
@@ -198,14 +199,13 @@ class WixClient(
         val body = mapOf("plan" to wixPlan)
         val requestEntity = HttpEntity(body, headers)
 
-        // Using the configured wixApiUrl for creating plans
-        val createPlanUrl = wixApiUrl.replace("/query", "")  // Adjust endpoint as needed
+        val createPlanUrl = wixApiUrl.replace("/query", "")
 
         return restTemplate.exchange(
             createPlanUrl,
             HttpMethod.POST,
             requestEntity,
-            WixPlan::class.java
+            WixCreatePlanResponse::class.java
         )
     }
 }

@@ -56,7 +56,7 @@ class ProductVariantEntity(
     val perks: List<String>? = null,
     @Column(name = "linked_platforms", columnDefinition = "TEXT")
     @Convert(converter = LinkedPlatformsConverter::class)
-    val linkedPlatforms: List<LinkedPlatformSync>? = null,
+    var linkedPlatforms: List<LinkedPlatformSync>? = null,
 )
 
 @Converter
