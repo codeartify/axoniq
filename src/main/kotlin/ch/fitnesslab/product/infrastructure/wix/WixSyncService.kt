@@ -120,27 +120,28 @@ class WixSyncService(
                                     hasLocalChanges = false, // Reset after successful upload
                                     hasIncomingChanges = false, // Reset after successful upload
                                     localHash = null,
-                                    remoteHash = computeWixPlanHash(
-                                        WixPlan(
-                                            id = wixResponse?.id,
-                                            revision = wixResponse?.revision,
-                                            name = wixResponse?.name,
-                                            slug = wixResponse?.slug,
-                                            description = wixResponse?.description,
-                                            visibility = wixResponse?.visibility,
-                                            buyable = wixResponse?.buyable,
-                                            buyerCanCancel = wixResponse?.buyerCanCancel,
-                                            maxPurchasesPerBuyer = wixResponse?.maxPurchasesPerBuyer,
-                                            perks = wixResponse?.perks ?: emptyList(),
-                                            pricingVariants = wixResponse?.pricingVariants ?: emptyList(),
-                                            createdDate = wixResponse?.createdDate,
-                                            updatedDate = wixResponse?.updatedDate,
-                                            status = wixResponse?.status,
-                                            archived = wixResponse?.archived,
-                                            primary = wixResponse?.primary,
-                                            currency = wixResponse?.currency
-                                        )
-                                    ),
+                                    remoteHash =
+                                        computeWixPlanHash(
+                                            WixPlan(
+                                                id = wixResponse?.id,
+                                                revision = wixResponse?.revision,
+                                                name = wixResponse?.name,
+                                                slug = wixResponse?.slug,
+                                                description = wixResponse?.description,
+                                                visibility = wixResponse?.visibility,
+                                                buyable = wixResponse?.buyable,
+                                                buyerCanCancel = wixResponse?.buyerCanCancel,
+                                                maxPurchasesPerBuyer = wixResponse?.maxPurchasesPerBuyer,
+                                                perks = wixResponse?.perks ?: emptyList(),
+                                                pricingVariants = wixResponse?.pricingVariants ?: emptyList(),
+                                                createdDate = wixResponse?.createdDate,
+                                                updatedDate = wixResponse?.updatedDate,
+                                                status = wixResponse?.status,
+                                                archived = wixResponse?.archived,
+                                                primary = wixResponse?.primary,
+                                                currency = wixResponse?.currency,
+                                            ),
+                                        ),
                                 ),
                             )
                         }
@@ -504,25 +505,32 @@ class WixSyncService(
             .trim('-')
 
     private fun computeWixPlanHash(wixPlan: WixPlan): String {
-        val data = buildString {
-            append(wixPlan.slug ?: "")
-            append(wixPlan.name ?: "")
-            append(wixPlan.description ?: "")
-            append(wixPlan.visibility ?: "")
-            append(wixPlan.buyable ?: false)
-            append(wixPlan.buyerCanCancel ?: false)
-            append(wixPlan.maxPurchasesPerBuyer ?: "")
-            append(wixPlan.perks.mapNotNull { it.description }.joinToString(","))
-            val pricingVariant = wixPlan.pricingVariants.firstOrNull()
-            if (pricingVariant != null) {
-                append(pricingVariant.billingTerms?.endType ?: "")
-                append(pricingVariant.billingTerms?.billingCycle?.period ?: "")
-                append(pricingVariant.billingTerms?.billingCycle?.count ?: "")
-                append(pricingVariant.freeTrialDays ?: "")
-                append(pricingVariant.pricingStrategies.firstOrNull()?.flatRate?.amount ?: "")
+        val data =
+            buildString {
+                append(wixPlan.slug ?: "")
+                append(wixPlan.name ?: "")
+                append(wixPlan.description ?: "")
+                append(wixPlan.visibility ?: "")
+                append(wixPlan.buyable ?: false)
+                append(wixPlan.buyerCanCancel ?: false)
+                append(wixPlan.maxPurchasesPerBuyer ?: "")
+                append(wixPlan.perks.mapNotNull { it.description }.joinToString(","))
+                val pricingVariant = wixPlan.pricingVariants.firstOrNull()
+                if (pricingVariant != null) {
+                    append(pricingVariant.billingTerms?.endType ?: "")
+                    append(pricingVariant.billingTerms?.billingCycle?.period ?: "")
+                    append(pricingVariant.billingTerms?.billingCycle?.count ?: "")
+                    append(pricingVariant.freeTrialDays ?: "")
+                    append(
+                        pricingVariant.pricingStrategies
+                            .firstOrNull()
+                            ?.flatRate
+                            ?.amount ?: "",
+                    )
+                }
             }
-        }
-        return MessageDigest.getInstance("SHA-256")
+        return MessageDigest
+            .getInstance("SHA-256")
             .digest(data.toByteArray())
             .joinToString("") { "%02x".format(it) }
     }

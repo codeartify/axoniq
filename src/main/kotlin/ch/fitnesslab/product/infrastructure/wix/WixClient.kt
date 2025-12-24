@@ -23,11 +23,14 @@ class WixClient(
 ) {
     private val logger = LoggerFactory.getLogger(WixClient::class.java)
 
-    private val restTemplate: RestTemplate = RestTemplate().apply {
-        requestFactory = org.springframework.http.client.HttpComponentsClientHttpRequestFactory(
-            org.apache.hc.client5.http.impl.classic.HttpClients.createDefault()
-        )
-    }
+    private val restTemplate: RestTemplate =
+        RestTemplate().apply {
+            requestFactory =
+                org.springframework.http.client.HttpComponentsClientHttpRequestFactory(
+                    org.apache.hc.client5.http.impl.classic.HttpClients
+                        .createDefault(),
+                )
+        }
 
     fun fetchPricingPlans(): List<WixPlan> {
         if (wixToken.isBlank() || wixSiteId.isBlank()) {
@@ -222,7 +225,11 @@ class WixClient(
         )
     }
 
-    fun updatePricingPlanOnWix(product: ProductVariantEntity, wixPlanId: String, revision: String?): WixPlan? {
+    fun updatePricingPlanOnWix(
+        product: ProductVariantEntity,
+        wixPlanId: String,
+        revision: String?,
+    ): WixPlan? {
         if (wixToken.isBlank() || wixSiteId.isBlank()) {
             logger.warn("Wix credentials not configured. Skipping Wix update.")
             return null
@@ -232,11 +239,15 @@ class WixClient(
             // First fetch the existing plan to get perk IDs and other Wix-managed fields
             logger.info("Fetching existing Wix plan: $wixPlanId")
             val existingPlan = fetchPlanById(wixPlanId)
-            logger.info("Existing plan fetched. Perks: ${existingPlan?.perks?.size}, Variant ID: ${existingPlan?.pricingVariants?.firstOrNull()?.id}")
+            logger.info(
+                "Existing plan fetched. Perks: ${existingPlan?.perks?.size}, Variant ID: ${existingPlan?.pricingVariants?.firstOrNull()?.id}",
+            )
 
             // Map local product to Wix plan structure
             val updatedPlan = mapProductToWixPlanForUpdate(product, existingPlan)
-            logger.info("Mapped updated plan. Perks: ${updatedPlan.perks.size}, Variant ID: ${updatedPlan.pricingVariants.firstOrNull()?.id}")
+            logger.info(
+                "Mapped updated plan. Perks: ${updatedPlan.perks.size}, Variant ID: ${updatedPlan.pricingVariants.firstOrNull()?.id}",
+            )
 
             val response = sendUpdatePlanRequest(updatedPlan, wixPlanId)
 
@@ -253,33 +264,39 @@ class WixClient(
         val headers = wixHeaders()
         val requestEntity = HttpEntity<Void>(headers)
 
-        val response = restTemplate.exchange(
-            url,
-            HttpMethod.GET,
-            requestEntity,
-            WixPlanResponse::class.java
-        )
+        val response =
+            restTemplate.exchange(
+                url,
+                HttpMethod.GET,
+                requestEntity,
+                WixPlanResponse::class.java,
+            )
 
         return response.body?.plan
     }
 
-    private fun mapProductToWixPlanForUpdate(product: ProductVariantEntity, existingPlan: WixPlan?): WixPlan {
+    private fun mapProductToWixPlanForUpdate(
+        product: ProductVariantEntity,
+        existingPlan: WixPlan?,
+    ): WixPlan {
         // Preserve existing pricing variant ID
         val existingVariantId = existingPlan?.pricingVariants?.firstOrNull()?.id
-        val pricingVariant = mapProductToPricingVariant(product).copy(
-            id = existingVariantId
-        )
+        val pricingVariant =
+            mapProductToPricingVariant(product).copy(
+                id = existingVariantId,
+            )
 
         // Preserve existing perk IDs or generate new ones for new perks
         val existingPerks = existingPlan?.perks ?: emptyList()
-        val wixPerks = product.perks?.mapIndexed { index, perkDescription ->
-            // Try to reuse existing perk ID if available, otherwise create new UUID
-            val existingPerk = existingPerks.getOrNull(index)
-            WixPerk(
-                id = existingPerk?.id ?: UUID.randomUUID().toString(),
-                description = perkDescription,
-            )
-        } ?: emptyList()
+        val wixPerks =
+            product.perks?.mapIndexed { index, perkDescription ->
+                // Try to reuse existing perk ID if available, otherwise create new UUID
+                val existingPerk = existingPerks.getOrNull(index)
+                WixPerk(
+                    id = existingPerk?.id ?: UUID.randomUUID().toString(),
+                    description = perkDescription,
+                )
+            } ?: emptyList()
 
         return WixPlan(
             id = existingPlan?.id,
@@ -302,7 +319,10 @@ class WixClient(
         )
     }
 
-    private fun sendUpdatePlanRequest(wixPlan: WixPlan, planId: String): ResponseEntity<WixCreatePlanResponse?> {
+    private fun sendUpdatePlanRequest(
+        wixPlan: WixPlan,
+        planId: String,
+    ): ResponseEntity<WixCreatePlanResponse?> {
         val headers =
             wixHeaders().apply {
                 set("Content-Type", "application/json")
@@ -315,7 +335,9 @@ class WixClient(
 
         // Log the full request payload for debugging
         try {
-            val objectMapper = com.fasterxml.jackson.databind.ObjectMapper()
+            val objectMapper =
+                com.fasterxml.jackson.databind
+                    .ObjectMapper()
             objectMapper.findAndRegisterModules()
             val jsonPayload = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(body)
             logger.info("PATCH request to $updatePlanUrl with payload:\n$jsonPayload")
