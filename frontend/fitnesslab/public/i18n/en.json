@@ -32,7 +32,6 @@
   "button.markOverdue": "Mark Overdue",
   "button.confirmCancel": "Confirm Cancel",
   "button.assigning": "Assigning...",
-  "button.downloadFromWix": "⤓ from Wix",
 
   "nav.customers": "Customers",
   "nav.products": "Products",
@@ -189,5 +188,9 @@
   "error.goBack": "Go back",
   "error.toDashboard": "Go to dashboard",
   "error.tip": "Tip: if this keeps happening, refresh the page or sign in again.",
-  "error.errorPage": "Error page"
+  "error.errorPage": "Error page",
+
+  "nav.dashboard": "Dashboard",
+  "dashboard.commonUseCases": "Common Use Cases"
+
 }

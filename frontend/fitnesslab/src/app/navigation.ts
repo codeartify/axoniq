@@ -16,6 +16,7 @@ import {NavigationLink, NavigationLinkConfiguration} from './navigation-link';
 })
 export class Navigation {
   navigationLinkConfigs = signal<NavigationLinkConfiguration[]>([
+    {label: 'nav.dashboard', route: '/dashboard'},
     {label: 'nav.customers', route: '/customers'},
     {label: 'nav.products', route: '/products'},
     {label: 'nav.invoices', route: '/invoices'},

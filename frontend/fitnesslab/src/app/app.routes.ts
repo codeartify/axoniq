@@ -14,6 +14,7 @@ import {InvoiceList} from './invoices/invoice-list';
 import {Products} from './products/products';
 import {catchError, of, timeout} from 'rxjs';
 import {Error} from './error';
+import {Dashboard} from './dashboard/dashboard';
 
 
 export const resolveAllCustomers: ResolveFn<CustomerView[]> = () => inject(CustomersService).getAllCustomers()
@@ -49,13 +50,13 @@ export const routes: Routes = [
     path: 'customers/new',
     component: CustomerCreate,
     canActivate: [authGuard],
-    data: {roles: ['customers.write']} // create requires write
+    data: {roles: ['customers.write']}
   },
   {
     path: 'customers/:id',
     component: CustomerDetail,
     canActivate: [authGuard],
-    data: {roles: ['customers.read']} // detail view; use button-level checks for edit
+    data: {roles: ['customers.read']}
   },
 
   // ----------------------
@@ -92,9 +93,20 @@ export const routes: Routes = [
     canActivate: [authGuard],
     data: {roles: ['invoices.read']},
   },
+
+  // ----------------------
+  //   DASHBOARD
+  // ----------------------
+  {
+    path: 'dashboard',
+    component: Dashboard,
+    canActivate: [authGuard],
+    data: {roles: []}
+  },
+
   {path: 'not-found', component: NotFound},
   {path: 'error', component: Error},
-  {path: '', redirectTo: '/customers', pathMatch: 'full'},
+  {path: '', redirectTo: '/dashboard', pathMatch: 'full'},
   {path: '**', redirectTo: '/not-found'}
 
 ];

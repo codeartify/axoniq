@@ -32,7 +32,6 @@
   "button.markOverdue": "Als überfällig markieren",
   "button.confirmCancel": "Stornierung bestätigen",
   "button.assigning": "Wird zugewiesen...",
-  "button.downloadFromWix": "⤓ von Wix",
 
   "nav.customers": "Kunden",
   "nav.products": "Produkte",
@@ -187,5 +186,10 @@
   "error.goBack": "Zurück",
   "error.toDashboard": "Zum Dashboard",
   "error.tip": "Tipp: Wenn dies weiterhin passiert, laden Sie die Seite neu oder melden Sie sich erneut an.",
-  "error.errorPage": "Fehlerseite"
+  "error.errorPage": "Fehlerseite",
+
+  "nav.dashboard": "Dashboard",
+  "dashboard.commonUseCases": "Häufige Business Cases"
+
+
 }
