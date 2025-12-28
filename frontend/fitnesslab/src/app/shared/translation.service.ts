@@ -3,7 +3,7 @@ import {inject, Injectable} from '@angular/core';
 import {TranslateService} from '@ngx-translate/core';
 import {Location} from '@angular/common';
 
-export type Language = { code: string; label: string };
+export interface Language { code: string; label: string }
 
 @Injectable({
   providedIn: 'root'

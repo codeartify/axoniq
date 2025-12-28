@@ -1,10 +1,10 @@
 import {Component, computed, input, output} from '@angular/core';
 
-type UserProfileButton = {
+interface UserProfileButton {
   picture?: string;
   firstName?: string;
   lastName?: string;
-};
+}
 
 @Component({
   selector: 'gym-user-profile-image-button',

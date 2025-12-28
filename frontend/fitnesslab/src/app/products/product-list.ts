@@ -108,19 +108,19 @@ export class ProductList {
     },
     {
       labelKey: 'products.checkForWixUpdates',
-      onClick: (product) => this.checkForWixUpdates(product.productId!!),
+      onClick: (product) => this.checkForWixUpdates(product.productId!),
       isDisabled: (product) => !this.isLinkedWithWix(product),
       stopPropagation: true,
     },
     {
       labelKey: 'products.downloadFromWix',
-      onClick: (product) => this.downloadProductFromWix(product.productId!!),
+      onClick: (product) => this.downloadProductFromWix(product.productId!),
       isDisabled: (product) => !this.hasIncomingWixChanges(product),
       stopPropagation: true,
     },
     {
       labelKey: 'products.uploadToWix',
-      onClick: (product) => this.uploadToWix(product.productId!!),
+      onClick: (product) => this.uploadToWix(product.productId!),
       isDisabled: (product) => !this.hasLocalChanges(product) || this.hasIncomingWixChanges(product),
       stopPropagation: true,
     }
