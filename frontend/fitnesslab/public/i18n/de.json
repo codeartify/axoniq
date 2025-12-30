@@ -188,8 +188,8 @@
   "error.tip": "Tipp: Wenn dies weiterhin passiert, laden Sie die Seite neu oder melden Sie sich erneut an.",
   "error.errorPage": "Fehlerseite",
 
-  "nav.dashboard": "Dashboard",
-  "dashboard.commonUseCases": "Häufige Business Cases"
-
+  "nav.dashboard": "Übersicht",
+  "dashboard.commonUseCases": "Häufige Business Cases",
+  "dashboard.title": "Übersicht"
 
 }

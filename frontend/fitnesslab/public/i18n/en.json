@@ -191,6 +191,6 @@
   "error.errorPage": "Error page",
 
   "nav.dashboard": "Dashboard",
-  "dashboard.commonUseCases": "Common Use Cases"
-
+  "dashboard.commonUseCases": "Common Use Cases",
+  "dashboard.title": "Dashboard"
 }

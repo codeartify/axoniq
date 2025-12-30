@@ -35,7 +35,7 @@ export class CommonUseCases {
   private router = inject(Router);
 
   commonUseCases = signal<UseCaseTile[]>([
-    {title: 'Create new subscription', route: '/subscriptions/new'},
+    {title: 'commonUseCases.newMembership', route: '/membership/new'},
     {title: 'Add new customer', route: '/customers/new'},
     {title: 'View invoices', route: '/invoices'}
   ]);

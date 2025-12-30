@@ -29,8 +29,6 @@ export const resolveAllProducts: ResolveFn<ProductView[] | RedirectCommand> = ()
 };
 
 export const routes: Routes = [
-  {path: 'login', component: Login, data: {companyName: 'Fitness Management System'}},
-  {path: 'unauthorized', component: Login},
 
   // ----------------------
   //   CUSTOMERS
@@ -106,6 +104,8 @@ export const routes: Routes = [
 
   {path: 'not-found', component: NotFound},
   {path: 'error', component: Error},
+  {path: 'login', component: Login, data: {companyName: 'Fitness Management System'}},
+  {path: 'unauthorized', component: Login},
   {path: '', redirectTo: '/dashboard', pathMatch: 'full'},
   {path: '**', redirectTo: '/not-found'}
 
