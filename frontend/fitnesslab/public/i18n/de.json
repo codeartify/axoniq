@@ -189,7 +189,8 @@
   "error.errorPage": "Fehlerseite",
 
   "nav.dashboard": "Übersicht",
-  "dashboard.commonUseCases": "Häufige Business Cases",
+  "dashboard.commonUseCases": "Häufige Anwendungsfälle",
+  "dashboard.commonUseCases.createMembership": "Mitgliedschaft erstellen",
   "dashboard.title": "Übersicht"
 
 }
