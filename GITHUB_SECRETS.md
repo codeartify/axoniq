@@ -28,18 +28,18 @@ Add these secrets to your GitHub repository at Settings → Secrets and variable
 
 ## Frontend Configuration
 - `FRONTEND_PORT` - Frontend application port (e.g., `9002` for reverse proxy)
-- `API_URL` - Backend API URL with /api prefix (e.g., `https://oliverzihler.ch/api`)
+- `API_URL` - Backend API URL (e.g., `https://api.oliverzihler.ch`)
 - `AUTH_ISSUER` - Keycloak/OAuth issuer URL (e.g., `https://auth.oliverzihler.ch/realms/fitnesslab`)
 - `AUTH_CLIENT_ID` - OAuth client ID (e.g., `fitnesslab-app`)
 
 ## Reverse Proxy Setup
 
-The application is designed to work behind a reverse proxy:
+The application is designed to work behind a reverse proxy with subdomain routing:
 - Frontend: `https://oliverzihler.ch` → `localhost:9002`
-- Backend API: `https://oliverzihler.ch/api` → `localhost:9001`
+- Backend API: `https://api.oliverzihler.ch` → `localhost:9001`
 
-The backend serves all endpoints under `/api` context path (configured via `SERVER_CONTEXT_PATH`).
 CORS is configured to allow requests from `https://oliverzihler.ch`.
+CSP allows connections to `https://api.oliverzihler.ch` and `https://auth.oliverzihler.ch`.
 
 ## How It Works
 
