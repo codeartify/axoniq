@@ -38,9 +38,9 @@
     "tslib": "^2.3.0"
   },
   "devDependencies": {
-    "@angular/build": "^21.0.0",
-    "@angular/cli": "^21.0.0",
-    "@angular/compiler-cli": "^21.0.0",
+    "@angular/build": "^21.0.2",
+    "@angular/cli": "^21.0.2",
+    "@angular/compiler-cli": "21.0.2",
     "@openapitools/openapi-generator-cli": "^2.25.2",
     "@tailwindcss/postcss": "^4.1.12",
     "angular-eslint": "21.0.1",
