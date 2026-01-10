@@ -124,57 +124,36 @@ jobs:
       - name: Install sshpass
         run: sudo apt-get update && sudo apt-get install -y sshpass
 
-      - name: Copy docker-compose files to server
+      - name: Copy docker-compose file to server
         run: |
-          # Copy docker-compose.backend.yml
-          cat docker-compose.backend.yml | sshpass -p "${{ secrets.SSH_PASS }}" ssh -o StrictHostKeyChecking=no -p ${{ secrets.SSH_PORT }} \
-            ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "cat > ${{ secrets.DEPLOY_PATH }}/docker-compose.backend.yml"
+          cat docker-compose.prod.yml | sshpass -p "${{ secrets.SSH_PASS }}" ssh -o StrictHostKeyChecking=no -p ${{ secrets.SSH_PORT }} \
+            ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "cat > ${{ secrets.DEPLOY_PATH }}/docker-compose.yml"
 
-          # Copy docker-compose.frontend.yml
-          cat docker-compose.frontend.yml | sshpass -p "${{ secrets.SSH_PASS }}" ssh -o StrictHostKeyChecking=no -p ${{ secrets.SSH_PORT }} \
-            ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "cat > ${{ secrets.DEPLOY_PATH }}/docker-compose.frontend.yml"
-
-      - name: Deploy backend with docker-compose
+      - name: Deploy with docker-compose
         run: |
           sshpass -p "${{ secrets.SSH_PASS }}" ssh -o StrictHostKeyChecking=no -p ${{ secrets.SSH_PORT }} \
             ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
               cd ${{ secrets.DEPLOY_PATH }}
 
-              # Export environment variables for docker-compose
+              # Export all environment variables for docker-compose
               export DOCKER_BACKEND_IMAGE_NAME=${{ secrets.DOCKER_BACKEND_IMAGE_NAME }}:latest
+              export DOCKER_FRONTEND_IMAGE_NAME=${{ secrets.DOCKER_FRONTEND_IMAGE_NAME }}:latest
               export POSTGRES_USER=${{ secrets.POSTGRES_USER }}
               export POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
               export POSTGRES_DB=${{ secrets.POSTGRES_DB }}
               export POSTGRES_PORT=${{ secrets.POSTGRES_PORT }}
               export BACKEND_PORT=${{ secrets.BACKEND_PORT }}
+              export FRONTEND_PORT=${{ secrets.FRONTEND_PORT }}
               export MAIL_PASSWORD=${{ secrets.MAIL_PASSWORD }}
               export MAILHOG_SMTP_PORT=${{ secrets.MAILHOG_SMTP_PORT }}
               export MAILHOG_WEB_PORT=${{ secrets.MAILHOG_WEB_PORT }}
-
-              # Pull latest images and deploy backend stack
-              ${{ secrets.DOCKER_PATH_ON_SERVER }}docker-compose -f docker-compose.backend.yml pull
-              ${{ secrets.DOCKER_PATH_ON_SERVER }}docker-compose -f docker-compose.backend.yml up -d
-
-              # Clean up dangling images
-              ${{ secrets.DOCKER_PATH_ON_SERVER }}docker image prune -f
-          EOF
-
-      - name: Deploy frontend with docker-compose
-        run: |
-          sshpass -p "${{ secrets.SSH_PASS }}" ssh -o StrictHostKeyChecking=no -p ${{ secrets.SSH_PORT }} \
-            ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
-              cd ${{ secrets.DEPLOY_PATH }}
-
-              # Export environment variables for docker-compose
-              export DOCKER_FRONTEND_IMAGE_NAME=${{ secrets.DOCKER_FRONTEND_IMAGE_NAME }}:latest
-              export FRONTEND_PORT=${{ secrets.FRONTEND_PORT }}
               export API_URL=${{ secrets.API_URL }}
               export AUTH_ISSUER=${{ secrets.AUTH_ISSUER }}
               export AUTH_CLIENT_ID=${{ secrets.AUTH_CLIENT_ID }}
 
-              # Pull latest images and deploy frontend
-              ${{ secrets.DOCKER_PATH_ON_SERVER }}docker-compose -f docker-compose.frontend.yml pull
-              ${{ secrets.DOCKER_PATH_ON_SERVER }}docker-compose -f docker-compose.frontend.yml up -d
+              # Pull latest images and deploy entire stack
+              ${{ secrets.DOCKER_PATH_ON_SERVER }}docker-compose pull
+              ${{ secrets.DOCKER_PATH_ON_SERVER }}docker-compose up -d
 
               # Clean up dangling images
               ${{ secrets.DOCKER_PATH_ON_SERVER }}docker image prune -f

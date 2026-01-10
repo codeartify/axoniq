@@ -1,0 +1,74 @@
+services:
+  postgres:
+    image: postgres:18
+    container_name: fitnesslab-postgres
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-test}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-test}
+      POSTGRES_DB: ${POSTGRES_DB:-fitnesslab}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-test} -d ${POSTGRES_DB:-fitnesslab}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - fitnesslab-network
+
+  mailhog:
+    image: mailhog/mailhog:v1.0.1
+    container_name: fitnesslab-mailhog
+    restart: unless-stopped
+    ports:
+      - "${MAILHOG_SMTP_PORT:-1025}:1025"
+      - "${MAILHOG_WEB_PORT:-8025}:8025"
+    networks:
+      - fitnesslab-network
+
+  backend:
+    image: ${DOCKER_BACKEND_IMAGE_NAME}
+    container_name: fitnesslab-backend
+    restart: unless-stopped
+    ports:
+      - "${BACKEND_PORT:-8080}:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-fitnesslab}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-test}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-test}
+      SPRING_MAIL_HOST: mailhog
+      SPRING_MAIL_PORT: 1025
+      SPRING_MAIL_PASSWORD: ${MAIL_PASSWORD:-}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mailhog:
+        condition: service_started
+    networks:
+      - fitnesslab-network
+
+  frontend:
+    image: ${DOCKER_FRONTEND_IMAGE_NAME}
+    container_name: fitnesslab-frontend
+    restart: unless-stopped
+    ports:
+      - "${FRONTEND_PORT:-8081}:80"
+    environment:
+      API_URL: ${API_URL:-http://localhost:8080}
+      AUTH_ISSUER: ${AUTH_ISSUER:-https://auth.oliverzihler.ch/realms/fitnesslab}
+      AUTH_CLIENT_ID: ${AUTH_CLIENT_ID:-fitnesslab-app}
+    depends_on:
+      - backend
+    networks:
+      - fitnesslab-network
+
+volumes:
+  postgres_data:
+
+networks:
+  fitnesslab-network:
+    name: fitnesslab-network
+    driver: bridge
