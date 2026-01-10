@@ -126,9 +126,13 @@ jobs:
 
       - name: Copy docker-compose files to server
         run: |
-          sshpass -p "${{ secrets.SSH_PASS }}" scp -o StrictHostKeyChecking=no -P ${{ secrets.SSH_PORT }} \
-            docker-compose.backend.yml docker-compose.frontend.yml \
-            ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:${{ secrets.DEPLOY_PATH }}/
+          # Copy docker-compose.backend.yml
+          cat docker-compose.backend.yml | sshpass -p "${{ secrets.SSH_PASS }}" ssh -o StrictHostKeyChecking=no -p ${{ secrets.SSH_PORT }} \
+            ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "cat > ${{ secrets.DEPLOY_PATH }}/docker-compose.backend.yml"
+
+          # Copy docker-compose.frontend.yml
+          cat docker-compose.frontend.yml | sshpass -p "${{ secrets.SSH_PASS }}" ssh -o StrictHostKeyChecking=no -p ${{ secrets.SSH_PORT }} \
+            ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "cat > ${{ secrets.DEPLOY_PATH }}/docker-compose.frontend.yml"
 
       - name: Deploy backend with docker-compose
         run: |
