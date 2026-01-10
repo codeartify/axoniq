@@ -56,3 +56,4 @@ volumes:
 networks:
   fitnesslab-network:
     name: fitnesslab-network
+    driver: bridge

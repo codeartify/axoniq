@@ -4,6 +4,7 @@ import {HttpClient} from '@angular/common/http';
 import {AuthConfig, OAuthService} from 'angular-oauth2-oidc';
 import {BehaviorSubject, firstValueFrom, Observable} from 'rxjs';
 import {toSignal} from '@angular/core/rxjs-interop';
+import {environment} from '../../environments/environment';
 
 export interface UserProfile {
   username: string;
@@ -33,9 +34,9 @@ interface TokenResponse {
 }
 
 const authConfig: AuthConfig = {
-  issuer: 'https://auth.oliverzihler.ch/realms/fitnesslab',
+  issuer: environment.authIssuer,
   redirectUri: window.location.origin + '/login',
-  clientId: 'fitnesslab-app',
+  clientId: environment.authClientId,
   scope: 'openid profile email',
   responseType: 'code',
   showDebugInformation: false,
@@ -51,7 +52,7 @@ const authConfig: AuthConfig = {
 class AuthService {
   private userProfileSubject = new BehaviorSubject<UserProfile | null>(null);
   public userProfile$: Observable<UserProfile | null> = this.userProfileSubject.asObservable();
-  private tokenEndpoint = 'https://auth.oliverzihler.ch/realms/fitnesslab/protocol/openid-connect/token';
+  private tokenEndpoint = `${environment.authIssuer}/protocol/openid-connect/token`;
 
   isLoggedIn = toSignal((this.userProfile$));
 

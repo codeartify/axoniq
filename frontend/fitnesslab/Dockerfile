@@ -24,8 +24,12 @@ COPY --from=build /app/dist/fitnesslab/browser /usr/share/nginx/html
 # Copy nginx configuration
 COPY nginx.conf /etc/nginx/nginx.conf
 
+# Copy environment configuration script
+COPY env-config.sh /docker-entrypoint.d/env-config.sh
+RUN chmod +x /docker-entrypoint.d/env-config.sh
+
 # Expose port 80
 EXPOSE 80
 
-# Start nginx
+# Start nginx (env-config.sh will run automatically via docker-entrypoint.d)
 CMD ["nginx", "-g", "daemon off;"]

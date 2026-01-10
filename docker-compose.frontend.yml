@@ -5,10 +5,15 @@ services:
     restart: unless-stopped
     ports:
       - "${FRONTEND_PORT:-8081}:80"
+    environment:
+      API_URL: ${API_URL:-http://localhost:8080}
+      AUTH_ISSUER: ${AUTH_ISSUER:-https://auth.oliverzihler.ch/realms/fitnesslab}
+      AUTH_CLIENT_ID: ${AUTH_CLIENT_ID:-fitnesslab-app}
     networks:
       - fitnesslab-network
 
 networks:
   fitnesslab-network:
     name: fitnesslab-network
+    driver: bridge
     external: true

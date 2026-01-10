@@ -160,6 +160,9 @@ jobs:
               # Export environment variables for docker-compose
               export DOCKER_FRONTEND_IMAGE_NAME=${{ secrets.DOCKER_FRONTEND_IMAGE_NAME }}:latest
               export FRONTEND_PORT=${{ secrets.FRONTEND_PORT }}
+              export API_URL=${{ secrets.API_URL }}
+              export AUTH_ISSUER=${{ secrets.AUTH_ISSUER }}
+              export AUTH_CLIENT_ID=${{ secrets.AUTH_CLIENT_ID }}
 
               # Pull latest images and deploy frontend
               ${{ secrets.DOCKER_PATH_ON_SERVER }}docker-compose -f docker-compose.frontend.yml pull
