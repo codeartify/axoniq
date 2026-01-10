@@ -1,3 +1,7 @@
+server:
+  servlet:
+    context-path: ${SERVER_CONTEXT_PATH:/api}
+
 spring:
   application:
     name: ${SPRING_APPLICATION_NAME:axoniq}
