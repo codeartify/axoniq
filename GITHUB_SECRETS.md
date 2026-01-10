@@ -26,6 +26,12 @@ Add these secrets to your GitHub repository at Settings → Secrets and variable
 - `MAILHOG_SMTP_PORT` - MailHog SMTP port (e.g., `1025`)
 - `MAILHOG_WEB_PORT` - MailHog web UI port (e.g., `8025`)
 
+## External API Configuration
+- `WIX_TOKEN` - Wix API authentication token
+- `WIX_SITE_ID` - Wix site ID
+- `BEXIO_API_TOKEN` - Bexio API authentication token
+- `BEXIO_OWNER_ID` - Bexio owner ID
+
 ## Frontend Configuration
 - `FRONTEND_PORT` - Frontend application port (e.g., `9002` for reverse proxy)
 - `API_URL` - Backend API URL (e.g., `https://api.oliverzihler.ch`)

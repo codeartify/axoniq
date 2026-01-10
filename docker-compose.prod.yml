@@ -42,6 +42,10 @@ services:
       SPRING_MAIL_HOST: mailhog
       SPRING_MAIL_PORT: 1025
       SPRING_MAIL_PASSWORD: ${MAIL_PASSWORD:-}
+      WIX_TOKEN: ${WIX_TOKEN}
+      WIX_SITE_ID: ${WIX_SITE_ID}
+      BEXIO_API_TOKEN: ${BEXIO_API_TOKEN}
+      BEXIO_OWNER_ID: ${BEXIO_OWNER_ID}
     depends_on:
       postgres:
         condition: service_healthy
