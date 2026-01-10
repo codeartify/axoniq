@@ -3,6 +3,9 @@ FROM node:22-alpine AS build
 
 WORKDIR /app
 
+# Install Java (required for openapi-generator-cli)
+RUN apk add --no-cache openjdk17-jre
+
 # Copy OpenAPI spec from backend (expecting context at repo root)
 COPY backend/src/main/resources/openapi.yaml /tmp/openapi.yaml
 
