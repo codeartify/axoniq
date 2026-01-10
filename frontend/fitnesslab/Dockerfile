@@ -28,10 +28,10 @@ FROM nginx:alpine
 COPY --from=build /app/dist/fitnesslab/browser /usr/share/nginx/html
 
 # Copy nginx configuration
-COPY nginx.conf /etc/nginx/nginx.conf
+COPY frontend/fitnesslab/nginx.conf /etc/nginx/nginx.conf
 
 # Copy environment configuration script
-COPY env-config.sh /docker-entrypoint.d/env-config.sh
+COPY frontend/fitnesslab/env-config.sh /docker-entrypoint.d/env-config.sh
 RUN chmod +x /docker-entrypoint.d/env-config.sh
 
 # Expose port 80
