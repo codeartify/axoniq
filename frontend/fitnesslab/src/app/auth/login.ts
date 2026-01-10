@@ -88,7 +88,7 @@ export class Login implements OnInit {
   ngOnInit(): void {
     // If already authenticated, redirect
     if (this.authService.isAuthenticated()) {
-      this.router.navigate(['/customers']);
+      this.router.navigate(['/dashboard']);
     }
   }
 
@@ -103,7 +103,7 @@ export class Login implements OnInit {
 
     try {
       await this.authService.loginWithCredentials(this.username, this.password);
-      this.router.navigate(['/customers']);
+      this.router.navigate(['/dashboard']);
     } catch (error: unknown) {
       console.error(error);
       const err = error as { error?: { error_description?: string }; error_description?: string };
