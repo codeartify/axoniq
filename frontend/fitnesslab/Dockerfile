@@ -3,14 +3,20 @@ FROM node:22-alpine AS build
 
 WORKDIR /app
 
+# Copy OpenAPI spec from backend (expecting context at repo root)
+COPY backend/src/main/resources/openapi.yaml /tmp/openapi.yaml
+
 # Copy package files
-COPY package*.json ./
+COPY frontend/fitnesslab/package*.json ./
 
 # Install dependencies
 RUN npm install --legacy-peer-deps
 
-# Copy source code
-COPY . .
+# Copy frontend source code
+COPY frontend/fitnesslab/ .
+
+# Generate API client from OpenAPI spec
+RUN npm run generate-api:docker
 
 # Build the application
 RUN npm run build

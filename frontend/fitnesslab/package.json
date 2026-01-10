@@ -8,7 +8,8 @@
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "lint": "ng lint",
-    "generate-api": "openapi-generator-cli generate -i ../../src/main/resources/openapi.yaml -g typescript-angular -o src/app/generated-api --additional-properties=ngVersion=21.0.0,npmName=fitnesslab-api,supportsES6=true,withInterfaces=true"
+    "generate-api": "openapi-generator-cli generate -i ../../backend/src/main/resources/openapi.yaml -g typescript-angular -o src/app/generated-api --additional-properties=ngVersion=21.0.0,npmName=fitnesslab-api,supportsES6=true,withInterfaces=true",
+    "generate-api:docker": "openapi-generator-cli generate -i /tmp/openapi.yaml -g typescript-angular -o src/app/generated-api --additional-properties=ngVersion=21.0.0,npmName=fitnesslab-api,supportsES6=true,withInterfaces=true"
   },
   "prettier": {
     "printWidth": 100,
