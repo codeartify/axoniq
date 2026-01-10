@@ -1,0 +1,14 @@
+services:
+  frontend:
+    image: ${DOCKER_FRONTEND_IMAGE_NAME}
+    container_name: fitnesslab-frontend
+    restart: unless-stopped
+    ports:
+      - "${FRONTEND_PORT:-8081}:80"
+    networks:
+      - fitnesslab-network
+
+networks:
+  fitnesslab-network:
+    name: fitnesslab-network
+    external: true
