@@ -1,5 +1,5 @@
-<div class="p-5 max-w-4xl mx-auto">
-  <h2 class="text-3xl font-bold text-gray-800 mb-5">{{ 'product.create.title' | translate }}</h2>
+<div class="p-3 sm:p-5 max-w-4xl mx-auto">
+  <h2 class="text-2xl sm:text-3xl font-bold text-gray-800 mb-4 sm:mb-5">{{ 'product.create.title' | translate }}</h2>
 
   @if (errorMessage) {
     <div class="p-4 mb-4 bg-red-100 border border-red-400 text-red-700 rounded">
@@ -7,10 +7,10 @@
     </div>
   }
 
-  <form (ngSubmit)="onSubmit()" class="bg-white shadow-md rounded-lg p-6">
+  <form (ngSubmit)="onSubmit()" class="bg-white shadow-md rounded-lg p-4 sm:p-6">
     <!-- Basic Information Section -->
-    <div class="mb-6">
-      <h3 class="text-xl font-semibold text-gray-700 mb-4">{{ 'product.create.basicInformation' | translate }}</h3>
+    <div class="mb-5 sm:mb-6">
+      <h3 class="text-lg sm:text-xl font-semibold text-gray-700 mb-3 sm:mb-4">{{ 'product.create.basicInformation' | translate }}</h3>
 
       <div class="mb-4">
         <label for="slug" class="block text-sm font-medium text-gray-700 mb-1">{{ 'product.fields.slug' | translate }} *</label>

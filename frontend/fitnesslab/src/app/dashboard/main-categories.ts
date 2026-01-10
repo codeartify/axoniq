@@ -21,17 +21,16 @@ interface MainCategory {
     NgComponentOutlet
   ],
   template: `
-
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
       @for (category of mainCategories(); track category) {
         @if (category.canView()) {
           <div
-            class="bg-white rounded-lg shadow p-6 cursor-pointer hover:shadow-lg transition-shadow"
+            class="bg-white rounded-lg shadow p-5 sm:p-6 cursor-pointer hover:shadow-lg transition-shadow active:scale-95"
             (click)="navigateTo(category.route)">
-            <div class="flex items-center mb-4">
+            <div class="flex items-center mb-3 sm:mb-4">
               <ng-container [ngComponentOutlet]="category.iconComponent"/>
             </div>
-            <h2 class="text-xl font-semibold text-gray-900 mb-2">
+            <h2 class="text-lg sm:text-xl font-semibold text-gray-900 mb-2">
               {{ category.nameTranslationKey | translate }}
             </h2>
           </div>

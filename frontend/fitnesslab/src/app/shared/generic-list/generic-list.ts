@@ -29,17 +29,17 @@ export interface CollectionAction {
   standalone: true,
   imports: [CommonModule, FormsModule, TranslateModule],
   template: `
-    <div class="p-5 max-w-7xl mx-auto">
+    <div class="p-3 sm:p-5 max-w-7xl mx-auto">
       <!-- Header with title and collection actions -->
-      <div class="flex justify-between items-center mb-5">
-        <h2 class="text-3xl font-bold text-gray-800">{{ titleKey() | translate }}</h2>
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-5">
+        <h2 class="text-2xl sm:text-3xl font-bold text-gray-800">{{ titleKey() | translate }}</h2>
         @if (collectionActions().length > 0) {
-          <div class="flex gap-2">
+          <div class="flex gap-2 w-full sm:w-auto">
             @for (action of collectionActions(); track action.labelKey) {
               @if (action.show !== false) {
                 <button
                   (click)="action.onClick()"
-                  class="px-4 py-2 bg-blue-500 text-white rounded border-none cursor-pointer text-sm font-medium hover:bg-blue-600 transition-colors"
+                  class="flex-1 sm:flex-none px-4 py-2 bg-blue-500 text-white rounded border-none cursor-pointer text-sm font-medium hover:bg-blue-600 transition-colors"
                 >
                   {{ action.labelKey | translate }}
                 </button>
@@ -92,8 +92,8 @@ export interface CollectionAction {
             }
           </div>
         } @else {
-          <!-- Table -->
-          <div class="overflow-x-auto bg-white shadow-md rounded-lg" style="overflow: visible;">
+          <!-- Desktop Table View -->
+          <div class="hidden md:block overflow-x-auto bg-white shadow-md rounded-lg" style="overflow: visible;">
             <table class="w-full border-collapse" style="overflow: visible;">
               <thead class="bg-gray-100">
               <tr>
@@ -168,6 +168,60 @@ export interface CollectionAction {
                 }
               </tbody>
             </table>
+          </div>
+
+          <!-- Mobile Card View -->
+          <div class="md:hidden space-y-3">
+            @for (item of items(); track trackByFn()($index, item)) {
+              <div
+                [class.cursor-pointer]="onRowClick()"
+                (click)="onRowClick() ? handleRowClick(item) : null"
+                class="bg-white shadow rounded-lg p-4 hover:shadow-lg transition-shadow"
+              >
+                @for (column of columns(); track column.key) {
+                  <div class="flex justify-between items-start py-2 border-b border-gray-100 last:border-b-0">
+                    <span class="text-sm font-semibold text-gray-600 flex-shrink-0 mr-2">
+                      {{ column.headerKey | translate }}:
+                    </span>
+                    <span class="text-sm text-gray-900 text-right">
+                      @if (column.template) {
+                        <ng-container
+                          *ngTemplateOutlet="column.template; context: { $implicit: item }"></ng-container>
+                      } @else {
+                        {{ getCellValue(item, column) }}
+                      }
+                    </span>
+                  </div>
+                }
+                @if (rowActions().length > 0) {
+                  <div class="mt-3 pt-3 border-t border-gray-200">
+                    <div class="relative">
+                      <button
+                        (click)="toggleDropdown(trackByFn()($index, item), $event)"
+                        class="w-full px-4 py-2 bg-gray-100 text-gray-700 rounded hover:bg-gray-200 text-sm font-medium"
+                      >
+                        {{ 'common.actions' | translate }}
+                      </button>
+                      @if (isDropdownOpen(trackByFn()($index, item))) {
+                        <div
+                          class="absolute left-0 right-0 mt-2 bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden"
+                          style="z-index: 9999;">
+                          @for (action of rowActions(); track action.labelKey) {
+                            <button
+                              (click)="executeAction(action, item, $event)"
+                              [disabled]="action.isDisabled ? action.isDisabled(item) : false"
+                              class="w-full text-left px-4 py-2 text-sm bg-white border-b border-gray-200 last:border-b-0 disabled:text-gray-400 disabled:cursor-not-allowed disabled:bg-gray-50 enabled:text-gray-700 enabled:hover:bg-gray-100 enabled:cursor-pointer block"
+                            >
+                              {{ action.labelKey | translate }}
+                            </button>
+                          }
+                        </div>
+                      }
+                    </div>
+                  </div>
+                }
+              </div>
+            }
           </div>
         }
       }
