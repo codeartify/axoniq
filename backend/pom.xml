@@ -9,10 +9,10 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.codeartify</groupId>
-	<artifactId>axoniq</artifactId>
+	<artifactId>fms</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>axoniq</name>
-	<description>axoniq</description>
+	<name>Fitness Management System</name>
+	<description>Fitness Management System</description>
 	<url/>
 	<licenses>
 		<license/>

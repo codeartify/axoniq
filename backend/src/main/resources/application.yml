@@ -5,7 +5,7 @@ app:
 
 spring:
   application:
-    name: ${SPRING_APPLICATION_NAME:axoniq}
+    name: ${SPRING_APPLICATION_NAME:fms}
   profiles:
     active: ${SPRING_PROFILES_ACTIVE:dev}
   datasource:
