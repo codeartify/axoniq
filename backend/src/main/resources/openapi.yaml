@@ -271,6 +271,27 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/MembershipSignUpResultDto'
+  /api/product-contracts/customer/{customerId}:
+    get:
+      tags:
+      - Product Contracts
+      operationId: getContractsByCustomerId
+      summary: Get all product contracts for a customer
+      parameters:
+      - name: customerId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: List of contracts for the customer
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ProductContractDetailDto'
   /api/product-contracts/{contractId}:
     get:
       tags:

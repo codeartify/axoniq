@@ -7,7 +7,8 @@ import {Customers, CustomerView} from './customers';
 import {Products, ProductView} from '../products/products';
 import {Memberships, MembershipSignUpRequest} from '../memberships/memberships';
 import {Invoices, InvoiceView} from '../invoices/invoices';
-import {MembershipSignUpRequestDto} from '../generated-api/model/models';
+import {MembershipSignUpRequestDto, ProductContractDetailDto} from '../generated-api/model/models';
+import {ProductContractsService} from '../generated-api';
 
 @Component({
   selector: 'gym-customer-detail',
@@ -22,6 +23,7 @@ export class CustomerDetail implements OnInit {
   private productService = inject(Products);
   private membershipService = inject(Memberships);
   private invoiceService = inject(Invoices);
+  private contractService = inject(ProductContractsService);
   private fb = inject(FormBuilder);
 
   customer = signal<CustomerView | null>(null);
@@ -36,6 +38,8 @@ export class CustomerDetail implements OnInit {
   successMessage = signal<string | null>(null);
   invoices = signal<InvoiceView[]>([]);
   isLoadingInvoices = signal<boolean>(false);
+  contracts = signal<ProductContractDetailDto[]>([]);
+  isLoadingContracts = signal<boolean>(false);
 
   customerForm: FormGroup;
   salutations = ['MR', 'MS', 'MRS', 'MX', 'DR'];
@@ -73,12 +77,27 @@ export class CustomerDetail implements OnInit {
         this.populateForm(customer);
         this.isLoading.set(false);
         this.loadInvoices(customerId);
+        this.loadContracts(customerId);
       },
       error: (err) => {
         this.errorMessage.set(err.status === 404
           ? 'Customer not found'
           : 'Failed to load customer details');
         this.isLoading.set(false);
+      }
+    });
+  }
+
+  loadContracts(customerId: string): void {
+    this.isLoadingContracts.set(true);
+    this.contractService.getContractsByCustomerId(customerId).subscribe({
+      next: (contracts) => {
+        this.contracts.set(contracts);
+        this.isLoadingContracts.set(false);
+      },
+      error: (err) => {
+        console.error(err);
+        this.isLoadingContracts.set(false);
       }
     });
   }

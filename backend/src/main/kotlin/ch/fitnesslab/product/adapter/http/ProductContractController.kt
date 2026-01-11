@@ -30,6 +30,12 @@ class ProductContractController(
     private val commandGateway: CommandGateway,
     private val queryGateway: QueryGateway,
 ) : ProductContractsApi {
+    override fun getContractsByCustomerId(customerId: String): ResponseEntity<List<ProductContractDetailDto>> {
+        val contracts = productContractProjection.findByCustomerId(customerId)
+        val contractDtos = contracts.map { toDto(it) }
+        return ResponseEntity.ok(contractDtos)
+    }
+
     override fun getContractById(contractId: String): ResponseEntity<ProductContractDetailDto> {
         val productContractId = ProductContractId.from(contractId)
 

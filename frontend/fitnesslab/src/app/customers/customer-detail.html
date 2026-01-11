@@ -212,10 +212,126 @@
         </form>
       }
 
+      <!-- Product Contracts Section -->
+      @if (!isEditMode()) {
+        <div class="mb-6">
+          <h3 class="text-lg sm:text-xl font-semibold text-gray-700 mb-3 sm:mb-4">{{ 'customer.detail.contracts' | translate }}</h3>
+          @if (isLoadingContracts()) {
+            <div class="text-center py-5 text-gray-500">{{ 'customer.detail.loadingContracts' | translate }}</div>
+          }
+          @if (!isLoadingContracts() && contracts().length === 0) {
+            <p class="text-gray-600">{{ 'customer.detail.noContractsFound' | translate }}</p>
+          }
+          @if (!isLoadingContracts() && contracts().length > 0) {
+            <!-- Desktop Table View -->
+            <div class="hidden sm:block overflow-x-auto">
+              <table class="w-full border-collapse">
+                <thead class="bg-gray-100">
+                  <tr>
+                    <th class="px-3 py-3 text-left border-b-2 border-gray-300 font-semibold">{{ 'contract.table.contractId' | translate }}</th>
+                    <th class="px-3 py-3 text-left border-b-2 border-gray-300 font-semibold">{{ 'contract.table.product' | translate }}</th>
+                    <th class="px-3 py-3 text-left border-b-2 border-gray-300 font-semibold">{{ 'contract.table.status' | translate }}</th>
+                    <th class="px-3 py-3 text-left border-b-2 border-gray-300 font-semibold">{{ 'contract.table.validity' | translate }}</th>
+                    <th class="px-3 py-3 text-left border-b-2 border-gray-300 font-semibold">{{ 'contract.table.sessions' | translate }}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (contract of contracts(); track contract.contractId) {
+                    <tr class="hover:bg-gray-50">
+                      <td class="px-3 py-3 border-b border-gray-200">{{ contract.contractId.substring(0, 8) }}...</td>
+                      <td class="px-3 py-3 border-b border-gray-200">{{ contract.productVariantId }}</td>
+                      <td class="px-3 py-3 border-b border-gray-200">
+                        @if (contract.status === 'ACTIVE') {
+                          <span class="px-2 py-1 rounded text-xs font-semibold uppercase bg-green-100 text-green-800">
+                            {{ contract.status }}
+                          </span>
+                        }
+                        @if (contract.status === 'PAUSED') {
+                          <span class="px-2 py-1 rounded text-xs font-semibold uppercase bg-yellow-100 text-yellow-800">
+                            {{ contract.status }}
+                          </span>
+                        }
+                        @if (contract.status === 'TERMINATED') {
+                          <span class="px-2 py-1 rounded text-xs font-semibold uppercase bg-red-100 text-red-800">
+                            {{ contract.status }}
+                          </span>
+                        }
+                      </td>
+                      <td class="px-3 py-3 border-b border-gray-200">
+                        @if (contract.validity) {
+                          {{ contract.validity.start }} - {{ contract.validity.end }}
+                        } @else {
+                          N/A
+                        }
+                      </td>
+                      <td class="px-3 py-3 border-b border-gray-200">
+                        @if (contract.sessionsTotal) {
+                          {{ contract.sessionsUsed }} / {{ contract.sessionsTotal }}
+                        } @else {
+                          Unlimited
+                        }
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Mobile Card View -->
+            <div class="sm:hidden space-y-3">
+              @for (contract of contracts(); track contract.contractId) {
+                <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                  <div class="flex justify-between items-start mb-2">
+                    <span class="text-xs text-gray-600">{{ 'contract.table.contractId' | translate }}</span>
+                    <span class="text-sm font-mono">{{ contract.contractId.substring(0, 8) }}...</span>
+                  </div>
+                  <div class="flex justify-between items-start mb-2">
+                    <span class="text-xs text-gray-600">{{ 'contract.table.product' | translate }}</span>
+                    <span class="text-sm">{{ contract.productVariantId }}</span>
+                  </div>
+                  <div class="flex justify-between items-start mb-2">
+                    <span class="text-xs text-gray-600">{{ 'contract.table.status' | translate }}</span>
+                    @if (contract.status === 'ACTIVE') {
+                      <span class="px-2 py-1 rounded text-xs font-semibold uppercase bg-green-100 text-green-800">{{ contract.status }}</span>
+                    }
+                    @if (contract.status === 'PAUSED') {
+                      <span class="px-2 py-1 rounded text-xs font-semibold uppercase bg-yellow-100 text-yellow-800">{{ contract.status }}</span>
+                    }
+                    @if (contract.status === 'TERMINATED') {
+                      <span class="px-2 py-1 rounded text-xs font-semibold uppercase bg-red-100 text-red-800">{{ contract.status }}</span>
+                    }
+                  </div>
+                  <div class="flex justify-between items-start mb-2">
+                    <span class="text-xs text-gray-600">{{ 'contract.table.validity' | translate }}</span>
+                    <span class="text-sm">
+                      @if (contract.validity) {
+                        {{ contract.validity.start }} - {{ contract.validity.end }}
+                      } @else {
+                        N/A
+                      }
+                    </span>
+                  </div>
+                  <div class="flex justify-between items-start">
+                    <span class="text-xs text-gray-600">{{ 'contract.table.sessions' | translate }}</span>
+                    <span class="text-sm">
+                      @if (contract.sessionsTotal) {
+                        {{ contract.sessionsUsed }} / {{ contract.sessionsTotal }}
+                      } @else {
+                        Unlimited
+                      }
+                    </span>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      }
+
       <!-- Invoices Section -->
       @if (!isEditMode()) {
         <div class="mb-6">
-          <h3 class="text-xl font-semibold text-gray-700 mb-4">{{ 'customer.detail.invoices' | translate }}</h3>
+          <h3 class="text-lg sm:text-xl font-semibold text-gray-700 mb-3 sm:mb-4">{{ 'customer.detail.invoices' | translate }}</h3>
           @if (isLoadingInvoices()) {
             <div class="text-center py-5 text-gray-500">{{ 'customer.detail.loadingInvoices' | translate }}</div>
           }
