@@ -51,6 +51,11 @@
   "customer.detail.selectProduct": "Produkt auswählen",
   "customer.detail.loadingProducts": "Produkte werden geladen...",
   "customer.detail.noProductsAvailable": "Keine Produkte verfügbar",
+  "customer.detail.contracts": "Produktverträge",
+  "customer.detail.loadingContracts": "Verträge werden geladen...",
+  "customer.detail.noContractsFound": "Keine Verträge für diesen Kunden gefunden.",
+  "customer.detail.productAssignedSuccess": "Produkt erfolgreich zugewiesen! Vertrags-ID: {{contractId}}",
+  "customer.detail.productAssignedError": "Produkt konnte nicht zugewiesen werden",
 
   "customer.create.title": "Neuen Kunden registrieren",
   "customer.create.personalInformation": "Persönliche Informationen",
@@ -60,6 +65,12 @@
   "customer.table.phone": "Telefon",
   "customer.table.city": "Stadt",
   "customer.table.dateOfBirth": "Geburtsdatum",
+
+  "contract.table.contractId": "Vertrags-ID",
+  "contract.table.product": "Produkt",
+  "contract.table.status": "Status",
+  "contract.table.validity": "Gültigkeit",
+  "contract.table.sessions": "Sitzungen",
 
   "invoice.list.title": "Rechnungen",
   "invoice.list.searchPlaceholder": "Rechnungen durchsuchen...",

@@ -857,6 +857,9 @@ components:
           type: string
         productVariantId:
           type: string
+        productName:
+          type: string
+          nullable: true
         bookingId:
           type: string
         status:

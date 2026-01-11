@@ -1,8 +1,8 @@
 import {Component, OnInit, signal, inject} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
-import {ActivatedRoute, Router} from '@angular/router';
-import {TranslateModule} from '@ngx-translate/core';
+import {ActivatedRoute, Router, RouterLink} from '@angular/router';
+import {TranslateModule, TranslateService} from '@ngx-translate/core';
 import {Customers, CustomerView} from './customers';
 import {Products, ProductView} from '../products/products';
 import {Memberships, MembershipSignUpRequest} from '../memberships/memberships';
@@ -13,7 +13,7 @@ import {ProductContractsService} from '../generated-api';
 @Component({
   selector: 'gym-customer-detail',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, TranslateModule],
+  imports: [CommonModule, ReactiveFormsModule, TranslateModule, RouterLink],
   templateUrl: './customer-detail.html'
 })
 export class CustomerDetail implements OnInit {
@@ -25,6 +25,7 @@ export class CustomerDetail implements OnInit {
   private invoiceService = inject(Invoices);
   private contractService = inject(ProductContractsService);
   private fb = inject(FormBuilder);
+  private translate = inject(TranslateService);
 
   customer = signal<CustomerView | null>(null);
   errorMessage = signal<string | null>(null);
@@ -229,13 +230,14 @@ export class CustomerDetail implements OnInit {
       this.membershipService.signUp(signUpRequest).subscribe({
         next: (result) => {
           this.isAssigningProduct.set(false);
-          this.successMessage.set(`Membership assigned successfully! Contract ID: ${result.contractId}`);
+          this.successMessage.set(this.translate.instant('customer.detail.productAssignedSuccess', { contractId: result.contractId }));
           this.closeProductSelection();
           this.loadInvoices(customer.customerId);
+          this.loadContracts(customer.customerId);
         },
         error: (err) => {
           this.isAssigningProduct.set(false);
-          this.errorMessage.set('Failed to assign membership product');
+          this.errorMessage.set(this.translate.instant('customer.detail.productAssignedError'));
           console.error(err);
         }
       });

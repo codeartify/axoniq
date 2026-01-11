@@ -51,6 +51,11 @@
   "customer.detail.selectProduct": "Select Product",
   "customer.detail.loadingProducts": "Loading products...",
   "customer.detail.noProductsAvailable": "No products available",
+  "customer.detail.contracts": "Product Contracts",
+  "customer.detail.loadingContracts": "Loading contracts...",
+  "customer.detail.noContractsFound": "No contracts found for this customer.",
+  "customer.detail.productAssignedSuccess": "Product assigned successfully! Contract ID: {{contractId}}",
+  "customer.detail.productAssignedError": "Failed to assign product",
 
   "customer.create.title": "Register New Customer",
   "customer.create.personalInformation": "Personal Information",
@@ -60,6 +65,12 @@
   "customer.table.phone": "Phone",
   "customer.table.city": "City",
   "customer.table.dateOfBirth": "Date of Birth",
+
+  "contract.table.contractId": "Contract ID",
+  "contract.table.product": "Product",
+  "contract.table.status": "Status",
+  "contract.table.validity": "Validity",
+  "contract.table.sessions": "Sessions",
 
   "invoice.list.title": "Invoices",
   "invoice.list.searchPlaceholder": "Search invoices...",

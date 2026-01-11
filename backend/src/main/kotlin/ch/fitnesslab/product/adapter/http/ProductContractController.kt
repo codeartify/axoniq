@@ -2,6 +2,7 @@ package ch.fitnesslab.product.adapter.http
 
 import ch.fitnesslab.domain.value.DateRange
 import ch.fitnesslab.domain.value.ProductContractId
+import ch.fitnesslab.domain.value.ProductVariantId
 import ch.fitnesslab.generated.api.ProductContractsApi
 import ch.fitnesslab.generated.model.DateRangeDto
 import ch.fitnesslab.generated.model.PauseContractRequest
@@ -11,6 +12,7 @@ import ch.fitnesslab.product.application.FindAllProductContractsQuery
 import ch.fitnesslab.product.application.ProductContractProjection
 import ch.fitnesslab.product.application.ProductContractUpdatedUpdate
 import ch.fitnesslab.product.application.ProductContractView
+import ch.fitnesslab.product.application.ProductProjection
 import ch.fitnesslab.product.domain.ProductContractStatus
 import ch.fitnesslab.product.domain.commands.PauseProductContractCommand
 import ch.fitnesslab.product.domain.commands.PauseReason
@@ -27,6 +29,7 @@ import java.time.LocalDate
 @RestController
 class ProductContractController(
     private val productContractProjection: ProductContractProjection,
+    private val productProjection: ProductProjection,
     private val commandGateway: CommandGateway,
     private val queryGateway: QueryGateway,
 ) : ProductContractsApi {
@@ -133,11 +136,18 @@ class ProductContractController(
             ResponseTypes.instanceOf(ProductContractUpdatedUpdate::class.java),
         )
 
-    private fun toDto(productContractView: ProductContractView) =
-        ProductContractDetailDto(
+    private fun toDto(productContractView: ProductContractView): ProductContractDetailDto {
+        val productName = try {
+            productProjection.findById(ProductVariantId.from(productContractView.productVariantId))?.name
+        } catch (e: Exception) {
+            null
+        }
+
+        return ProductContractDetailDto(
             contractId = productContractView.contractId,
             customerId = productContractView.customerId,
             productVariantId = productContractView.productVariantId,
+            productName = productName,
             bookingId = productContractView.bookingId,
             status = productContractView.status.name,
             validity = productContractView.validity?.let { DateRangeDto(it.start, it.end) },
@@ -152,4 +162,5 @@ class ProductContractController(
                 },
             canBePaused = productContractView.status == ProductContractStatus.ACTIVE,
         )
+    }
 }
