@@ -1,3 +1,8 @@
+app:
+  version: @project.version@
+  build-time: @maven.build.timestamp@
+  commit: ${GIT_COMMIT:unknown}
+
 spring:
   application:
     name: ${SPRING_APPLICATION_NAME:axoniq}
