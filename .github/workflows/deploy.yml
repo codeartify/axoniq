@@ -103,7 +103,12 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      - name: Set timezone for build
+        run: echo "TZ=Europe/Zurich" >> $GITHUB_ENV
+
       - name: Build and push backend image
+        env:
+          TZ: Europe/Zurich
         run: |
           docker build \
             --build-arg GIT_COMMIT=${{ github.sha }} \

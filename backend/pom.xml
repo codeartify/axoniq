@@ -28,7 +28,8 @@
 	</scm>
     <properties>
         <java.version>21</java.version>
-        <maven.build.timestamp.format>yyyy-MM-dd'T'HH:mm:ss'Z'</maven.build.timestamp.format>
+        <maven.build.timestamp.format>yyyy-MM-dd HH:mm:ss</maven.build.timestamp.format>
+        <user.timezone>Europe/Zurich</user.timezone>
         <kotlin.version>1.9.25</kotlin.version>
         <axon.version>4.11.2</axon.version>
         <openapi-generator.version>7.10.0</openapi-generator.version>

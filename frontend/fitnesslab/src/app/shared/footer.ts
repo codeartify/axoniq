@@ -10,7 +10,7 @@ import { VersionService } from './version.service';
         <div class="flex flex-col sm:flex-row justify-center items-center gap-2 sm:gap-4">
           <span>Version: {{ version.version }}</span>
           <span class="hidden sm:inline">•</span>
-          <span>Build: {{ version.buildTime }}</span>
+          <span>Build: {{ version.buildTime }} CET</span>
           @if (version.commit !== 'unknown') {
             <span class="hidden sm:inline">•</span>
             <span>Commit: {{ version.commit.substring(0, 7) }}</span>
