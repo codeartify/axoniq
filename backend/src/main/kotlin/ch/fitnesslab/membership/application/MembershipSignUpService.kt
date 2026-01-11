@@ -8,6 +8,7 @@ import ch.fitnesslab.booking.domain.PurchasedProduct
 import ch.fitnesslab.booking.domain.commands.PlaceBookingCommand
 import ch.fitnesslab.customers.application.FindCustomerByIdQuery
 import ch.fitnesslab.customers.infrastructure.CustomerEntity
+import ch.fitnesslab.domain.value.BexioContactId
 import ch.fitnesslab.domain.value.BookingId
 import ch.fitnesslab.domain.value.CustomerId
 import ch.fitnesslab.domain.value.DateRange
@@ -73,16 +74,16 @@ class MembershipSignUpService(
             )
             waitForUpdateOf(contractSubscription)
 
-            // 3. Create invoice in Bexio
+            // 3. Create invoice in Bexio (currently doesn't work)
             val dueDate = LocalDate.now().plusDays(30)
-            val bexioInvoiceId =
-                bexioInvoiceService.createInvoiceInBexio(
-                    invoiceId = invoiceId,
-                    customerId = customerId,
-                    productVariantId = productVariantId,
-                    amount = productVariantEntity.flatRate,
-                    dueDate = dueDate,
-                )
+//            val bexioInvoiceId =
+//                bexioInvoiceService.createInvoiceInBexio(
+//                    invoiceId = invoiceId,
+//                    customerId = customerId,
+//                    productVariantId = productVariantId,
+//                    amount = productVariantEntity.flatRate,
+//                    dueDate = dueDate,
+//                )
 
             // Note: Payment status is now managed in Bexio
             // The payment mode (PAY_ON_SITE) would need to be handled in Bexio separately
@@ -91,7 +92,7 @@ class MembershipSignUpService(
                 contractId = contractId,
                 bookingId = bookingId,
                 invoiceId = invoiceId,
-                bexioInvoiceId = bexioInvoiceId,
+                bexioInvoiceId = 0,
             )
         } finally {
             bookingSubscription.close()
