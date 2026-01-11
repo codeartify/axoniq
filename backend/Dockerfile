@@ -1,6 +1,9 @@
 # Build stage
 FROM maven:3.9-eclipse-temurin-21 AS build
 
+# Accept build arg for git commit
+ARG GIT_COMMIT=unknown
+
 WORKDIR /app
 
 # Copy pom.xml and download dependencies
@@ -15,6 +18,10 @@ RUN mvn clean package -DskipTests
 
 # Runtime stage
 FROM eclipse-temurin:21-jre-alpine
+
+# Accept build arg and set as environment variable
+ARG GIT_COMMIT=unknown
+ENV GIT_COMMIT=${GIT_COMMIT}
 
 WORKDIR /app
 

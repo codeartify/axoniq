@@ -105,7 +105,10 @@ jobs:
 
       - name: Build and push backend image
         run: |
-          docker build -t ${{ secrets.DOCKER_BACKEND_IMAGE_NAME }}:latest --push .
+          docker build \
+            --build-arg GIT_COMMIT=${{ github.sha }} \
+            -t ${{ secrets.DOCKER_BACKEND_IMAGE_NAME }}:latest \
+            --push .
         working-directory: backend
 
       - name: Build and push frontend image

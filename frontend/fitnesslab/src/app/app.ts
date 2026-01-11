@@ -15,12 +15,10 @@ import AuthService from './auth/auth.service';
       @if (isLoggedIn()) {
         <gym-header [title]="companyName()"/>
       }
-      <main class="flex-1">
+      <main class="flex-1 pb-4">
         <router-outlet/>
       </main>
-      @if (isLoggedIn()) {
-        <gym-footer/>
-      }
+      <gym-footer/>
     </div>
   `
 })
