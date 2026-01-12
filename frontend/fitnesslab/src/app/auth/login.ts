@@ -1,4 +1,4 @@
-import {Component, computed, inject, input, OnInit} from '@angular/core';
+import {ChangeDetectorRef, Component, computed, inject, input, OnInit} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import AuthService from './auth.service';
 import {CommonModule} from '@angular/common';
@@ -84,6 +84,7 @@ export class Login implements OnInit {
 
   private authService = inject(AuthService);
   private router = inject(Router);
+  private cdr = inject(ChangeDetectorRef);
 
   ngOnInit(): void {
     // If already authenticated, redirect
@@ -106,9 +107,21 @@ export class Login implements OnInit {
       this.router.navigate(['/dashboard']);
     } catch (error: unknown) {
       console.error(error);
-      const err = error as { error?: { error_description?: string }; error_description?: string };
-      this.errorMessage = err.error?.error_description || err.error_description || 'Invalid username or password';
+      const err = error as {
+        status?: number;
+        error?: { error_description?: string };
+        error_description?: string;
+        message?: string;
+      };
+
+      if (err.status === 401 || err.status === 0) {
+        this.errorMessage = 'Invalid username or password';
+      } else {
+        this.errorMessage = err.error?.error_description || err.error_description || err.message || 'Login failed. Please try again.';
+      }
+    } finally {
       this.isLoading = false;
+      this.cdr.detectChanges();
     }
   }
 }
