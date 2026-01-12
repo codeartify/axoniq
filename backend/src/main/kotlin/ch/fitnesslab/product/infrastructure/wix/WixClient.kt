@@ -279,12 +279,15 @@ class WixClient(
         product: ProductVariantEntity,
         existingPlan: WixPlan?,
     ): WixPlan {
-        // Preserve existing pricing variant ID
-        val existingVariantId = existingPlan?.pricingVariants?.firstOrNull()?.id
-        val pricingVariant =
-            mapProductToPricingVariant(product).copy(
-                id = existingVariantId,
-            )
+        // Preserve existing pricing variant ID and billingTerms
+        val existingVariant = existingPlan?.pricingVariants?.firstOrNull()
+        val newVariant = mapProductToPricingVariant(product)
+
+        // If billingTerms would be null but existing plan has billingTerms, preserve them
+        val pricingVariant = newVariant.copy(
+            id = existingVariant?.id,
+            billingTerms = newVariant.billingTerms ?: existingVariant?.billingTerms
+        )
 
         // Preserve existing perk IDs or generate new ones for new perks
         val existingPerks = existingPlan?.perks ?: emptyList()
