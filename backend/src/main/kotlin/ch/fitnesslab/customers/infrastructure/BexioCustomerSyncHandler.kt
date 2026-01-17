@@ -1,12 +1,14 @@
-package ch.fitnesslab.plugins.bexio.customer
+package ch.fitnesslab.customers.infrastructure
 
 import ch.fitnesslab.customers.domain.commands.LinkBexioContactCommand
 import ch.fitnesslab.customers.domain.events.CustomerRegisteredEvent
 import ch.fitnesslab.customers.domain.events.CustomerUpdatedEvent
-import ch.fitnesslab.customers.infrastructure.CustomerRepository
 import ch.fitnesslab.domain.value.BexioContactId
 import ch.fitnesslab.domain.value.Country
 import ch.fitnesslab.domain.value.Salutation
+import ch.fitnesslab.plugins.bexio.customer.BexioContactAdapter
+import ch.fitnesslab.plugins.bexio.customer.BexioCreateContactRequest
+import ch.fitnesslab.plugins.bexio.customer.BexioUpdateContactRequest
 import org.axonframework.commandhandling.gateway.CommandGateway
 import org.axonframework.config.ProcessingGroup
 import org.axonframework.eventhandling.EventHandler

@@ -48,8 +48,6 @@ class MembershipSignUpService(
         val contractId = ContractId.generate()
         val invoiceId = InvoiceId.generate()
 
-
-
         try {
             commandGateway.send<Any>(
                 PlaceBookingCommand(
@@ -70,7 +68,6 @@ class MembershipSignUpService(
                     sessionsTotal = null,
                 ),
             )
-
 
             val dueDate = DueDate.inDays(30)
             commandGateway.send<Any>(
