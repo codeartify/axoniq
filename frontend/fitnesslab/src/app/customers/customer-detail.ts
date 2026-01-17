@@ -243,4 +243,9 @@ export class CustomerDetail implements OnInit {
       });
 
   }
+
+  navigateToInvoice(invoiceId: string): void {
+    console.log(invoiceId);
+    this.router.navigate(['/invoices']);
+  }
 }

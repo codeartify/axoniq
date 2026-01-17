@@ -237,7 +237,7 @@
                 </thead>
                 <tbody>
                   @for (contract of contracts(); track contract.contractId) {
-                    <tr class="hover:bg-slate-900">
+                    <tr class="hover:bg-slate-700">
                       <td class="px-3 py-3 border-b border-slate-700">{{ contract.contractId.substring(0, 8) }}...</td>
                       <td class="px-3 py-3 border-b border-slate-700">
                         @if (contract.productName) {
@@ -366,7 +366,7 @@
                 </thead>
                 <tbody>
                   @for (invoice of invoices(); track invoice.invoiceId) {
-                    <tr class="hover:bg-slate-900">
+                    <tr class="hover:bg-slate-700 cursor-pointer transition-colors" (click)="navigateToInvoice(invoice.invoiceId)">
                       <td class="px-3 py-3 border-b border-slate-700">{{ invoice.invoiceId.substring(0, 8) }}...</td>
                       <td class="px-3 py-3 border-b border-slate-700">{{ invoice.amount | currency }}</td>
                       <td class="px-3 py-3 border-b border-slate-700">{{ invoice.dueDate }}</td>
@@ -402,7 +402,7 @@
             <!-- Mobile Invoice Cards -->
             <div class="sm:hidden space-y-3">
               @for (invoice of invoices(); track invoice.invoiceId) {
-                <div class="bg-slate-900 rounded-lg p-4 border border-slate-700">
+                <div class="bg-slate-900 rounded-lg p-4 border border-slate-700 cursor-pointer hover:bg-slate-700 transition-colors" (click)="navigateToInvoice(invoice.invoiceId)">
                   <div class="flex justify-between items-start mb-2">
                     <span class="text-xs text-slate-400">{{ 'invoice.table.invoiceId' | translate }}</span>
                     <span class="text-sm font-mono">{{ invoice.invoiceId.substring(0, 8) }}...</span>
