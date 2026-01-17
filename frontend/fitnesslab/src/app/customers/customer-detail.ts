@@ -7,8 +7,8 @@ import {Customers, CustomerView} from './customers';
 import {Products, ProductView} from '../products/products';
 import {Memberships, MembershipSignUpRequest} from '../memberships/memberships';
 import {Invoices, InvoiceView} from '../invoices/invoices';
-import {MembershipSignUpRequestDto, ProductContractDetailDto} from '../generated-api/model/models';
-import {ProductContractsService} from '../generated-api';
+import {MembershipSignUpRequestDto, ContractDetailDto} from '../generated-api/model/models';
+import {ContractsService} from '../generated-api';
 
 @Component({
   selector: 'gym-customer-detail',
@@ -23,7 +23,7 @@ export class CustomerDetail implements OnInit {
   private productService = inject(Products);
   private membershipService = inject(Memberships);
   private invoiceService = inject(Invoices);
-  private contractService = inject(ProductContractsService);
+  private contractService = inject(ContractsService);
   private fb = inject(FormBuilder);
   private translate = inject(TranslateService);
 
@@ -39,7 +39,7 @@ export class CustomerDetail implements OnInit {
   successMessage = signal<string | null>(null);
   invoices = signal<InvoiceView[]>([]);
   isLoadingInvoices = signal<boolean>(false);
-  contracts = signal<ProductContractDetailDto[]>([]);
+  contracts = signal<ContractDetailDto[]>([]);
   isLoadingContracts = signal<boolean>(false);
 
   customerForm: FormGroup;

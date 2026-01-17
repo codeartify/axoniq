@@ -1,97 +1,160 @@
 package ch.fitnesslab.billing.adapter.http
 
+
+import ch.fitnesslab.billing.application.FindAllInvoicesQuery
+import ch.fitnesslab.billing.application.InvoiceProjection
+import ch.fitnesslab.billing.application.InvoiceUpdated
+import ch.fitnesslab.billing.application.InvoiceView
 import ch.fitnesslab.billing.domain.InvoiceStatus
-import ch.fitnesslab.billing.infrastructure.bexio.BexioInvoiceDto
-import ch.fitnesslab.billing.infrastructure.bexio.BexioInvoiceService
-import ch.fitnesslab.customers.infrastructure.bexio.BexioContactService
-import ch.fitnesslab.domain.value.CustomerId
+import ch.fitnesslab.billing.domain.commands.CancelInvoiceCommand
+import ch.fitnesslab.billing.domain.commands.MarkInvoiceOverdueCommand
+import ch.fitnesslab.billing.domain.commands.MarkInvoicePaidCommand
+import ch.fitnesslab.domain.value.InvoiceId
 import ch.fitnesslab.generated.api.InvoicesApi
 import ch.fitnesslab.generated.model.CancelInvoiceRequest
 import ch.fitnesslab.generated.model.InvoiceDto
+import ch.fitnesslab.utils.waitForUpdateOf
+import org.axonframework.commandhandling.gateway.CommandGateway
+import org.axonframework.messaging.responsetypes.ResponseTypes
+import org.axonframework.queryhandling.QueryGateway
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.RestController
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
+import org.springframework.web.bind.annotation.*
+import java.time.Instant
+import java.time.OffsetDateTime
+import java.time.ZoneId
 
 @RestController
+@RequestMapping("/api/invoices")
 class InvoicesController(
-    private val bexioInvoiceService: BexioInvoiceService,
-    private val bexioContactService: BexioContactService,
+    private val invoiceProjection: InvoiceProjection,
+    private val commandGateway: CommandGateway,
+    private val queryGateway: QueryGateway,
 ) : InvoicesApi {
-    override fun getInvoices(status: String?): ResponseEntity<List<InvoiceDto>> {
-        val invoices = bexioInvoiceService.fetchAllInvoices()
-        val filtered =
+    @GetMapping
+    fun getInvoices(
+        @RequestParam(required = false) status: InvoiceStatus?,
+    ): ResponseEntity<List<InvoiceDto>> {
+        val invoices =
             if (status != null) {
-                invoices.filter {
-                    BexioInvoiceService.mapBexioStatusToInvoiceStatus(it.kbItemStatusId) ==
-                        InvoiceStatus.valueOf(
-                            status,
-                        )
-                }
+                invoiceProjection.findByStatus(status)
             } else {
-                invoices
+                invoiceProjection.findAll()
             }
 
-        return ResponseEntity.ok(filtered.map { toDto(it) })
+        return ResponseEntity.ok(invoices.map { it.toDto() })
     }
 
-    override fun getInvoicesByCustomerId(customerId: String): ResponseEntity<List<InvoiceDto>> {
-        val invoices = bexioInvoiceService.fetchInvoicesByCustomerId(CustomerId.from(customerId))
-        return ResponseEntity.ok(invoices.map { toDto(it) })
+    @GetMapping("/customer/{customerId}")
+    override fun getInvoicesByCustomerId(
+        @PathVariable customerId: String,
+    ): ResponseEntity<List<InvoiceDto>> {
+        val invoices = invoiceProjection.findByCustomerId(customerId)
+        return ResponseEntity.ok(invoices.map { it.toDto() })
     }
 
-    override fun getInvoiceById(invoiceId: String): ResponseEntity<InvoiceDto> {
-        // Assuming invoiceId is the Bexio invoice ID
+    @GetMapping("/{invoiceId}")
+    override fun getInvoiceById(
+        @PathVariable invoiceId: String,
+    ): ResponseEntity<InvoiceDto> {
         val invoice =
-            bexioInvoiceService.fetchInvoiceById(invoiceId.toInt())
+            invoiceProjection.findById(InvoiceId.from(invoiceId))
                 ?: return ResponseEntity.notFound().build()
 
-        return ResponseEntity.ok(toDto(invoice))
+        return ResponseEntity.ok(invoice.toDto())
     }
 
-    override fun markAsPaid(invoiceId: String): ResponseEntity<Unit> {
-        // Payment status is now managed in Bexio
-        // This endpoint would need to call Bexio API to mark invoice as paid
-        // For now, return not implemented
-        return ResponseEntity.status(501).build()
-    }
-
-    override fun markAsOverdue(invoiceId: String): ResponseEntity<Unit> {
-        // Overdue status is now managed in Bexio
-        // This endpoint would need to call Bexio API
-        return ResponseEntity.status(501).build()
-    }
-
-    override fun cancelInvoice(
-        invoiceId: String,
-        cancelInvoiceRequest: CancelInvoiceRequest,
+    @PostMapping("/{invoiceId}/pay")
+    override fun markAsPaid(
+        @PathVariable invoiceId: String,
     ): ResponseEntity<Unit> {
-        // Cancel status is now managed in Bexio
-        // This endpoint would need to call Bexio API
-        return ResponseEntity.status(501).build()
+        val subscriptionQuery =
+            queryGateway.subscriptionQuery(
+                FindAllInvoicesQuery(),
+                ResponseTypes.multipleInstancesOf(InvoiceView::class.java),
+                ResponseTypes.instanceOf(InvoiceUpdated::class.java),
+            )
+
+        try {
+            commandGateway.sendAndWait<Any>(
+                MarkInvoicePaidCommand(
+                    invoiceId = InvoiceId.from(invoiceId),
+                    paidAt = Instant.now(),
+                ),
+            )
+
+            waitForUpdateOf(subscriptionQuery)
+
+            return ResponseEntity.ok().build()
+        } finally {
+            subscriptionQuery.close()
+        }
     }
 
-    private fun toDto(invoiceDto: BexioInvoiceDto): InvoiceDto {
-        val contact = bexioContactService.fetchContact(invoiceDto.contactId)
+    @PostMapping("/{invoiceId}/mark-overdue")
+    override fun markAsOverdue(
+        @PathVariable invoiceId: String,
+    ): ResponseEntity<Unit> {
+        val subscriptionQuery =
+            queryGateway.subscriptionQuery(
+                FindAllInvoicesQuery(),
+                ResponseTypes.multipleInstancesOf(InvoiceView::class.java),
+                ResponseTypes.instanceOf(InvoiceUpdated::class.java),
+            )
 
-        val customerName: String
-        if (contact == null) {
-            customerName = invoiceDto.contactAddress?.substringBefore("\n") ?: "Unknown"
-        } else {
-            customerName = "${contact.name1}  ${contact.name2 ?: ""}".trim()
+        try {
+            commandGateway.sendAndWait<Any>(
+                MarkInvoiceOverdueCommand(
+                    invoiceId = InvoiceId.from(invoiceId),
+                ),
+            )
+
+            waitForUpdateOf(subscriptionQuery)
+
+            return ResponseEntity.ok().build()
+        } finally {
+            subscriptionQuery.close()
         }
+    }
 
-        return InvoiceDto(
-            invoiceId = invoiceDto.id.toString(),
-            customerId = invoiceDto.contactId.toString(),
-            customerName = customerName,
-            bookingId = invoiceDto.apiReference ?: "N/A",
-            amount = invoiceDto.total,
-            dueDate = LocalDate.parse(invoiceDto.isValidTo, DateTimeFormatter.ISO_LOCAL_DATE),
-            status = BexioInvoiceService.mapBexioStatusToInvoiceStatus(invoiceDto.kbItemStatusId).name,
-            isInstallment = false,
-            installmentNumber = null,
-            paidAt = null, // Would need to parse from Bexio data
-        )
+    @PostMapping("/{invoiceId}/cancel")
+    override fun cancelInvoice(
+        @PathVariable invoiceId: String,
+        @RequestBody cancelInvoiceRequest: CancelInvoiceRequest,
+    ): ResponseEntity<Unit> {
+        val subscriptionQuery =
+            queryGateway.subscriptionQuery(
+                FindAllInvoicesQuery(),
+                ResponseTypes.multipleInstancesOf(InvoiceView::class.java),
+                ResponseTypes.instanceOf(InvoiceUpdated::class.java),
+            )
+
+        try {
+            commandGateway.sendAndWait<Any>(
+                CancelInvoiceCommand(
+                    invoiceId = InvoiceId.from(invoiceId),
+                    reason = cancelInvoiceRequest.reason,
+                ),
+            )
+
+            waitForUpdateOf(subscriptionQuery)
+
+            return ResponseEntity.ok().build()
+        } finally {
+            subscriptionQuery.close()
+        }
     }
 }
+
+private fun InvoiceView.toDto() =
+    InvoiceDto(
+        invoiceId = invoiceId,
+        customerId = customerId,
+        customerName = customerName,
+        bookingId = bookingId,
+        amount = amount,
+        dueDate = dueDate,
+        status = status.name,
+        isInstallment = isInstallment,
+        installmentNumber = installmentNumber,
+        paidAt = paidAt?.let { OffsetDateTime.ofInstant(it, ZoneId.systemDefault()) },
+    )
