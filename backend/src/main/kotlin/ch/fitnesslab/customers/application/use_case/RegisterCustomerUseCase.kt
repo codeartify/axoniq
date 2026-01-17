@@ -25,11 +25,11 @@ class RegisterCustomerUseCase(
             )
 
         try {
-            val customerId = commandGateway.sendAndWait<CustomerId>(command)
+            commandGateway.send<CustomerId>(command)
 
             waitForUpdateOf(subscriptionQuery)
 
-            return customerId
+            return command.customerId
         } finally {
             subscriptionQuery.close()
         }
