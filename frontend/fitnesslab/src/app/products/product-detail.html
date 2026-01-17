@@ -4,7 +4,7 @@
   }
 
   @if (errorMessage()) {
-    <div class="p-4 mb-4 bg-red-100 border border-red-400 text-red-700 rounded">
+    <div class="p-4 mb-4 bg-red-900 border border-red-700 text-red-300 rounded">
       {{ errorMessage() }}
     </div>
   }
@@ -16,14 +16,14 @@
   }
 
   @if (!isLoading() && product()) {
-    <div class="bg-white shadow-md rounded-lg p-4 sm:p-6">
+    <div class="bg-slate-800 shadow-md rounded-lg p-4 sm:p-6">
       <div class="flex flex-col gap-4 mb-6">
-        <h2 class="text-2xl sm:text-3xl font-bold text-gray-800">{{ isEditing() ? ('product.detail.editTitle' | translate) : ('product.detail.title' | translate) }}</h2>
+        <h2 class="text-2xl sm:text-3xl font-bold text-slate-50">{{ isEditing() ? ('product.detail.editTitle' | translate) : ('product.detail.title' | translate) }}</h2>
         <div class="flex flex-col sm:flex-row gap-2">
           @if (!isEditing()) {
             <button (click)="startEdit()" [disabled]="hasIncomingChanges()" [class]="hasIncomingChanges() ? 'w-full sm:w-auto px-4 py-2 bg-gray-300 text-gray-500 rounded border-none cursor-not-allowed text-sm font-medium' : 'w-full sm:w-auto px-4 py-2 bg-blue-500 text-white rounded border-none cursor-pointer text-sm font-medium hover:bg-blue-600 transition-colors'">{{ 'common.edit' | translate }}</button>
           }
-          <button (click)="goBack()" class="w-full sm:w-auto px-4 py-2 bg-gray-500 text-white rounded border-none cursor-pointer text-sm font-medium hover:bg-gray-600 transition-colors">{{ 'button.backToList' | translate }}</button>
+          <button (click)="goBack()" class="w-full sm:w-auto px-4 py-2 bg-slate-600 text-white rounded border-none cursor-pointer text-sm font-medium hover:bg-slate-700 transition-colors">{{ 'button.backToList' | translate }}</button>
         </div>
       </div>
 
@@ -31,59 +31,59 @@
         <div>
           <!-- Basic Information Section -->
           <div class="mb-6">
-            <h3 class="text-xl font-semibold text-gray-700 mb-4">{{ 'product.detail.basicInformation' | translate }}</h3>
+            <h3 class="text-xl font-semibold text-slate-300 mb-4">{{ 'product.detail.basicInformation' | translate }}</h3>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <span class="block text-sm font-medium text-gray-600 mb-1">{{ 'product.fields.slug' | translate }}:</span>
-                <span class="text-gray-800">{{ product()!.slug }}</span>
+                <span class="block text-sm font-medium text-slate-400 mb-1">{{ 'product.fields.slug' | translate }}:</span>
+                <span class="text-slate-50">{{ product()!.slug }}</span>
               </div>
               <div>
-                <span class="block text-sm font-medium text-gray-600 mb-1">{{ 'product.fields.productName' | translate }}:</span>
-                <span class="text-gray-800">{{ product()!.name }}</span>
+                <span class="block text-sm font-medium text-slate-400 mb-1">{{ 'product.fields.productName' | translate }}:</span>
+                <span class="text-slate-50">{{ product()!.name }}</span>
               </div>
               <div>
-                <span class="block text-sm font-medium text-gray-600 mb-1">{{ 'product.fields.productType' | translate }}:</span>
-                <span class="text-gray-800">{{ product()!.productType }}</span>
+                <span class="block text-sm font-medium text-slate-400 mb-1">{{ 'product.fields.productType' | translate }}:</span>
+                <span class="text-slate-50">{{ product()!.productType }}</span>
               </div>
               <div>
-                <span class="block text-sm font-medium text-gray-600 mb-1">{{ 'product.fields.audience' | translate }}:</span>
-                <span class="text-gray-800">{{ product()!.audience }}</span>
+                <span class="block text-sm font-medium text-slate-400 mb-1">{{ 'product.fields.audience' | translate }}:</span>
+                <span class="text-slate-50">{{ product()!.audience }}</span>
               </div>
               <div>
-                <span class="block text-sm font-medium text-gray-600 mb-1">{{ 'product.fields.requiresMembership' | translate }}:</span>
-                <span class="text-gray-800">{{ product()!.requiresMembership ? ('common.yes' | translate) : ('common.no' | translate) }}</span>
+                <span class="block text-sm font-medium text-slate-400 mb-1">{{ 'product.fields.requiresMembership' | translate }}:</span>
+                <span class="text-slate-50">{{ product()!.requiresMembership ? ('common.yes' | translate) : ('common.no' | translate) }}</span>
               </div>
             </div>
           </div>
 
           <!-- Pricing Configuration Section -->
           <div class="mb-6">
-            <h3 class="text-xl font-semibold text-gray-700 mb-4">{{ 'product.detail.pricingConfiguration' | translate }}</h3>
+            <h3 class="text-xl font-semibold text-slate-300 mb-4">{{ 'product.detail.pricingConfiguration' | translate }}</h3>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <span class="block text-sm font-medium text-gray-600 mb-1">{{ 'product.fields.pricingModel' | translate }}:</span>
-                <span class="text-gray-800">{{ product()!.pricingVariant?.pricingModel }}</span>
+                <span class="block text-sm font-medium text-slate-400 mb-1">{{ 'product.fields.pricingModel' | translate }}:</span>
+                <span class="text-slate-50">{{ product()!.pricingVariant?.pricingModel }}</span>
               </div>
               <div>
-                <span class="block text-sm font-medium text-gray-600 mb-1">{{ 'product.fields.flatRate' | translate }}:</span>
-                <span class="text-gray-800">{{ product()!.pricingVariant?.flatRate | currency }}</span>
+                <span class="block text-sm font-medium text-slate-400 mb-1">{{ 'product.fields.flatRate' | translate }}:</span>
+                <span class="text-slate-50">{{ product()!.pricingVariant?.flatRate | currency }}</span>
               </div>
               @if (product()!.pricingVariant?.billingCycle) {
                 <div>
-                  <span class="block text-sm font-medium text-gray-600 mb-1">{{ 'product.fields.billingCycle' | translate }}:</span>
-                  <span class="text-gray-800">{{ product()!.pricingVariant?.billingCycle?.count }} {{ product()!.pricingVariant?.billingCycle?.interval }}</span>
+                  <span class="block text-sm font-medium text-slate-400 mb-1">{{ 'product.fields.billingCycle' | translate }}:</span>
+                  <span class="text-slate-50">{{ product()!.pricingVariant?.billingCycle?.count }} {{ product()!.pricingVariant?.billingCycle?.interval }}</span>
                 </div>
               }
               @if (product()!.pricingVariant?.duration) {
                 <div>
-                  <span class="block text-sm font-medium text-gray-600 mb-1">{{ 'product.fields.duration' | translate }}:</span>
-                  <span class="text-gray-800">{{ product()!.pricingVariant?.duration?.count }} {{ product()!.pricingVariant?.duration?.interval }}</span>
+                  <span class="block text-sm font-medium text-slate-400 mb-1">{{ 'product.fields.duration' | translate }}:</span>
+                  <span class="text-slate-50">{{ product()!.pricingVariant?.duration?.count }} {{ product()!.pricingVariant?.duration?.interval }}</span>
                 </div>
               }
               @if (product()!.pricingVariant?.freeTrial) {
                 <div>
-                  <span class="block text-sm font-medium text-gray-600 mb-1">{{ 'product.fields.freeTrial' | translate }}:</span>
-                  <span class="text-gray-800">{{ product()!.pricingVariant?.freeTrial?.count }} {{ product()!.pricingVariant?.freeTrial?.interval }}</span>
+                  <span class="block text-sm font-medium text-slate-400 mb-1">{{ 'product.fields.freeTrial' | translate }}:</span>
+                  <span class="text-slate-50">{{ product()!.pricingVariant?.freeTrial?.count }} {{ product()!.pricingVariant?.freeTrial?.interval }}</span>
                 </div>
               }
             </div>
@@ -91,34 +91,34 @@
 
           <!-- Behavior Configuration Section -->
           <div class="mb-6">
-            <h3 class="text-xl font-semibold text-gray-700 mb-4">{{ 'product.detail.behaviorConfiguration' | translate }}</h3>
+            <h3 class="text-xl font-semibold text-slate-300 mb-4">{{ 'product.detail.behaviorConfiguration' | translate }}</h3>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <span class="block text-sm font-medium text-gray-600 mb-1">{{ 'product.fields.canBePaused' | translate }}:</span>
-                <span class="text-gray-800">{{ product()!.behavior?.canBePaused ? ('common.yes' | translate) : ('common.no' | translate) }}</span>
+                <span class="block text-sm font-medium text-slate-400 mb-1">{{ 'product.fields.canBePaused' | translate }}:</span>
+                <span class="text-slate-50">{{ product()!.behavior?.canBePaused ? ('common.yes' | translate) : ('common.no' | translate) }}</span>
               </div>
               @if (product()!.behavior?.renewalLeadTimeDays) {
                 <div>
-                  <span class="block text-sm font-medium text-gray-600 mb-1">{{ 'product.fields.renewalLeadTimeDays' | translate }}:</span>
-                  <span class="text-gray-800">{{ product()!.behavior?.renewalLeadTimeDays }} days</span>
+                  <span class="block text-sm font-medium text-slate-400 mb-1">{{ 'product.fields.renewalLeadTimeDays' | translate }}:</span>
+                  <span class="text-slate-50">{{ product()!.behavior?.renewalLeadTimeDays }} days</span>
                 </div>
               }
               @if (product()!.behavior?.maxActivePerCustomer) {
                 <div>
-                  <span class="block text-sm font-medium text-gray-600 mb-1">{{ 'product.fields.maxActivePerCustomer' | translate }}:</span>
-                  <span class="text-gray-800">{{ product()!.behavior?.maxActivePerCustomer }}</span>
+                  <span class="block text-sm font-medium text-slate-400 mb-1">{{ 'product.fields.maxActivePerCustomer' | translate }}:</span>
+                  <span class="text-slate-50">{{ product()!.behavior?.maxActivePerCustomer }}</span>
                 </div>
               }
               @if (product()!.behavior?.maxPurchasesPerBuyer) {
                 <div>
-                  <span class="block text-sm font-medium text-gray-600 mb-1">{{ 'product.fields.maxPurchasesPerBuyer' | translate }}:</span>
-                  <span class="text-gray-800">{{ product()!.behavior?.maxPurchasesPerBuyer }}</span>
+                  <span class="block text-sm font-medium text-slate-400 mb-1">{{ 'product.fields.maxPurchasesPerBuyer' | translate }}:</span>
+                  <span class="text-slate-50">{{ product()!.behavior?.maxPurchasesPerBuyer }}</span>
                 </div>
               }
               @if (product()!.behavior?.numberOfSessions) {
                 <div>
-                  <span class="block text-sm font-medium text-gray-600 mb-1">{{ 'product.fields.numberOfSessions' | translate }}:</span>
-                  <span class="text-gray-800">{{ product()!.behavior?.numberOfSessions }}</span>
+                  <span class="block text-sm font-medium text-slate-400 mb-1">{{ 'product.fields.numberOfSessions' | translate }}:</span>
+                  <span class="text-slate-50">{{ product()!.behavior?.numberOfSessions }}</span>
                 </div>
               }
             </div>
@@ -126,35 +126,35 @@
 
           <!-- Additional Settings Section -->
           <div class="mb-6">
-            <h3 class="text-xl font-semibold text-gray-700 mb-4">{{ 'product.detail.additionalSettings' | translate }}</h3>
+            <h3 class="text-xl font-semibold text-slate-300 mb-4">{{ 'product.detail.additionalSettings' | translate }}</h3>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               @if (product()!.description) {
                 <div class="col-span-2">
-                  <span class="block text-sm font-medium text-gray-600 mb-1">{{ 'product.fields.description' | translate }}:</span>
-                  <span class="text-gray-800">{{ product()!.description }}</span>
+                  <span class="block text-sm font-medium text-slate-400 mb-1">{{ 'product.fields.description' | translate }}:</span>
+                  <span class="text-slate-50">{{ product()!.description }}</span>
                 </div>
               }
               @if (product()!.termsAndConditions) {
                 <div class="col-span-2">
-                  <span class="block text-sm font-medium text-gray-600 mb-1">{{ 'product.fields.termsAndConditions' | translate }}:</span>
-                  <span class="text-gray-800">{{ product()!.termsAndConditions }}</span>
+                  <span class="block text-sm font-medium text-slate-400 mb-1">{{ 'product.fields.termsAndConditions' | translate }}:</span>
+                  <span class="text-slate-50">{{ product()!.termsAndConditions }}</span>
                 </div>
               }
               <div>
-                <span class="block text-sm font-medium text-gray-600 mb-1">{{ 'product.fields.visibility' | translate }}:</span>
-                <span class="text-gray-800">{{ product()!.visibility }}</span>
+                <span class="block text-sm font-medium text-slate-400 mb-1">{{ 'product.fields.visibility' | translate }}:</span>
+                <span class="text-slate-50">{{ product()!.visibility }}</span>
               </div>
               <div>
-                <span class="block text-sm font-medium text-gray-600 mb-1">{{ 'product.fields.buyable' | translate }}:</span>
-                <span class="text-gray-800">{{ product()!.buyable ? ('common.yes' | translate) : ('common.no' | translate) }}</span>
+                <span class="block text-sm font-medium text-slate-400 mb-1">{{ 'product.fields.buyable' | translate }}:</span>
+                <span class="text-slate-50">{{ product()!.buyable ? ('common.yes' | translate) : ('common.no' | translate) }}</span>
               </div>
               <div>
-                <span class="block text-sm font-medium text-gray-600 mb-1">{{ 'product.fields.buyerCanCancel' | translate }}:</span>
-                <span class="text-gray-800">{{ product()!.buyerCanCancel ? ('common.yes' | translate) : ('common.no' | translate) }}</span>
+                <span class="block text-sm font-medium text-slate-400 mb-1">{{ 'product.fields.buyerCanCancel' | translate }}:</span>
+                <span class="text-slate-50">{{ product()!.buyerCanCancel ? ('common.yes' | translate) : ('common.no' | translate) }}</span>
               </div>
               @if (product()!.perks && product()!.perks!.length > 0) {
                 <div class="col-span-2">
-                  <span class="block text-sm font-medium text-gray-600 mb-1">{{ 'product.fields.perks' | translate }}:</span>
+                  <span class="block text-sm font-medium text-slate-400 mb-1">{{ 'product.fields.perks' | translate }}:</span>
                   <div class="flex flex-wrap gap-2 mt-2">
                     @for (perk of product()!.perks; track perk) {
                       <span class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">{{ perk }}</span>
@@ -169,52 +169,52 @@
         <form (ngSubmit)="saveProduct()">
           <!-- Basic Information Section -->
           <div class="mb-6">
-            <h3 class="text-xl font-semibold text-gray-700 mb-4">{{ 'product.detail.basicInformation' | translate }}</h3>
+            <h3 class="text-xl font-semibold text-slate-300 mb-4">{{ 'product.detail.basicInformation' | translate }}</h3>
 
             <div class="mb-4">
-              <label for="slug" class="block text-sm font-medium text-gray-700 mb-1">{{ 'product.fields.slug' | translate }} *</label>
+              <label for="slug" class="block text-sm font-medium text-slate-300 mb-1">{{ 'product.fields.slug' | translate }} *</label>
               <input
                 type="text"
                 id="slug"
                 [(ngModel)]="editedProduct!.slug"
                 name="slug"
                 required
-                class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                class="w-full px-3 py-2 border border-slate-600 rounded focus:outline-none focus:ring-2 focus:ring-blue-400 bg-slate-700 text-slate-50"
               />
             </div>
 
             <div class="mb-4">
-              <label for="name" class="block text-sm font-medium text-gray-700 mb-1">{{ 'product.fields.productName' | translate }} *</label>
+              <label for="name" class="block text-sm font-medium text-slate-300 mb-1">{{ 'product.fields.productName' | translate }} *</label>
               <input
                 type="text"
                 id="name"
                 [(ngModel)]="editedProduct!.name"
                 name="name"
                 required
-                class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                class="w-full px-3 py-2 border border-slate-600 rounded focus:outline-none focus:ring-2 focus:ring-blue-400 bg-slate-700 text-slate-50"
               />
             </div>
 
             <div class="mb-4">
-              <label for="productType" class="block text-sm font-medium text-gray-700 mb-1">{{ 'product.fields.productType' | translate }} *</label>
+              <label for="productType" class="block text-sm font-medium text-slate-300 mb-1">{{ 'product.fields.productType' | translate }} *</label>
               <input
                 type="text"
                 id="productType"
                 [(ngModel)]="editedProduct!.productType"
                 name="productType"
                 required
-                class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                class="w-full px-3 py-2 border border-slate-600 rounded focus:outline-none focus:ring-2 focus:ring-blue-400 bg-slate-700 text-slate-50"
               />
             </div>
 
             <div class="mb-4">
-              <label for="audience" class="block text-sm font-medium text-gray-700 mb-1">{{ 'product.fields.audience' | translate }} *</label>
+              <label for="audience" class="block text-sm font-medium text-slate-300 mb-1">{{ 'product.fields.audience' | translate }} *</label>
               <select
                 id="audience"
                 [(ngModel)]="editedProduct!.audience"
                 name="audience"
                 required
-                class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                class="w-full px-3 py-2 border border-slate-600 rounded focus:outline-none focus:ring-2 focus:ring-blue-400 bg-slate-700 text-slate-50"
               >
                 @for (aud of audiences; track aud) {
                   <option [value]="aud">{{ aud }}</option>
@@ -228,24 +228,24 @@
                   type="checkbox"
                   [(ngModel)]="editedProduct!.requiresMembership"
                   name="requiresMembership"
-                  class="mr-2 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                  class="mr-2 h-4 w-4 text-blue-600 border-slate-600 rounded focus:ring-blue-400"
                 />
-                <span class="text-sm font-medium text-gray-700">{{ 'product.fields.requiresMembership' | translate }}</span>
+                <span class="text-sm font-medium text-slate-300">{{ 'product.fields.requiresMembership' | translate }}</span>
               </label>
             </div>
           </div>
 
           <!-- Pricing Configuration Section -->
           <div class="mb-6">
-            <h3 class="text-xl font-semibold text-gray-700 mb-4">{{ 'product.detail.pricingConfiguration' | translate }}</h3>
+            <h3 class="text-xl font-semibold text-slate-300 mb-4">{{ 'product.detail.pricingConfiguration' | translate }}</h3>
 
             <div class="mb-4">
-              <label for="pricingModel" class="block text-sm font-medium text-gray-700 mb-1">{{ 'product.fields.pricingModel' | translate }}</label>
+              <label for="pricingModel" class="block text-sm font-medium text-slate-300 mb-1">{{ 'product.fields.pricingModel' | translate }}</label>
               <select
                 id="pricingModel"
                 [(ngModel)]="editedProduct!.pricingVariant.pricingModel"
                 name="pricingModel"
-                class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                class="w-full px-3 py-2 border border-slate-600 rounded focus:outline-none focus:ring-2 focus:ring-blue-400 bg-slate-700 text-slate-50"
               >
                 @for (model of pricingModels; track model) {
                   <option [value]="model">{{ model }}</option>
@@ -254,7 +254,7 @@
             </div>
 
             <div class="mb-4">
-              <label for="flatRate" class="block text-sm font-medium text-gray-700 mb-1">{{ 'product.fields.flatRate' | translate }} *</label>
+              <label for="flatRate" class="block text-sm font-medium text-slate-300 mb-1">{{ 'product.fields.flatRate' | translate }} *</label>
               <input
                 type="number"
                 id="flatRate"
@@ -263,7 +263,7 @@
                 required
                 min="0"
                 step="0.01"
-                class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                class="w-full px-3 py-2 border border-slate-600 rounded focus:outline-none focus:ring-2 focus:ring-blue-400 bg-slate-700 text-slate-50"
               />
             </div>
 
@@ -276,20 +276,20 @@
                     [checked]="!!editedProduct!.pricingVariant.billingCycle"
                     (change)="toggleBillingCycle()"
                     name="hasBillingCycle"
-                    class="mr-2 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                    class="mr-2 h-4 w-4 text-blue-600 border-slate-600 rounded focus:ring-blue-400"
                   />
-                  <span class="text-sm font-medium text-gray-700">{{ 'product.fields.billingCycle' | translate }}</span>
+                  <span class="text-sm font-medium text-slate-300">{{ 'product.fields.billingCycle' | translate }}</span>
                 </label>
               </div>
               @if (editedProduct!.pricingVariant.billingCycle) {
                 <div class="ml-6 grid grid-cols-2 gap-4">
                   <div>
-                    <label for="billingCycleInterval" class="block text-sm font-medium text-gray-700 mb-1">{{ 'product.fields.interval' | translate }}</label>
+                    <label for="billingCycleInterval" class="block text-sm font-medium text-slate-300 mb-1">{{ 'product.fields.interval' | translate }}</label>
                     <select
                       id="billingCycleInterval"
                       [(ngModel)]="editedProduct!.pricingVariant.billingCycle!.interval"
                       name="billingCycleInterval"
-                      class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      class="w-full px-3 py-2 border border-slate-600 rounded focus:outline-none focus:ring-2 focus:ring-blue-400 bg-slate-700 text-slate-50"
                     >
                       @for (interval of billingIntervals; track interval) {
                         <option [value]="interval">{{ interval }}</option>
@@ -297,14 +297,14 @@
                     </select>
                   </div>
                   <div>
-                    <label for="billingCycleCount" class="block text-sm font-medium text-gray-700 mb-1">{{ 'product.fields.count' | translate }}</label>
+                    <label for="billingCycleCount" class="block text-sm font-medium text-slate-300 mb-1">{{ 'product.fields.count' | translate }}</label>
                     <input
                       type="number"
                       id="billingCycleCount"
                       [(ngModel)]="editedProduct!.pricingVariant.billingCycle!.count"
                       name="billingCycleCount"
                       min="1"
-                      class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      class="w-full px-3 py-2 border border-slate-600 rounded focus:outline-none focus:ring-2 focus:ring-blue-400 bg-slate-700 text-slate-50"
                     />
                   </div>
                 </div>
@@ -320,20 +320,20 @@
                     [checked]="!!editedProduct!.pricingVariant.duration"
                     (change)="toggleDuration()"
                     name="hasDuration"
-                    class="mr-2 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                    class="mr-2 h-4 w-4 text-blue-600 border-slate-600 rounded focus:ring-blue-400"
                   />
-                  <span class="text-sm font-medium text-gray-700">{{ 'product.fields.duration' | translate }}</span>
+                  <span class="text-sm font-medium text-slate-300">{{ 'product.fields.duration' | translate }}</span>
                 </label>
               </div>
               @if (editedProduct!.pricingVariant.duration) {
                 <div class="ml-6 grid grid-cols-2 gap-4">
                   <div>
-                    <label for="durationInterval" class="block text-sm font-medium text-gray-700 mb-1">{{ 'product.fields.interval' | translate }}</label>
+                    <label for="durationInterval" class="block text-sm font-medium text-slate-300 mb-1">{{ 'product.fields.interval' | translate }}</label>
                     <select
                       id="durationInterval"
                       [(ngModel)]="editedProduct!.pricingVariant.duration!.interval"
                       name="durationInterval"
-                      class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      class="w-full px-3 py-2 border border-slate-600 rounded focus:outline-none focus:ring-2 focus:ring-blue-400 bg-slate-700 text-slate-50"
                     >
                       @for (interval of billingIntervals; track interval) {
                         <option [value]="interval">{{ interval }}</option>
@@ -341,14 +341,14 @@
                     </select>
                   </div>
                   <div>
-                    <label for="durationCount" class="block text-sm font-medium text-gray-700 mb-1">{{ 'product.fields.count' | translate }}</label>
+                    <label for="durationCount" class="block text-sm font-medium text-slate-300 mb-1">{{ 'product.fields.count' | translate }}</label>
                     <input
                       type="number"
                       id="durationCount"
                       [(ngModel)]="editedProduct!.pricingVariant.duration!.count"
                       name="durationCount"
                       min="1"
-                      class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      class="w-full px-3 py-2 border border-slate-600 rounded focus:outline-none focus:ring-2 focus:ring-blue-400 bg-slate-700 text-slate-50"
                     />
                   </div>
                 </div>
@@ -364,20 +364,20 @@
                     [checked]="!!editedProduct!.pricingVariant.freeTrial"
                     (change)="toggleFreeTrial()"
                     name="hasFreeTrial"
-                    class="mr-2 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                    class="mr-2 h-4 w-4 text-blue-600 border-slate-600 rounded focus:ring-blue-400"
                   />
-                  <span class="text-sm font-medium text-gray-700">{{ 'product.fields.freeTrial' | translate }}</span>
+                  <span class="text-sm font-medium text-slate-300">{{ 'product.fields.freeTrial' | translate }}</span>
                 </label>
               </div>
               @if (editedProduct!.pricingVariant.freeTrial) {
                 <div class="ml-6 grid grid-cols-2 gap-4">
                   <div>
-                    <label for="freeTrialInterval" class="block text-sm font-medium text-gray-700 mb-1">{{ 'product.fields.interval' | translate }}</label>
+                    <label for="freeTrialInterval" class="block text-sm font-medium text-slate-300 mb-1">{{ 'product.fields.interval' | translate }}</label>
                     <select
                       id="freeTrialInterval"
                       [(ngModel)]="editedProduct!.pricingVariant.freeTrial!.interval"
                       name="freeTrialInterval"
-                      class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      class="w-full px-3 py-2 border border-slate-600 rounded focus:outline-none focus:ring-2 focus:ring-blue-400 bg-slate-700 text-slate-50"
                     >
                       @for (interval of billingIntervals; track interval) {
                         <option [value]="interval">{{ interval }}</option>
@@ -385,14 +385,14 @@
                     </select>
                   </div>
                   <div>
-                    <label for="freeTrialCount" class="block text-sm font-medium text-gray-700 mb-1">{{ 'product.fields.count' | translate }}</label>
+                    <label for="freeTrialCount" class="block text-sm font-medium text-slate-300 mb-1">{{ 'product.fields.count' | translate }}</label>
                     <input
                       type="number"
                       id="freeTrialCount"
                       [(ngModel)]="editedProduct!.pricingVariant.freeTrial!.count"
                       name="freeTrialCount"
                       min="1"
-                      class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      class="w-full px-3 py-2 border border-slate-600 rounded focus:outline-none focus:ring-2 focus:ring-blue-400 bg-slate-700 text-slate-50"
                     />
                   </div>
                 </div>
@@ -402,7 +402,7 @@
 
           <!-- Behavior Configuration Section -->
           <div class="mb-6">
-            <h3 class="text-xl font-semibold text-gray-700 mb-4">{{ 'product.detail.behaviorConfiguration' | translate }}</h3>
+            <h3 class="text-xl font-semibold text-slate-300 mb-4">{{ 'product.detail.behaviorConfiguration' | translate }}</h3>
 
             <div class="mb-4 flex items-center">
               <label class="flex items-center cursor-pointer">
@@ -410,94 +410,94 @@
                   type="checkbox"
                   [(ngModel)]="editedProduct!.behavior.canBePaused"
                   name="canBePaused"
-                  class="mr-2 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                  class="mr-2 h-4 w-4 text-blue-600 border-slate-600 rounded focus:ring-blue-400"
                 />
-                <span class="text-sm font-medium text-gray-700">{{ 'product.fields.canBePaused' | translate }}</span>
+                <span class="text-sm font-medium text-slate-300">{{ 'product.fields.canBePaused' | translate }}</span>
               </label>
             </div>
 
             <div class="mb-4">
-              <label for="renewalLeadTimeDays" class="block text-sm font-medium text-gray-700 mb-1">{{ 'product.fields.renewalLeadTime' | translate }}</label>
+              <label for="renewalLeadTimeDays" class="block text-sm font-medium text-slate-300 mb-1">{{ 'product.fields.renewalLeadTime' | translate }}</label>
               <input
                 type="number"
                 id="renewalLeadTimeDays"
                 [(ngModel)]="editedProduct!.behavior.renewalLeadTimeDays"
                 name="renewalLeadTimeDays"
                 min="0"
-                class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                class="w-full px-3 py-2 border border-slate-600 rounded focus:outline-none focus:ring-2 focus:ring-blue-400 bg-slate-700 text-slate-50"
               />
             </div>
 
             <div class="mb-4">
-              <label for="maxActivePerCustomer" class="block text-sm font-medium text-gray-700 mb-1">{{ 'product.fields.maxActivePerCustomer' | translate }}</label>
+              <label for="maxActivePerCustomer" class="block text-sm font-medium text-slate-300 mb-1">{{ 'product.fields.maxActivePerCustomer' | translate }}</label>
               <input
                 type="number"
                 id="maxActivePerCustomer"
                 [(ngModel)]="editedProduct!.behavior.maxActivePerCustomer"
                 name="maxActivePerCustomer"
                 min="0"
-                class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                class="w-full px-3 py-2 border border-slate-600 rounded focus:outline-none focus:ring-2 focus:ring-blue-400 bg-slate-700 text-slate-50"
               />
             </div>
 
             <div class="mb-4">
-              <label for="maxPurchasesPerBuyer" class="block text-sm font-medium text-gray-700 mb-1">{{ 'product.fields.maxPurchasesPerBuyer' | translate }}</label>
+              <label for="maxPurchasesPerBuyer" class="block text-sm font-medium text-slate-300 mb-1">{{ 'product.fields.maxPurchasesPerBuyer' | translate }}</label>
               <input
                 type="number"
                 id="maxPurchasesPerBuyer"
                 [(ngModel)]="editedProduct!.behavior.maxPurchasesPerBuyer"
                 name="maxPurchasesPerBuyer"
                 min="0"
-                class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                class="w-full px-3 py-2 border border-slate-600 rounded focus:outline-none focus:ring-2 focus:ring-blue-400 bg-slate-700 text-slate-50"
               />
             </div>
 
             <div class="mb-4">
-              <label for="numberOfSessions" class="block text-sm font-medium text-gray-700 mb-1">{{ 'product.fields.numberOfSessions' | translate }}</label>
+              <label for="numberOfSessions" class="block text-sm font-medium text-slate-300 mb-1">{{ 'product.fields.numberOfSessions' | translate }}</label>
               <input
                 type="number"
                 id="numberOfSessions"
                 [(ngModel)]="editedProduct!.behavior.numberOfSessions"
                 name="numberOfSessions"
                 min="0"
-                class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                class="w-full px-3 py-2 border border-slate-600 rounded focus:outline-none focus:ring-2 focus:ring-blue-400 bg-slate-700 text-slate-50"
               />
             </div>
           </div>
 
           <!-- Additional Settings Section -->
           <div class="mb-6">
-            <h3 class="text-xl font-semibold text-gray-700 mb-4">{{ 'product.detail.additionalSettings' | translate }}</h3>
+            <h3 class="text-xl font-semibold text-slate-300 mb-4">{{ 'product.detail.additionalSettings' | translate }}</h3>
 
             <div class="mb-4">
-              <label for="description" class="block text-sm font-medium text-gray-700 mb-1">{{ 'product.fields.description' | translate }}</label>
+              <label for="description" class="block text-sm font-medium text-slate-300 mb-1">{{ 'product.fields.description' | translate }}</label>
               <textarea
                 id="description"
                 [(ngModel)]="editedProduct!.description"
                 name="description"
                 rows="3"
-                class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                class="w-full px-3 py-2 border border-slate-600 rounded focus:outline-none focus:ring-2 focus:ring-blue-400 bg-slate-700 text-slate-50"
               ></textarea>
             </div>
 
             <div class="mb-4">
-              <label for="termsAndConditions" class="block text-sm font-medium text-gray-700 mb-1">{{ 'product.fields.termsAndConditions' | translate }}</label>
+              <label for="termsAndConditions" class="block text-sm font-medium text-slate-300 mb-1">{{ 'product.fields.termsAndConditions' | translate }}</label>
               <textarea
                 id="termsAndConditions"
                 [(ngModel)]="editedProduct!.termsAndConditions"
                 name="termsAndConditions"
                 rows="3"
-                class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                class="w-full px-3 py-2 border border-slate-600 rounded focus:outline-none focus:ring-2 focus:ring-blue-400 bg-slate-700 text-slate-50"
               ></textarea>
             </div>
 
             <div class="mb-4">
-              <label for="visibility" class="block text-sm font-medium text-gray-700 mb-1">{{ 'product.fields.visibility' | translate }}</label>
+              <label for="visibility" class="block text-sm font-medium text-slate-300 mb-1">{{ 'product.fields.visibility' | translate }}</label>
               <select
                 id="visibility"
                 [(ngModel)]="editedProduct!.visibility"
                 name="visibility"
-                class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                class="w-full px-3 py-2 border border-slate-600 rounded focus:outline-none focus:ring-2 focus:ring-blue-400 bg-slate-700 text-slate-50"
               >
                 @for (vis of visibilityOptions; track vis) {
                   <option [value]="vis">{{ vis }}</option>
@@ -511,9 +511,9 @@
                   type="checkbox"
                   [(ngModel)]="editedProduct!.buyable"
                   name="buyable"
-                  class="mr-2 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                  class="mr-2 h-4 w-4 text-blue-600 border-slate-600 rounded focus:ring-blue-400"
                 />
-                <span class="text-sm font-medium text-gray-700">{{ 'product.fields.buyable' | translate }}</span>
+                <span class="text-sm font-medium text-slate-300">{{ 'product.fields.buyable' | translate }}</span>
               </label>
             </div>
 
@@ -523,22 +523,22 @@
                   type="checkbox"
                   [(ngModel)]="editedProduct!.buyerCanCancel"
                   name="buyerCanCancel"
-                  class="mr-2 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                  class="mr-2 h-4 w-4 text-blue-600 border-slate-600 rounded focus:ring-blue-400"
                 />
-                <span class="text-sm font-medium text-gray-700">{{ 'product.fields.buyerCanCancel' | translate }}</span>
+                <span class="text-sm font-medium text-slate-300">{{ 'product.fields.buyerCanCancel' | translate }}</span>
               </label>
             </div>
 
             <!-- Perks -->
             <div class="mb-4">
-              <label class="block text-sm font-medium text-gray-700 mb-2">{{ 'product.fields.perks' | translate }}</label>
+              <label class="block text-sm font-medium text-slate-300 mb-2">{{ 'product.fields.perks' | translate }}</label>
               <div class="flex gap-2 mb-2">
                 <input
                   type="text"
                   [(ngModel)]="perksInput"
                   name="perksInput"
                   placeholder="{{ 'product.fields.addPerk' | translate }}"
-                  class="flex-1 px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  class="flex-1 px-3 py-2 border border-slate-600 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
                 />
                 <button
                   type="button"
@@ -571,7 +571,7 @@
             <button
               type="button"
               (click)="cancelEdit()"
-              class="px-4 py-2 bg-gray-500 text-white rounded border-none cursor-pointer text-sm font-medium hover:bg-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              class="px-4 py-2 bg-slate-600 text-white rounded border-none cursor-pointer text-sm font-medium hover:bg-slate-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               [disabled]="isSaving()"
             >
               {{ 'common.cancel' | translate }}

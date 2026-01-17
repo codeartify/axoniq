@@ -20,7 +20,7 @@ import {DropdownArrow} from '../ui-elements/dropdown-arrow';
     <div class="relative inline-block">
       <button
         (click)="toggleDropdown()"
-        class="flex items-center gap-2 px-3 py-2 text-gray-700 hover:text-blue-600 transition-colors bg-white border border-gray-300 rounded-md hover:bg-gray-50">
+        class="flex items-center gap-2 px-3 py-2 text-slate-300 hover:text-blue-400 transition-colors bg-slate-800 border border-slate-600 rounded-md hover:bg-slate-900">
         <gym-language-icon/>
         <span class="font-medium">{{ currentLanguage().label | translate }}</span>
         <gym-dropdown-arrow/>

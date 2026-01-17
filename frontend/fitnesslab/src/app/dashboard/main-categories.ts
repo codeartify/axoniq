@@ -25,12 +25,12 @@ interface MainCategory {
       @for (category of mainCategories(); track category) {
         @if (category.canView()) {
           <div
-            class="bg-white rounded-lg shadow p-5 sm:p-6 cursor-pointer hover:shadow-lg transition-shadow active:scale-95"
+            class="bg-slate-800 rounded-lg shadow-lg p-5 sm:p-6 cursor-pointer hover:shadow-xl hover:bg-slate-750 transition-all active:scale-95 border border-slate-700"
             (click)="navigateTo(category.route)">
             <div class="flex items-center mb-3 sm:mb-4">
               <ng-container [ngComponentOutlet]="category.iconComponent"/>
             </div>
-            <h2 class="text-lg sm:text-xl font-semibold text-gray-900 mb-2">
+            <h2 class="text-lg sm:text-xl font-semibold text-slate-50 mb-2">
               {{ category.nameTranslationKey | translate }}
             </h2>
           </div>

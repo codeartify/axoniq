@@ -8,7 +8,7 @@ import {Language} from '../translation.service';
     LanguageSelection
   ],
   template: `
-    <div class="absolute right-0 mt-2 w-32 bg-white border border-gray-300 rounded-md shadow-lg z-50">
+    <div class="absolute right-0 mt-2 w-32 bg-slate-800 border border-slate-600 rounded-md shadow-lg z-50">
       @for (languageSelection of languages(); track languageSelection.code) {
         <gym-language-selection
           [languageSelection]="languageSelection"

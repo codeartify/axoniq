@@ -10,9 +10,9 @@ import {MainCategories} from './main-categories';
   standalone: true,
   imports: [CommonModule, TranslateModule, CommonUseCases, MainCategories],
   template: `
-    <div class="min-h-screen bg-gray-50 p-4 sm:p-6 md:p-8">
+    <div class="min-h-screen bg-slate-900 p-4 sm:p-6 md:p-8">
       <div class="max-w-7xl mx-auto">
-        <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-6 sm:mb-8">
+        <h1 class="text-2xl sm:text-3xl font-bold text-slate-50 mb-6 sm:mb-8">
           {{ 'dashboard.title' | translate }}
         </h1>
 

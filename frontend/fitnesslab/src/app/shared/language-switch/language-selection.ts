@@ -18,7 +18,7 @@ import {Tick} from '../ui-elements/tick';
     <button
       (click)="changeLanguage()"
       class="w-full text-left px-4 py-2 text-sm hover:bg-blue-50 transition-colors flex items-center justify-between"
-      [class.bg-blue-100]="isLangueSelected"
+      [class.bg-blue-900]="isLangueSelected"
       [class.font-semibold]="isLangueSelected"
     >
       <span> {{ languageLabel | translate }}</span>

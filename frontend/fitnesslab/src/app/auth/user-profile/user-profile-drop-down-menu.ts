@@ -20,8 +20,8 @@ import {Backdrop} from './backdrop';
     @let title = profile.firstName + ' ' + profile.lastName;
 
     @if (isOpen()) {
-      <div class="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-xl border border-gray-200 py-2 z-50">
-        <div class="px-4 py-3 border-b border-gray-200">
+      <div class="absolute right-0 mt-2 w-64 bg-slate-800 rounded-lg shadow-xl border border-slate-700 py-2 z-50">
+        <div class="px-4 py-3 border-b border-slate-700">
           <gym-user-profile-title [title]="title"/>
           <gym-user-profile-email [email]="profile.email"/>
           <gym-user-profile-roles [roles]="profile.roles"/>

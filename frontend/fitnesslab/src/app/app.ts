@@ -10,7 +10,7 @@ import AuthService from './auth/auth.service';
   selector: 'gym-root',
   imports: [RouterOutlet, LoadingBar, TranslateModule, Header, Footer],
   template: `
-    <div class="min-h-screen bg-gray-50 flex flex-col">
+    <div class="min-h-screen bg-slate-900 text-slate-50 flex flex-col">
       <gym-loading-bar/>
       @if (isLoggedIn()) {
         <gym-header [title]="companyName()"/>

@@ -3,7 +3,7 @@ import {Component, input} from '@angular/core';
 @Component({
   selector: 'gym-user-profile-title',
   template: `
-    <p class="text-sm font-semibold text-gray-900">
+    <p class="text-sm font-semibold text-slate-50">
       {{ title() }}
     </p>
   `

@@ -9,11 +9,11 @@ import {TranslatePipe} from '@ngx-translate/core';
     <section class="min-h-[60vh] flex items-center justify-center px-6 py-16">
       <div class="w-full max-w-2xl text-center">
 
-        <h1 class="mt-3 text-3xl sm:text-4xl font-bold text-gray-900">
+        <h1 class="mt-3 text-3xl sm:text-4xl font-bold text-slate-50">
           {{ 'notFound.title' | translate }}
         </h1>
 
-        <p class="mt-4 text-gray-600">
+        <p class="mt-4 text-slate-400">
           {{ 'notFound.description' | translate }}
         </p>
 

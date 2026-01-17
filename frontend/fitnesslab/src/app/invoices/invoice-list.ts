@@ -35,20 +35,20 @@ type SortColumn = 'invoiceId' | 'customerName' | 'amount' | 'dueDate' | 'status'
       <div class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"
            (click)="closeCancelModal()"
            (keydown.escape)="closeCancelModal()" tabindex="0" role="dialog" aria-modal="true">
-        <div class="bg-white p-6 rounded-lg max-w-lg w-11/12 shadow-xl" (click)="$event.stopPropagation()"
+        <div class="bg-slate-800 p-6 rounded-lg max-w-lg w-11/12 shadow-xl" (click)="$event.stopPropagation()"
              (keydown)="$event.stopPropagation()" tabindex="-1">
           <h2
-            class="mt-0 mb-4 text-xl font-semibold text-gray-800">{{ 'invoice.list.cancelModal.title' | translate }}</h2>
+            class="mt-0 mb-4 text-xl font-semibold text-slate-200">{{ 'invoice.list.cancelModal.title' | translate }}</h2>
           <p class="mb-4">{{ 'invoice.list.cancelModal.reasonPrompt' | translate }}</p>
           <textarea
             [(ngModel)]="cancelReason"
-            class="w-full px-3 py-2 border border-gray-300 rounded text-sm resize-y mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            class="w-full px-3 py-2 border border-slate-600 rounded text-sm resize-y mb-4 focus:outline-none focus:ring-2 focus:ring-blue-400"
             [placeholder]="'invoice.list.cancelModal.reasonPlaceholder' | translate"
             rows="4"
           ></textarea>
           <div class="flex justify-end gap-2">
             <button (click)="closeCancelModal()"
-                    class="px-3 py-1.5 bg-gray-500 text-white rounded border-none cursor-pointer text-sm hover:bg-gray-600 transition-colors">
+                    class="px-3 py-1.5 bg-slate-700 text-white rounded border-none cursor-pointer text-sm hover:bg-slate-600 transition-colors">
               {{ 'common.close' | translate }}
             </button>
             <button (click)="confirmCancel()"
@@ -68,7 +68,7 @@ type SortColumn = 'invoiceId' | 'customerName' | 'amount' | 'dueDate' | 'status'
     <ng-template #customerNameTemplate let-invoice>
       <a (click)="viewCustomer(invoice.customerId); $event.stopPropagation()"
          (keydown.enter)="viewCustomer(invoice.customerId)"
-         tabindex="0" role="button" class="text-blue-600 cursor-pointer underline hover:text-blue-800">
+         tabindex="0" role="button" class="text-blue-400 cursor-pointer underline hover:text-blue-300">
         {{ invoice.customerName }}
       </a>
     </ng-template>
@@ -118,13 +118,13 @@ export class InvoiceList implements AfterViewInit {
   statusColor = (status: string) => computed(() => {
     switch (status) {
       case 'OPEN':
-        return 'bg-blue-100 text-blue-800';
+        return 'bg-blue-900 text-blue-300';
       case 'PAID':
-        return 'bg-green-100 text-green-800';
+        return 'bg-green-900 text-green-300';
       case 'OVERDUE':
-        return 'bg-orange-100 text-orange-800';
+        return 'bg-orange-900 text-orange-300';
       case 'CANCELLED':
-        return 'bg-red-100 text-red-800';
+        return 'bg-red-900 text-red-300';
       default:
         return '';
     }

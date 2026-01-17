@@ -11,14 +11,14 @@ import {UserProfileMenu} from './auth/user-profile/user-profile-menu';
     UserProfileMenu
   ],
   template: `
-    <header class="bg-white shadow-sm sticky top-0 z-50">
+    <header class="bg-slate-800 shadow-lg sticky top-0 z-50">
       <div class="max-w-7xl mx-auto px-4 py-4">
         <!-- Mobile header -->
         <div class="flex justify-between items-center lg:hidden">
-          <h1 class="text-xl font-bold text-gray-900 truncate">{{ title() }}</h1>
+          <h1 class="text-xl font-bold text-slate-50 truncate">{{ title() }}</h1>
           <button
             (click)="toggleMobileMenu()"
-            class="p-2 text-gray-600 hover:text-gray-900 focus:outline-none"
+            class="p-2 text-slate-300 hover:text-slate-50 focus:outline-none"
             aria-label="Toggle menu"
           >
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -33,7 +33,7 @@ import {UserProfileMenu} from './auth/user-profile/user-profile-menu';
 
         <!-- Desktop header -->
         <div class="hidden lg:flex justify-between items-center">
-          <h1 class="text-2xl font-bold text-gray-900">{{ title() }}</h1>
+          <h1 class="text-2xl font-bold text-slate-50">{{ title() }}</h1>
           <div class="flex items-center gap-6">
             <gym-navigation/>
             <gym-language-switch/>
@@ -43,9 +43,9 @@ import {UserProfileMenu} from './auth/user-profile/user-profile-menu';
 
         <!-- Mobile menu -->
         @if (mobileMenuOpen()) {
-          <div class="lg:hidden mt-4 pb-4 border-t border-gray-200 pt-4">
+          <div class="lg:hidden mt-4 pb-4 border-t border-slate-700 pt-4">
             <gym-navigation [mobile]="true"/>
-            <div class="flex items-center gap-4 mt-4 pt-4 border-t border-gray-200">
+            <div class="flex items-center gap-4 mt-4 pt-4 border-t border-slate-700">
               <gym-language-switch/>
               <gym-user-profile-menu/>
             </div>

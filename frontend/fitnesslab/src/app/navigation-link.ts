@@ -19,9 +19,9 @@ export interface NavigationLinkConfiguration {
     @let config = navigationLinkConfiguration();
 
     <a [routerLink]="config.route"
-       routerLinkActive="text-blue-600 font-semibold"
+       routerLinkActive="text-blue-400 font-semibold"
        [routerLinkActiveOptions]="{exact: false}"
-       [class]="mobile() ? 'block py-2 px-4 text-gray-700 hover:bg-gray-100 hover:text-blue-600 rounded transition-colors' : 'text-gray-700 hover:text-blue-600 transition-colors'">
+       [class]="mobile() ? 'block py-2 px-4 text-slate-300 hover:bg-slate-700 hover:text-blue-400 rounded transition-colors' : 'text-slate-300 hover:text-blue-400 transition-colors'">
       {{ config.label | translate }}
     </a>
   `,

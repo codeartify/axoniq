@@ -9,7 +9,7 @@ import AuthService from '../auth.service';
   ],
   template: `
     <button
-      class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors cursor-pointer"
+      class="w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-red-50 transition-colors cursor-pointer"
       (click)="logout()">
       {{ 'auth.logout' | translate }}
     </button>

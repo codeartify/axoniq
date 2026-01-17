@@ -11,7 +11,7 @@ interface UserProfileButton {
   template: `
     <button
       (click)="toggleMenu()"
-      class="flex items-center justify-center w-10 h-10 rounded-full bg-blue-600 text-white font-semibold hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 cursor-pointer"
+      class="flex items-center justify-center w-10 h-10 rounded-full bg-blue-600 text-white font-semibold hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 cursor-pointer"
     >
       @if (userProfileButton(); as profileButton) {
         @if (profileButton.picture) {

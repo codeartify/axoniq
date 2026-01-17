@@ -5,7 +5,7 @@ import { VersionService } from './version.service';
   selector: 'gym-footer',
   standalone: true,
   template: `
-    <footer class="bg-gray-800 text-gray-400 py-3 px-4 text-center text-xs sm:text-sm mt-auto">
+    <footer class="bg-slate-950 text-slate-400 py-3 px-4 text-center text-xs sm:text-sm mt-auto border-t border-slate-800">
       @if (versionService.versionInfo(); as version) {
         <div class="flex flex-col sm:flex-row justify-center items-center gap-2 sm:gap-4">
           <span>Version: {{ version.version }}</span>

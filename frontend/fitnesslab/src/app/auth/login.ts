@@ -11,16 +11,16 @@ import {toSignal} from '@angular/core/rxjs-interop';
   standalone: true,
   imports: [CommonModule, FormsModule, TranslateModule],
   template: `
-    <div class="min-h-screen flex items-center justify-center bg-gray-100">
-      <div class="max-w-md w-full bg-white rounded-lg shadow-lg p-8">
+    <div class="min-h-screen flex items-center justify-center bg-slate-700">
+      <div class="max-w-md w-full bg-slate-800 rounded-lg shadow-lg p-8">
         <div class="text-center mb-8">
-          <h1 class="text-3xl font-bold text-gray-900 mb-2">{{ companyName() }}</h1>
-          <p class="text-gray-600">{{ 'login.welcome' | translate : {companyName: companyName()} }}</p>
+          <h1 class="text-3xl font-bold text-slate-50 mb-2">{{ companyName() }}</h1>
+          <p class="text-slate-400">{{ 'login.welcome' | translate : {companyName: companyName()} }}</p>
         </div>
 
         <form (ngSubmit)="login()" class="space-y-6">
           <div>
-            <label for="username" class="block text-sm font-medium text-gray-700 mb-2">
+            <label for="username" class="block text-sm font-medium text-slate-300 mb-2">
               {{ 'login.username' | translate }}
             </label>
             <input
@@ -29,13 +29,13 @@ import {toSignal} from '@angular/core/rxjs-interop';
               [(ngModel)]="username"
               name="username"
               required
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              class="w-full px-4 py-2 border border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent"
               [disabled]="isLoading"
             />
           </div>
 
           <div>
-            <label for="password" class="block text-sm font-medium text-gray-700 mb-2">
+            <label for="password" class="block text-sm font-medium text-slate-300 mb-2">
               {{ 'login.password' | translate }}
             </label>
             <input
@@ -44,13 +44,13 @@ import {toSignal} from '@angular/core/rxjs-interop';
               [(ngModel)]="password"
               name="password"
               required
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              class="w-full px-4 py-2 border border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent"
               [disabled]="isLoading"
             />
           </div>
 
           @if (errorMessage) {
-            <div class="text-red-600 text-sm text-center">
+            <div class="text-red-400 text-sm text-center">
               {{ errorMessage }}
             </div>
           }
