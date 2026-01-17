@@ -1,12 +1,13 @@
-package ch.fitnesslab.product.domain.commands
+package ch.fitnesslab.contract.domain.commands
 
+import ch.fitnesslab.domain.PauseReason
 import ch.fitnesslab.domain.value.DateRange
-import ch.fitnesslab.domain.value.ProductContractId
+import ch.fitnesslab.domain.value.ContractId
 import org.axonframework.modelling.command.TargetAggregateIdentifier
 
-data class PauseProductContractCommand(
+data class PauseContractCommand(
     @TargetAggregateIdentifier
-    val contractId: ProductContractId,
+    val contractId: ContractId,
     val pauseRange: DateRange,
     val reason: PauseReason,
 )

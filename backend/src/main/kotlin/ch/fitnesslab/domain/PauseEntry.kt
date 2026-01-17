@@ -1,7 +1,6 @@
-package ch.fitnesslab.product.domain
+package ch.fitnesslab.domain
 
 import ch.fitnesslab.domain.value.DateRange
-import ch.fitnesslab.product.domain.commands.PauseReason
 
 data class PauseEntry(
     val pauseRange: DateRange,

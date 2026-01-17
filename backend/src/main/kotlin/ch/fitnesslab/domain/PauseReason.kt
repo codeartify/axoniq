@@ -1,4 +1,4 @@
-package ch.fitnesslab.product.domain.commands
+package ch.fitnesslab.domain
 
 enum class PauseReason {
     MEDICAL,

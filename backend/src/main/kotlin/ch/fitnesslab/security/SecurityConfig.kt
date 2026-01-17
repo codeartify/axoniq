@@ -98,13 +98,13 @@ class SecurityConfig {
             .requestMatchers(POST, "/api/invoices/**")
             .hasAuthority("ROLE_invoices.write")
             // =======================
-            //     PRODUCT CONTRACTS
+            //     CONTRACTS
             // =======================
             // GET → contracts.read
-            .requestMatchers(GET, "/api/product-contracts/**")
+            .requestMatchers(GET, "/api/contracts/**")
             .hasAuthority("ROLE_contracts.read")
             // POST → contracts.write
-            .requestMatchers(POST, "/api/product-contracts/**")
+            .requestMatchers(POST, "/api/contracts/**")
             .hasAuthority("ROLE_contracts.write")
             // =======================
             //     MEMBERSHIPS

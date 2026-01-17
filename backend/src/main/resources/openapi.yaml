@@ -11,8 +11,8 @@ tags:
   description: Product management operations
 - name: Memberships
   description: Membership operations
-- name: Product Contracts
-  description: Product contract management
+- name: Contracts
+  description: Contract management
 - name: Invoices
   description: Invoice management operations
 paths:
@@ -271,12 +271,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/MembershipSignUpResultDto'
-  /api/product-contracts/customer/{customerId}:
+  /api/contracts/customer/{customerId}:
     get:
       tags:
-      - Product Contracts
+      - Contracts
       operationId: getContractsByCustomerId
-      summary: Get all product contracts for a customer
+      summary: Get all Contracts for a customer
       parameters:
       - name: customerId
         in: path
@@ -291,13 +291,13 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/ProductContractDetailDto'
-  /api/product-contracts/{contractId}:
+                  $ref: '#/components/schemas/ContractDetailDto'
+  /api/contracts/{contractId}:
     get:
       tags:
-      - Product Contracts
+      - Contracts
       operationId: getContractById
-      summary: Get product contract by ID
+      summary: Get contract by ID
       parameters:
       - name: contractId
         in: path
@@ -310,15 +310,15 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ProductContractDetailDto'
+                $ref: '#/components/schemas/ContractDetailDto'
         '404':
           description: Contract not found
-  /api/product-contracts/{contractId}/pause:
+  /api/contracts/{contractId}/pause:
     post:
       tags:
-      - Product Contracts
+      - Contracts
       operationId: pauseContract
-      summary: Pause a product contract
+      summary: Pause a contract
       parameters:
       - name: contractId
         in: path
@@ -334,12 +334,12 @@ paths:
       responses:
         '200':
           description: Contract paused successfully
-  /api/product-contracts/{contractId}/resume:
+  /api/contracts/{contractId}/resume:
     post:
       tags:
-      - Product Contracts
+      - Contracts
       operationId: resumeContract
-      summary: Resume a paused product contract
+      summary: Resume a paused contract
       parameters:
       - name: contractId
         in: path
@@ -698,7 +698,7 @@ components:
       - BOTH
     ProductBehaviorConfig:
       type: object
-      description: Behavior and business rules applied to product contracts.
+      description: Behavior and business rules applied to Contracts.
       required:
       - canBePaused
       properties:
@@ -839,7 +839,7 @@ components:
         bexioInvoiceId:
           type: integer
           description: The Bexio invoice ID
-    ProductContractDetailDto:
+    ContractDetailDto:
       type: object
       required:
       - contractId

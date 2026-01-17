@@ -199,7 +199,7 @@ class MembershipIT : IntegrationTest() {
 //            expectedPdfRegex.matches(it)
 //        }
 //
-//        // 5) Pause membership contract via /api/product-contracts/{contractId}/pause
+//        // 5) Pause membership contract via /api/contracts/{contractId}/pause
 //        val pauseRequest =
 //            PauseContractRequest(
 //                startDate = LocalDate.parse("2023-06-01"),
@@ -212,12 +212,12 @@ class MembershipIT : IntegrationTest() {
 //        val initialContract =
 //            webTestClient
 //                .get()
-//                .uri("/api/product-contracts/$contractId")
+//                .uri("/api/contracts/$contractId")
 //                .accept(MediaType.APPLICATION_JSON)
 //                .exchange()
 //                .expectStatus()
 //                .isOk
-//                .expectBody(ProductContractDetailDto::class.java)
+//                .expectBody(ContractDetailDto::class.java)
 //                .returnResult()
 //                .responseBody!!
 //
@@ -248,7 +248,7 @@ class MembershipIT : IntegrationTest() {
 //            .usingRecursiveComparison()
 //            .isEqualTo(expectedPausedContract)
 //
-//        // 6) Resume membership contract via /api/product-contracts/{contractId}/resume
+//        // 6) Resume membership contract via /api/contracts/{contractId}/resume
 //        resume(contractId)
 //
 //        val actualResumedContract = getContract(contractId)
@@ -279,21 +279,21 @@ class MembershipIT : IntegrationTest() {
     private fun resume(contractId: String) {
         webTestClient
             .post()
-            .uri("/api/product-contracts/$contractId/resume")
+            .uri("/api/contracts/$contractId/resume")
             .exchange()
             .expectStatus()
             .isOk
     }
 
-    private fun getContract(contractId: String): ProductContractDetailDto =
+    private fun getContract(contractId: String): ContractDetailDto =
         webTestClient
             .get()
-            .uri("/api/product-contracts/$contractId")
+            .uri("/api/contracts/$contractId")
             .accept(MediaType.APPLICATION_JSON)
             .exchange()
             .expectStatus()
             .isOk
-            .expectBody(ProductContractDetailDto::class.java)
+            .expectBody(ContractDetailDto::class.java)
             .returnResult()
             .responseBody!!
 
@@ -303,7 +303,7 @@ class MembershipIT : IntegrationTest() {
     ) {
         webTestClient
             .post()
-            .uri("/api/product-contracts/$contractId/pause")
+            .uri("/api/contracts/$contractId/pause")
             .contentType(MediaType.APPLICATION_JSON)
             .bodyValue(pauseRequest)
             .exchange()

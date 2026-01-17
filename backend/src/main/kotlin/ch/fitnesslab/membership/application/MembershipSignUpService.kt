@@ -8,18 +8,17 @@ import ch.fitnesslab.booking.domain.PurchasedProduct
 import ch.fitnesslab.booking.domain.commands.PlaceBookingCommand
 import ch.fitnesslab.customers.application.FindCustomerByIdQuery
 import ch.fitnesslab.customers.infrastructure.CustomerEntity
-import ch.fitnesslab.domain.value.BexioContactId
 import ch.fitnesslab.domain.value.BookingId
 import ch.fitnesslab.domain.value.CustomerId
 import ch.fitnesslab.domain.value.DateRange
 import ch.fitnesslab.domain.value.InvoiceId
-import ch.fitnesslab.domain.value.ProductContractId
+import ch.fitnesslab.domain.value.ContractId
 import ch.fitnesslab.domain.value.ProductVariantId
-import ch.fitnesslab.product.application.FindAllProductContractsQuery
+import ch.fitnesslab.contract.application.FindAllContractsQuery
 import ch.fitnesslab.product.application.FindProductByIdQuery
-import ch.fitnesslab.product.application.ProductContractUpdatedUpdate
-import ch.fitnesslab.product.application.ProductContractView
-import ch.fitnesslab.product.domain.commands.CreateProductContractCommand
+import ch.fitnesslab.contract.application.ContractUpdatedUpdate
+import ch.fitnesslab.contract.application.ContractView
+import ch.fitnesslab.contract.domain.commands.CreateContractCommand
 import ch.fitnesslab.product.infrastructure.ProductVariantEntity
 import ch.fitnesslab.utils.waitForUpdateOf
 import org.axonframework.commandhandling.gateway.CommandGateway
@@ -47,7 +46,7 @@ class MembershipSignUpService(
         val productVariantEntity = getProductVariant(productVariantId)
 
         val bookingId = BookingId.generate()
-        val contractId = ProductContractId.generate()
+        val contractId = ContractId.generate()
         val invoiceId = InvoiceId.generate()
 
         try {
@@ -63,7 +62,7 @@ class MembershipSignUpService(
 
             // 2. Create contract
             commandGateway.sendAndWait<Any>(
-                CreateProductContractCommand(
+                CreateContractCommand(
                     contractId = contractId,
                     customerId = customerId,
                     productVariantId = productVariantId,
@@ -76,14 +75,14 @@ class MembershipSignUpService(
 
             // 3. Create invoice in Bexio (currently doesn't work)
             val dueDate = LocalDate.now().plusDays(30)
-//            val bexioInvoiceId =
-//                bexioInvoiceService.createInvoiceInBexio(
-//                    invoiceId = invoiceId,
-//                    customerId = customerId,
-//                    productVariantId = productVariantId,
-//                    amount = productVariantEntity.flatRate,
-//                    dueDate = dueDate,
-//                )
+            val bexioInvoiceId =
+                bexioInvoiceService.createInvoiceInBexio(
+                    invoiceId = invoiceId,
+                    customerId = customerId,
+                    productVariantId = productVariantId,
+                    amount = productVariantEntity.flatRate,
+                    dueDate = dueDate,
+                )
 
             // Note: Payment status is now managed in Bexio
             // The payment mode (PAY_ON_SITE) would need to be handled in Bexio separately
@@ -92,7 +91,7 @@ class MembershipSignUpService(
                 contractId = contractId,
                 bookingId = bookingId,
                 invoiceId = invoiceId,
-                bexioInvoiceId = 0,
+                bexioInvoiceId = bexioInvoiceId,
             )
         } finally {
             bookingSubscription.close()
@@ -100,11 +99,11 @@ class MembershipSignUpService(
         }
     }
 
-    private fun createContractSubscription(): SubscriptionQueryResult<MutableList<ProductContractView>, ProductContractUpdatedUpdate> =
+    private fun createContractSubscription(): SubscriptionQueryResult<MutableList<ContractView>, ContractUpdatedUpdate> =
         queryGateway.subscriptionQuery(
-            FindAllProductContractsQuery(),
-            ResponseTypes.multipleInstancesOf(ProductContractView::class.java),
-            ResponseTypes.instanceOf(ProductContractUpdatedUpdate::class.java),
+            FindAllContractsQuery(),
+            ResponseTypes.multipleInstancesOf(ContractView::class.java),
+            ResponseTypes.instanceOf(ContractUpdatedUpdate::class.java),
         )
 
     private fun createBookingSubscriptionQuery(): SubscriptionQueryResult<MutableList<BookingView>, BookingUpdatedUpdate> =

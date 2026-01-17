@@ -1,13 +1,13 @@
-package ch.fitnesslab.product.application
+package ch.fitnesslab.contract.application
 
 import ch.fitnesslab.domain.value.DateRange
-import ch.fitnesslab.domain.value.ProductContractId
-import ch.fitnesslab.product.domain.ProductContractStatus
-import ch.fitnesslab.product.domain.events.ProductContractPausedEvent
-import ch.fitnesslab.product.domain.events.ProductContractResumedEvent
-import ch.fitnesslab.product.domain.events.ProductContractSignedEvent
-import ch.fitnesslab.product.infrastructure.ProductContractEntity
-import ch.fitnesslab.product.infrastructure.ProductContractRepository
+import ch.fitnesslab.domain.value.ContractId
+import ch.fitnesslab.domain.ContractStatus
+import ch.fitnesslab.contract.domain.events.ContractPausedEvent
+import ch.fitnesslab.contract.domain.events.ContractResumedEvent
+import ch.fitnesslab.contract.domain.events.ContractSignedEvent
+import ch.fitnesslab.contract.infrastructure.ContractEntity
+import ch.fitnesslab.contract.infrastructure.ContractRepository
 import org.axonframework.config.ProcessingGroup
 import org.axonframework.eventhandling.EventHandler
 import org.axonframework.queryhandling.QueryHandler
@@ -15,115 +15,115 @@ import org.axonframework.queryhandling.QueryUpdateEmitter
 import org.springframework.stereotype.Component
 import java.util.*
 
-@ProcessingGroup("product-contracts")
+@ProcessingGroup("contracts")
 @Component
-class ProductContractProjection(
-    private val productContractRepository: ProductContractRepository,
+class ContractProjection(
+    private val contractRepository: ContractRepository,
     private val queryUpdateEmitter: QueryUpdateEmitter,
 ) {
     @EventHandler
-    fun on(event: ProductContractSignedEvent) {
+    fun on(event: ContractSignedEvent) {
         val entity =
-            ProductContractEntity(
+            ContractEntity(
                 contractId = event.contractId.value,
                 customerId = event.customerId.value,
                 productVariantId = event.productVariantId.value,
                 bookingId = event.bookingId.value,
-                status = ProductContractStatus.ACTIVE,
+                status = ContractStatus.ACTIVE,
                 validityStart = event.validity?.start,
                 validityEnd = event.validity?.end,
                 sessionsTotal = event.sessionsTotal,
                 sessionsUsed = 0,
             )
-        productContractRepository.save(entity)
+        contractRepository.save(entity)
 
         queryUpdateEmitter.emit(
-            FindAllProductContractsQuery::class.java,
+            FindAllContractsQuery::class.java,
             { true },
-            ProductContractUpdatedUpdate(event.contractId.value.toString()),
+            ContractUpdatedUpdate(event.contractId.value.toString()),
         )
     }
 
     @EventHandler
-    fun on(event: ProductContractPausedEvent) {
-        productContractRepository.findById(event.contractId.value).ifPresent { existing ->
+    fun on(event: ContractPausedEvent) {
+        contractRepository.findById(event.contractId.value).ifPresent { existing ->
             val updated =
-                ProductContractEntity(
+                ContractEntity(
                     contractId = existing.contractId,
                     customerId = existing.customerId,
                     productVariantId = existing.productVariantId,
                     bookingId = existing.bookingId,
-                    status = ProductContractStatus.PAUSED,
+                    status = ContractStatus.PAUSED,
                     validityStart = existing.validityStart,
                     validityEnd = existing.validityEnd,
                     sessionsTotal = existing.sessionsTotal,
                     sessionsUsed = existing.sessionsUsed,
                     pauseHistory = existing.pauseHistory + PauseHistoryEntry(event.pauseRange, event.reason),
                 )
-            productContractRepository.save(updated)
+            contractRepository.save(updated)
 
             queryUpdateEmitter.emit(
-                FindAllProductContractsQuery::class.java,
+                FindAllContractsQuery::class.java,
                 { true },
-                ProductContractUpdatedUpdate(event.contractId.value.toString()),
+                ContractUpdatedUpdate(event.contractId.value.toString()),
             )
             queryUpdateEmitter.emit(
-                FindProductContractByIdQuery::class.java,
+                FindContractByIdQuery::class.java,
                 { query -> query.contractId == event.contractId },
-                ProductContractUpdatedUpdate(event.contractId.value.toString()),
+                ContractUpdatedUpdate(event.contractId.value.toString()),
             )
         }
     }
 
     @EventHandler
-    fun on(event: ProductContractResumedEvent) {
-        productContractRepository.findById(event.contractId.value).ifPresent { existing ->
+    fun on(event: ContractResumedEvent) {
+        contractRepository.findById(event.contractId.value).ifPresent { existing ->
             val updated =
-                ProductContractEntity(
+                ContractEntity(
                     contractId = existing.contractId,
                     customerId = existing.customerId,
                     productVariantId = existing.productVariantId,
                     bookingId = existing.bookingId,
-                    status = ProductContractStatus.ACTIVE,
+                    status = ContractStatus.ACTIVE,
                     validityStart = event.extendedValidity.start,
                     validityEnd = event.extendedValidity.end,
                     sessionsTotal = existing.sessionsTotal,
                     sessionsUsed = existing.sessionsUsed,
                     pauseHistory = existing.pauseHistory,
                 )
-            productContractRepository.save(updated)
+            contractRepository.save(updated)
 
             queryUpdateEmitter.emit(
-                FindAllProductContractsQuery::class.java,
+                FindAllContractsQuery::class.java,
                 { true },
-                ProductContractUpdatedUpdate(event.contractId.value.toString()),
+                ContractUpdatedUpdate(event.contractId.value.toString()),
             )
             queryUpdateEmitter.emit(
-                FindProductContractByIdQuery::class.java,
+                FindContractByIdQuery::class.java,
                 { query -> query.contractId == event.contractId },
-                ProductContractUpdatedUpdate(event.contractId.value.toString()),
+                ContractUpdatedUpdate(event.contractId.value.toString()),
             )
         }
     }
 
     @QueryHandler
-    fun handle(query: FindProductContractByIdQuery): ProductContractView? =
-        productContractRepository.findById(query.contractId.value).map { toProductContractView(it) }.orElse(null)
+    fun handle(query: FindContractByIdQuery): ContractView? =
+        contractRepository.findById(query.contractId.value).map { toContractView(it) }.orElse(null)
 
     @QueryHandler
-    fun handle(query: FindAllProductContractsQuery): List<ProductContractView> =
-        productContractRepository.findAll().map { toProductContractView(it) }
+    fun handle(query: FindAllContractsQuery): List<ContractView> =
+        contractRepository.findAll().map { toContractView(it) }
 
-    fun findById(contractId: ProductContractId): ProductContractView? =
-        productContractRepository.findById(contractId.value).map { toProductContractView(it) }.orElse(null)
+    fun findById(contractId: ContractId): ContractView? =
+        contractRepository.findById(contractId.value).map { toContractView(it) }.orElse(null)
 
-    fun findAll(): List<ProductContractView> = productContractRepository.findAll().map { toProductContractView(it) }
+    fun findAll(): List<ContractView> = contractRepository.findAll().map { toContractView(it) }
 
-    fun findByCustomerId(customerId: String): List<ProductContractView> =
-        productContractRepository.findByCustomerId(UUID.fromString(customerId)).map { toProductContractView(it) }
+    fun findByCustomerId(customerId: String): List<ContractView> =
+        contractRepository.findByCustomerId(UUID.fromString(customerId)).map { toContractView(it) }
 
-    private fun toProductContractView(entity: ProductContractEntity) =
-        ProductContractView(
+    private fun toContractView(entity: ContractEntity) =
+        ContractView(
             contractId = entity.contractId.toString(),
             customerId = entity.customerId.toString(),
             productVariantId = entity.productVariantId.toString(),

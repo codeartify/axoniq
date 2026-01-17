@@ -1,6 +1,6 @@
-package ch.fitnesslab.product.domain
+package ch.fitnesslab.domain
 
-enum class ProductContractStatus {
+enum class ContractStatus {
     PENDING_ACTIVATION,
     ACTIVE,
     PAUSED,
