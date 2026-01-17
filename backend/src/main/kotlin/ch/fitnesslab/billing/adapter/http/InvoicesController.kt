@@ -1,6 +1,5 @@
 package ch.fitnesslab.billing.adapter.http
 
-
 import ch.fitnesslab.billing.application.FindAllInvoicesQuery
 import ch.fitnesslab.billing.application.InvoiceProjection
 import ch.fitnesslab.billing.application.InvoiceUpdated

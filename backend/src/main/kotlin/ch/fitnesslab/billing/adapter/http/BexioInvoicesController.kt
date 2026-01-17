@@ -1,23 +1,23 @@
-//package ch.fitnesslab.billing.adapter.http
+// package ch.fitnesslab.billing.adapter.http
 //
-//import ch.fitnesslab.billing.domain.InvoiceStatus
-//import ch.fitnesslab.billing.infrastructure.bexio.BexioInvoiceDto
-//import ch.fitnesslab.billing.infrastructure.bexio.BexioInvoiceService
-//import ch.fitnesslab.customers.infrastructure.bexio.BexioContactService
-//import ch.fitnesslab.domain.value.CustomerId
-//import ch.fitnesslab.generated.api.InvoicesApi
-//import ch.fitnesslab.generated.model.CancelInvoiceRequest
-//import ch.fitnesslab.generated.model.InvoiceDto
-//import org.springframework.http.ResponseEntity
-//import org.springframework.web.bind.annotation.RestController
-//import java.time.LocalDate
-//import java.time.format.DateTimeFormatter
+// import ch.fitnesslab.billing.domain.InvoiceStatus
+// import ch.fitnesslab.billing.infrastructure.bexio.BexioInvoiceDto
+// import ch.fitnesslab.billing.infrastructure.bexio.BexioInvoiceService
+// import ch.fitnesslab.customers.infrastructure.bexio.BexioContactService
+// import ch.fitnesslab.domain.value.CustomerId
+// import ch.fitnesslab.generated.api.InvoicesApi
+// import ch.fitnesslab.generated.model.CancelInvoiceRequest
+// import ch.fitnesslab.generated.model.InvoiceDto
+// import org.springframework.http.ResponseEntity
+// import org.springframework.web.bind.annotation.RestController
+// import java.time.LocalDate
+// import java.time.format.DateTimeFormatter
 //
-//@RestController
-//class BexioInvoicesController(
+// @RestController
+// class BexioInvoicesController(
 //    private val bexioInvoiceService: BexioInvoiceService,
 //    private val bexioContactService: BexioContactService,
-//) : InvoicesApi {
+// ) : InvoicesApi {
 //    override fun getInvoices(status: String?): ResponseEntity<List<InvoiceDto>> {
 //        val invoices = bexioInvoiceService.fetchAllInvoices()
 //        val filtered =
@@ -94,4 +94,4 @@
 //            paidAt = null, // Would need to parse from Bexio data
 //        )
 //    }
-//}
+// }

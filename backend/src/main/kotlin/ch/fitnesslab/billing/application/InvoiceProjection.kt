@@ -36,7 +36,7 @@ class InvoiceProjection(
                 invoiceId = event.invoiceId.value,
                 customerId = event.customerId.value,
                 bookingId = event.bookingId.value,
-                productVariantId = event.productVariantId?.value,
+                productVariantId = event.productId?.value,
                 amount = event.amount,
                 dueDate = event.dueDate.value,
                 status = event.status,

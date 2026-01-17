@@ -1,6 +1,6 @@
 package ch.fitnesslab.product.domain.events
 
-import ch.fitnesslab.domain.value.ProductVariantId
+import ch.fitnesslab.domain.value.ProductId
 import ch.fitnesslab.product.domain.LinkedPlatformSync
 import ch.fitnesslab.product.domain.PricingVariantConfig
 import ch.fitnesslab.product.domain.ProductAudience
@@ -10,7 +10,7 @@ import org.axonframework.serialization.Revision
 
 @Revision("2.0")
 data class ProductCreatedEvent(
-    val productId: ProductVariantId,
+    val productId: ProductId,
     val slug: String,
     val name: String,
     val productType: String,

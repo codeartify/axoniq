@@ -1,13 +1,13 @@
 package ch.fitnesslab.contract.application
 
-import ch.fitnesslab.domain.value.DateRange
-import ch.fitnesslab.domain.value.ContractId
-import ch.fitnesslab.domain.ContractStatus
 import ch.fitnesslab.contract.domain.events.ContractPausedEvent
 import ch.fitnesslab.contract.domain.events.ContractResumedEvent
 import ch.fitnesslab.contract.domain.events.ContractSignedEvent
 import ch.fitnesslab.contract.infrastructure.ContractEntity
 import ch.fitnesslab.contract.infrastructure.ContractRepository
+import ch.fitnesslab.domain.ContractStatus
+import ch.fitnesslab.domain.value.ContractId
+import ch.fitnesslab.domain.value.DateRange
 import org.axonframework.config.ProcessingGroup
 import org.axonframework.eventhandling.EventHandler
 import org.axonframework.queryhandling.QueryHandler
@@ -27,7 +27,7 @@ class ContractProjection(
             ContractEntity(
                 contractId = event.contractId.value,
                 customerId = event.customerId.value,
-                productVariantId = event.productVariantId.value,
+                productVariantId = event.productId.value,
                 bookingId = event.bookingId.value,
                 status = ContractStatus.ACTIVE,
                 validityStart = event.validity?.start,
@@ -111,8 +111,7 @@ class ContractProjection(
         contractRepository.findById(query.contractId.value).map { toContractView(it) }.orElse(null)
 
     @QueryHandler
-    fun handle(query: FindAllContractsQuery): List<ContractView> =
-        contractRepository.findAll().map { toContractView(it) }
+    fun handle(query: FindAllContractsQuery): List<ContractView> = contractRepository.findAll().map { toContractView(it) }
 
     fun findById(contractId: ContractId): ContractView? =
         contractRepository.findById(contractId.value).map { toContractView(it) }.orElse(null)

@@ -1,6 +1,6 @@
 package ch.fitnesslab.product.domain
 
-import ch.fitnesslab.domain.value.ProductVariantId
+import ch.fitnesslab.domain.value.ProductId
 import ch.fitnesslab.product.domain.commands.AddLinkedPlatformCommand
 import ch.fitnesslab.product.domain.commands.CreateProductCommand
 import ch.fitnesslab.product.domain.commands.UpdateProductCommand
@@ -18,7 +18,7 @@ import org.axonframework.spring.stereotype.Aggregate
 @Aggregate
 class Product() {
     @AggregateIdentifier
-    private lateinit var productId: ProductVariantId
+    private lateinit var productId: ProductId
     private lateinit var slug: String
     private lateinit var name: String
     private lateinit var productType: String

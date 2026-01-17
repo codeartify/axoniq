@@ -5,7 +5,7 @@ import ch.fitnesslab.customers.application.FindCustomerByIdQuery
 import ch.fitnesslab.customers.infrastructure.CustomerEntity
 import ch.fitnesslab.domain.value.CustomerId
 import ch.fitnesslab.domain.value.InvoiceId
-import ch.fitnesslab.domain.value.ProductVariantId
+import ch.fitnesslab.domain.value.ProductId
 import ch.fitnesslab.product.application.FindProductByIdQuery
 import ch.fitnesslab.product.infrastructure.ProductVariantEntity
 import org.axonframework.queryhandling.QueryGateway
@@ -25,7 +25,7 @@ class BexioInvoiceService(
     fun createInvoiceInBexio(
         invoiceId: InvoiceId,
         customerId: CustomerId,
-        productVariantId: ProductVariantId,
+        productId: ProductId,
         amount: BigDecimal,
         dueDate: LocalDate,
     ): Int {
@@ -45,7 +45,7 @@ class BexioInvoiceService(
         val product =
             queryGateway
                 .query(
-                    FindProductByIdQuery(productId = productVariantId),
+                    FindProductByIdQuery(productId = productId),
                     ProductVariantEntity::class.java,
                 ).get() ?: throw IllegalArgumentException("Product not found")
 
@@ -54,7 +54,7 @@ class BexioInvoiceService(
             BexioCreateInvoiceRequest(
                 contactId = bexioContactId,
                 userId = 1, // Required: Bexio user ID - TODO: make configurable
-                isValidFrom = LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE),
+                isValidFrom = dueDate.format(DateTimeFormatter.ISO_DATE),
                 title = "Membership: ${product.name}",
                 positions =
                     listOf(

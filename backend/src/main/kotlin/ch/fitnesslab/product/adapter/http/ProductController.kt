@@ -1,6 +1,6 @@
 package ch.fitnesslab.product.adapter.http
 
-import ch.fitnesslab.domain.value.ProductVariantId
+import ch.fitnesslab.domain.value.ProductId
 import ch.fitnesslab.generated.api.ProductsApi
 import ch.fitnesslab.generated.model.CreateProductRequest
 import ch.fitnesslab.generated.model.ProductCreationResponse
@@ -37,7 +37,7 @@ class ProductController(
             )
 
         try {
-            val productId = ProductVariantId.generate()
+            val productId = ProductId.generate()
 
             val command = toCreateProductCommand(productId, createProductRequest)
             commandGateway.sendAndWait<Any>(command)
@@ -53,7 +53,7 @@ class ProductController(
     }
 
     override fun getProduct(productId: String): ResponseEntity<ProductView> {
-        val product = productProjection.findById(ProductVariantId.from(productId))
+        val product = productProjection.findById(ProductId.from(productId))
         return if (product != null) {
             ResponseEntity.ok(product)
         } else {
@@ -152,7 +152,7 @@ class ProductController(
     }
 
     private fun toCreateProductCommand(
-        productId: ProductVariantId,
+        productId: ProductId,
         createProductRequest: CreateProductRequest,
     ): CreateProductCommand =
         CreateProductCommand(
@@ -225,7 +225,7 @@ class ProductController(
         updateProductRequest: UpdateProductRequest,
     ): UpdateProductCommand =
         UpdateProductCommand(
-            productId = ProductVariantId.from(productId),
+            productId = ProductId.from(productId),
             slug = updateProductRequest.slug,
             name = updateProductRequest.name,
             productType = updateProductRequest.productType,

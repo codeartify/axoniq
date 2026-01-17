@@ -828,7 +828,6 @@ components:
       - contractId
       - bookingId
       - invoiceId
-      - bexioInvoiceId
       properties:
         contractId:
           type: string
@@ -836,9 +835,6 @@ components:
           type: string
         invoiceId:
           type: string
-        bexioInvoiceId:
-          type: integer
-          description: The Bexio invoice ID
     ContractDetailDto:
       type: object
       required:

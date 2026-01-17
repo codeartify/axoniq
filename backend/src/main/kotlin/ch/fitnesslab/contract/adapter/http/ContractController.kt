@@ -10,7 +10,7 @@ import ch.fitnesslab.domain.ContractStatus
 import ch.fitnesslab.domain.PauseReason
 import ch.fitnesslab.domain.value.ContractId
 import ch.fitnesslab.domain.value.DateRange
-import ch.fitnesslab.domain.value.ProductVariantId
+import ch.fitnesslab.domain.value.ProductId
 import ch.fitnesslab.generated.api.ContractsApi
 import ch.fitnesslab.generated.model.ContractDetailDto
 import ch.fitnesslab.generated.model.DateRangeDto
@@ -137,11 +137,12 @@ class ContractController(
         )
 
     private fun toDto(contractView: ContractView): ContractDetailDto {
-        val productName = try {
-            productProjection.findById(ProductVariantId.from(contractView.productVariantId))?.name
-        } catch (e: Exception) {
-            null
-        }
+        val productName =
+            try {
+                productProjection.findById(ProductId.from(contractView.productVariantId))?.name
+            } catch (e: Exception) {
+                null
+            }
 
         return ContractDetailDto(
             contractId = contractView.contractId,

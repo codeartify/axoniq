@@ -1,7 +1,7 @@
 package ch.fitnesslab.booking.domain
 
-import ch.fitnesslab.domain.value.ProductVariantId
+import ch.fitnesslab.domain.value.ProductId
 
 data class PurchasedProduct(
-    val productVariantId: ProductVariantId,
+    val productId: ProductId,
 )

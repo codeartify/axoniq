@@ -1,7 +1,7 @@
 package ch.fitnesslab.membership.adapter.http
 
 import ch.fitnesslab.domain.value.CustomerId
-import ch.fitnesslab.domain.value.ProductVariantId
+import ch.fitnesslab.domain.value.ProductId
 import ch.fitnesslab.generated.api.MembershipsApi
 import ch.fitnesslab.generated.model.MembershipSignUpRequestDto
 import ch.fitnesslab.generated.model.MembershipSignUpResultDto
@@ -21,7 +21,7 @@ class MembershipsController(
             membershipSignUpService.signUp(
                 MembershipSignUpRequest(
                     customerId = CustomerId.from(membershipSignUpRequestDto.customerId),
-                    productVariantId = ProductVariantId.from(membershipSignUpRequestDto.productVariantId),
+                    productId = ProductId.from(membershipSignUpRequestDto.productVariantId),
                     paymentMode = membershipSignUpRequestDto.paymentMode.let { PaymentMode.valueOf(it.name) },
                     startDate = LocalDate.from(membershipSignUpRequestDto.startDate),
                 ),
@@ -32,7 +32,6 @@ class MembershipsController(
                 contractId = result.contractId.toString(),
                 bookingId = result.bookingId.toString(),
                 invoiceId = result.invoiceId.toString(),
-                bexioInvoiceId = result.bexioInvoiceId,
             ),
         )
     }

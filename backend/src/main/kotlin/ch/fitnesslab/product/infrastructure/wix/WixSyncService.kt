@@ -1,6 +1,6 @@
 package ch.fitnesslab.product.infrastructure.wix
 
-import ch.fitnesslab.domain.value.ProductVariantId
+import ch.fitnesslab.domain.value.ProductId
 import ch.fitnesslab.generated.model.ProductView
 import ch.fitnesslab.product.application.FindAllProductsQuery
 import ch.fitnesslab.product.application.ProductUpdatedUpdate
@@ -68,7 +68,7 @@ class WixSyncService(
 
                     val updateCommand =
                         AddLinkedPlatformCommand(
-                            productId = ProductVariantId(actualProduct.productId),
+                            productId = ProductId(actualProduct.productId),
                             linkedPlatforms = linkedPlatforms,
                         )
 
@@ -148,7 +148,7 @@ class WixSyncService(
 
                     val updateCommand =
                         AddLinkedPlatformCommand(
-                            productId = ProductVariantId(actualProduct.productId),
+                            productId = ProductId(actualProduct.productId),
                             linkedPlatforms = linkedPlatforms,
                         )
 
@@ -530,7 +530,7 @@ class WixSyncService(
 
         val updateCommand =
             AddLinkedPlatformCommand(
-                productId = ProductVariantId(existingProduct.productId),
+                productId = ProductId(existingProduct.productId),
                 linkedPlatforms = linkedPlatforms,
             )
 
@@ -606,7 +606,7 @@ class WixSyncService(
         val pricingVariant = wixPlan.pricingVariants.firstOrNull()
 
         return UpdateProductCommand(
-            productId = ProductVariantId(existingProduct.productId),
+            productId = ProductId(existingProduct.productId),
             slug = wixPlan.slug ?: existingProduct.slug,
             name = wixPlan.name ?: existingProduct.name,
             productType = existingProduct.productType,
@@ -675,7 +675,7 @@ class WixSyncService(
         val pricingVariant = wixPlan.pricingVariants.firstOrNull()
 
         return CreateProductCommand(
-            productId = ProductVariantId(UUID.randomUUID()),
+            productId = ProductId(UUID.randomUUID()),
             slug = wixPlan.slug ?: generateSlug(wixPlan.name ?: "unnamed-plan"),
             name = wixPlan.name.toString(),
             productType = "Wix Plan",

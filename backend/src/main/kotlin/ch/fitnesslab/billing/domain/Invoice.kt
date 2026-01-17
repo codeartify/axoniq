@@ -11,7 +11,7 @@ import ch.fitnesslab.billing.domain.events.InvoicePaidEvent
 import ch.fitnesslab.domain.value.BookingId
 import ch.fitnesslab.domain.value.CustomerId
 import ch.fitnesslab.domain.value.InvoiceId
-import ch.fitnesslab.domain.value.ProductVariantId
+import ch.fitnesslab.domain.value.ProductId
 import ch.fitnesslab.membership.domain.DueDate
 import org.axonframework.commandhandling.CommandHandler
 import org.axonframework.eventsourcing.EventSourcingHandler
@@ -27,7 +27,7 @@ class Invoice() {
     private lateinit var invoiceId: InvoiceId
     private lateinit var bookingId: BookingId
     private lateinit var customerId: CustomerId
-    private var productVariantId: ProductVariantId? = null
+    private var productId: ProductId? = null
     private lateinit var amount: BigDecimal
     private lateinit var dueDate: DueDate
     private lateinit var status: InvoiceStatus
@@ -42,7 +42,7 @@ class Invoice() {
                 invoiceId = command.invoiceId,
                 bookingId = command.bookingId,
                 customerId = command.customerId,
-                productVariantId = command.productVariantId,
+                productId = command.productId,
                 amount = command.amount,
                 dueDate = command.dueDate,
                 status = InvoiceStatus.OPEN,
@@ -71,7 +71,7 @@ class Invoice() {
         this.invoiceId = event.invoiceId
         this.bookingId = event.bookingId
         this.customerId = event.customerId
-        this.productVariantId = event.productVariantId
+        this.productId = event.productId
         this.amount = event.amount
         this.dueDate = event.dueDate
         this.status = event.status

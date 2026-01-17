@@ -1,6 +1,6 @@
 package ch.fitnesslab.product.application
 
-import ch.fitnesslab.domain.value.ProductVariantId
+import ch.fitnesslab.domain.value.ProductId
 import ch.fitnesslab.generated.model.*
 import ch.fitnesslab.product.domain.events.LinkedPlatformAddedEvent
 import ch.fitnesslab.product.domain.events.ProductCreatedEvent
@@ -148,7 +148,7 @@ class ProductProjection(
     @QueryHandler
     fun handle(query: FindAllProductsQuery): List<ProductView> = productRepository.findAll().map { toProductView(it) }
 
-    fun findById(productId: ProductVariantId): ProductView? =
+    fun findById(productId: ProductId): ProductView? =
         productRepository
             .findById(productId.value)
             .map { toProductView(it) }

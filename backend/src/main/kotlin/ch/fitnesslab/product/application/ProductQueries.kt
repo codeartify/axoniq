@@ -1,13 +1,13 @@
 package ch.fitnesslab.product.application
 
-import ch.fitnesslab.domain.value.ProductVariantId
+import ch.fitnesslab.domain.value.ProductId
 
 data class FindAllProductsQuery(
     val timestamp: Long = System.currentTimeMillis(),
 )
 
 data class FindProductByIdQuery(
-    val productId: ProductVariantId,
+    val productId: ProductId,
 )
 
 data class ProductUpdatedUpdate(
