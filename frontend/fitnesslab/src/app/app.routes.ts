@@ -1,22 +1,9 @@
 import {RedirectCommand, ResolveFn, Router, Routes} from '@angular/router';
-import {CustomerCreate} from './customers/customer-create';
-import {CustomerDetail} from './customers/customer-detail';
-import {CustomerList} from './customers/customer-list';
-import {ProductCreate} from './products/product-create';
-import {ProductDetail} from './products/product-detail';
-import {ProductList} from './products/product-list';
-import {Login} from './auth/login';
 import {authGuard} from './auth/auth.guard';
-import {NotFound} from './not-found';
 import {CustomersService, CustomerView, ProductView} from './generated-api';
 import {inject} from '@angular/core';
-import {InvoiceList} from './invoices/invoice-list';
 import {Products} from './products/products';
 import {catchError, of, timeout} from 'rxjs';
-import {Error} from './error';
-import {Dashboard} from './dashboard/dashboard';
-import {NewsletterList} from './newsletter/newsletter-list';
-import {NewsletterEditor} from './newsletter/newsletter-editor';
 
 
 export const resolveAllCustomers: ResolveFn<CustomerView[]> = () => inject(CustomersService).getAllCustomers()
@@ -37,7 +24,7 @@ export const routes: Routes = [
   // ----------------------
   {
     path: 'customers',
-    component: CustomerList,
+    loadComponent: () => import('./customers/customer-list').then(m => m.CustomerList),
     canActivate: [authGuard],
     data: {
       roles: ['customers.read']
@@ -48,13 +35,13 @@ export const routes: Routes = [
   },
   {
     path: 'customers/new',
-    component: CustomerCreate,
+    loadComponent: () => import('./customers/customer-create').then(m => m.CustomerCreate),
     canActivate: [authGuard],
     data: {roles: ['customers.write']}
   },
   {
     path: 'customers/:id',
-    component: CustomerDetail,
+    loadComponent: () => import('./customers/customer-detail').then(m => m.CustomerDetail),
     canActivate: [authGuard],
     data: {roles: ['customers.read']}
   },
@@ -64,7 +51,7 @@ export const routes: Routes = [
   // ----------------------
   {
     path: 'products',
-    component: ProductList,
+    loadComponent: () => import('./products/product-list').then(m => m.ProductList),
     canActivate: [authGuard],
     data: {roles: ['products.read']},
     resolve: {
@@ -73,13 +60,13 @@ export const routes: Routes = [
   },
   {
     path: 'products/new',
-    component: ProductCreate,
+    loadComponent: () => import('./products/product-create').then(m => m.ProductCreate),
     canActivate: [authGuard],
     data: {roles: ['products.write']} // Admin only
   },
   {
     path: 'products/:id',
-    component: ProductDetail,
+    loadComponent: () => import('./products/product-detail').then(m => m.ProductDetail),
     canActivate: [authGuard],
     data: {roles: ['products.read']} // detail view
   },
@@ -89,7 +76,7 @@ export const routes: Routes = [
   // ----------------------
   {
     path: 'invoices',
-    component: InvoiceList,
+    loadComponent: () => import('./invoices/invoice-list').then(m => m.InvoiceList),
     canActivate: [authGuard],
     data: {roles: ['invoices.read']},
   },
@@ -99,13 +86,13 @@ export const routes: Routes = [
   // ----------------------
   {
     path: 'newsletter',
-    component: NewsletterList,
+    loadComponent: () => import('./newsletter/newsletter-list').then(m => m.NewsletterList),
     canActivate: [authGuard],
     data: {roles: ['invoices.read']},
   },
   {
     path: 'newsletter/:id',
-    component: NewsletterEditor,
+    loadComponent: () => import('./newsletter/newsletter-editor').then(m => m.NewsletterEditor),
     canActivate: [authGuard],
     data: {roles: ['invoices.read']},
   },
@@ -115,15 +102,15 @@ export const routes: Routes = [
   // ----------------------
   {
     path: 'dashboard',
-    component: Dashboard,
+    loadComponent: () => import('./dashboard/dashboard').then(m => m.Dashboard),
     canActivate: [authGuard],
     data: {roles: []}
   },
 
-  {path: 'not-found', component: NotFound},
-  {path: 'error', component: Error},
-  {path: 'login', component: Login, data: {companyName: 'Fitness Management System'}},
-  {path: 'unauthorized', component: Login},
+  {path: 'not-found', loadComponent: () => import('./not-found').then(m => m.NotFound)},
+  {path: 'error', loadComponent: () => import('./error').then(m => m.Error)},
+  {path: 'login', loadComponent: () => import('./auth/login').then(m => m.Login), data: {companyName: 'Fitness Management System'}},
+  {path: 'unauthorized', loadComponent: () => import('./auth/login').then(m => m.Login)},
   {path: '', redirectTo: '/dashboard', pathMatch: 'full'},
   {path: '**', redirectTo: '/not-found'}
 
