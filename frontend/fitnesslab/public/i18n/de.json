@@ -36,6 +36,7 @@
   "nav.customers": "Kunden",
   "nav.products": "Produkte",
   "nav.invoices": "Rechnungen",
+  "nav.newsletter": "Newsletter",
 
   "customer.list.title": "Kundenliste",
   "customer.list.searchPlaceholder": "Nach Kundenname suchen...",
@@ -202,6 +203,15 @@
   "nav.dashboard": "Übersicht",
   "dashboard.commonUseCases": "Häufige Anwendungsfälle",
   "dashboard.commonUseCases.createMembership": "Mitgliedschaft erstellen",
-  "dashboard.title": "Übersicht"
+  "dashboard.title": "Übersicht",
+
+  "newsletter.title": "Newsletter",
+  "newsletter.createNewsletter": "Newsletter erstellen",
+  "newsletter.createFirstNewsletter": "Ihren ersten Newsletter erstellen",
+  "newsletter.editNewsletter": "Newsletter bearbeiten",
+  "newsletter.noNewsletters": "Noch keine Newsletter erstellt.",
+  "newsletter.lastUpdated": "Zuletzt aktualisiert",
+  "newsletter.content": "Inhalt",
+  "newsletter.titlePlaceholder": "Newsletter-Titel eingeben..."
 
 }

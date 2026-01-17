@@ -36,6 +36,7 @@
   "nav.customers": "Customers",
   "nav.products": "Products",
   "nav.invoices": "Invoices",
+  "nav.newsletter": "Newsletter",
 
   "customer.list.title": "Customer List",
   "customer.list.searchPlaceholder": "Search by customer name...",
@@ -204,5 +205,14 @@
   "nav.dashboard": "Dashboard",
   "dashboard.commonUseCases": "Common Use Cases",
   "dashboard.commonUseCases.createMembership": "Create Membership",
-  "dashboard.title": "Dashboard"
+  "dashboard.title": "Dashboard",
+
+  "newsletter.title": "Newsletter",
+  "newsletter.createNewsletter": "Create Newsletter",
+  "newsletter.createFirstNewsletter": "Create Your First Newsletter",
+  "newsletter.editNewsletter": "Edit Newsletter",
+  "newsletter.noNewsletters": "No newsletters created yet.",
+  "newsletter.lastUpdated": "Last updated",
+  "newsletter.content": "Content",
+  "newsletter.titlePlaceholder": "Enter newsletter title..."
 }

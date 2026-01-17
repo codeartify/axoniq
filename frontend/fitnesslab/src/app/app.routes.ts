@@ -15,6 +15,8 @@ import {Products} from './products/products';
 import {catchError, of, timeout} from 'rxjs';
 import {Error} from './error';
 import {Dashboard} from './dashboard/dashboard';
+import {NewsletterList} from './newsletter/newsletter-list';
+import {NewsletterEditor} from './newsletter/newsletter-editor';
 
 
 export const resolveAllCustomers: ResolveFn<CustomerView[]> = () => inject(CustomersService).getAllCustomers()
@@ -88,6 +90,22 @@ export const routes: Routes = [
   {
     path: 'invoices',
     component: InvoiceList,
+    canActivate: [authGuard],
+    data: {roles: ['invoices.read']},
+  },
+
+  // ----------------------
+  //   NEWSLETTER
+  // ----------------------
+  {
+    path: 'newsletter',
+    component: NewsletterList,
+    canActivate: [authGuard],
+    data: {roles: ['invoices.read']},
+  },
+  {
+    path: 'newsletter/:id',
+    component: NewsletterEditor,
     canActivate: [authGuard],
     data: {roles: ['invoices.read']},
   },
