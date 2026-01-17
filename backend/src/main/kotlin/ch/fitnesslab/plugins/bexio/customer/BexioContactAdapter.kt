@@ -1,14 +1,14 @@
-package ch.fitnesslab.customers.infrastructure.bexio
+package ch.fitnesslab.plugins.bexio.customer
 
-import ch.fitnesslab.billing.infrastructure.bexio.BexioClient
+import ch.fitnesslab.plugins.bexio.infrastructure.BexioClient
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
 @Service
-class BexioContactService(
+class BexioContactAdapter(
     private val bexioClient: BexioClient,
 ) {
-    private val logger = LoggerFactory.getLogger(BexioContactService::class.java)
+    private val logger = LoggerFactory.getLogger(BexioContactAdapter::class.java)
 
     fun createContact(request: BexioCreateContactRequest): BexioContactResponse {
         val bexioContact = bexioClient.createContact(request)

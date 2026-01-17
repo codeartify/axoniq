@@ -1,4 +1,4 @@
-package ch.fitnesslab.customers.infrastructure.bexio
+package ch.fitnesslab.plugins.bexio.customer
 
 import ch.fitnesslab.customers.domain.commands.LinkBexioContactCommand
 import ch.fitnesslab.customers.domain.events.CustomerRegisteredEvent
@@ -16,7 +16,7 @@ import org.springframework.stereotype.Component
 @Component
 @ProcessingGroup("bexio-sync")
 class BexioCustomerSyncHandler(
-    private val bexioContactService: BexioContactService,
+    private val bexioContactAdapter: BexioContactAdapter,
     private val customerRepository: CustomerRepository,
     private val commandGateway: CommandGateway,
 ) {
@@ -44,7 +44,7 @@ class BexioCustomerSyncHandler(
                     ownerId = 1, // Required: Owner ID in Bexio - TODO: make configurable
                 )
 
-            val bexioContact = bexioContactService.createContact(request)
+            val bexioContact = bexioContactAdapter.createContact(request)
 
             // Link the Bexio contact ID to the customer aggregate
             commandGateway.sendAndWait<Any>(
@@ -77,7 +77,7 @@ class BexioCustomerSyncHandler(
             }
 
             // Fetch existing contact from Bexio to get nr and contact_type_id
-            val existingContact = bexioContactService.fetchContact(customer.bexioContactId!!)
+            val existingContact = bexioContactAdapter.fetchContact(customer.bexioContactId!!)
             if (existingContact == null) {
                 logger.warn("Bexio contact ${customer.bexioContactId} not found, skipping update")
                 return
@@ -100,7 +100,7 @@ class BexioCustomerSyncHandler(
                     contactTypeId = existingContact.contactTypeId,
                 )
 
-            bexioContactService.updateContact(customer.bexioContactId!!, request)
+            bexioContactAdapter.updateContact(customer.bexioContactId!!, request)
 
             logger.info("Successfully synced customer ${event.customerId} update to Bexio contact ${customer.bexioContactId}")
         } catch (e: Exception) {

@@ -1,4 +1,4 @@
-package ch.fitnesslab.billing.infrastructure.bexio
+package ch.fitnesslab.plugins.bexio.invoice
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty

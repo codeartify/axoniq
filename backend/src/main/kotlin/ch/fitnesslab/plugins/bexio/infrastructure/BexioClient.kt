@@ -1,8 +1,11 @@
-package ch.fitnesslab.billing.infrastructure.bexio
+package ch.fitnesslab.plugins.bexio.infrastructure
 
-import ch.fitnesslab.customers.infrastructure.bexio.BexioContactResponse
-import ch.fitnesslab.customers.infrastructure.bexio.BexioCreateContactRequest
-import ch.fitnesslab.customers.infrastructure.bexio.BexioUpdateContactRequest
+import ch.fitnesslab.plugins.bexio.customer.BexioContactResponse
+import ch.fitnesslab.plugins.bexio.customer.BexioCreateContactRequest
+import ch.fitnesslab.plugins.bexio.customer.BexioUpdateContactRequest
+import ch.fitnesslab.plugins.bexio.invoice.BexioCreateInvoiceRequest
+import ch.fitnesslab.plugins.bexio.invoice.BexioException
+import ch.fitnesslab.plugins.bexio.invoice.BexioInvoiceDto
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpEntity

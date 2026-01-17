@@ -1,13 +1,13 @@
-package ch.fitnesslab.customers.infrastructure.bexio
+package ch.fitnesslab.plugins.bexio.customer
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-data class BexioUpdateContactRequest(
+data class BexioCreateContactRequest(
     val nr: String? = null,
     @JsonProperty("name_1")
-    val name1: String? = null,
+    val name1: String,
     @JsonProperty("name_2")
     val name2: String? = null,
     @JsonProperty("salutation_id")
@@ -34,7 +34,11 @@ data class BexioUpdateContactRequest(
     @JsonProperty("language_id")
     val languageId: Int? = null,
     @JsonProperty("contact_type_id")
-    val contactTypeId: Int? = null,
+    val contactTypeId: Int, // Required field
+    @JsonProperty("user_id")
+    val userId: Int, // Required field
+    @JsonProperty("owner_id")
+    val ownerId: Int, // Required field
     @JsonProperty("contact_group_ids")
     val contactGroupIds: List<Int>? = null,
 )

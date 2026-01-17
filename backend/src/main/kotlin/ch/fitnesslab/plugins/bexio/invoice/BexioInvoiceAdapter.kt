@@ -1,4 +1,4 @@
-package ch.fitnesslab.billing.infrastructure.bexio
+package ch.fitnesslab.plugins.bexio.invoice
 
 import ch.fitnesslab.billing.domain.InvoiceStatus
 import ch.fitnesslab.customers.application.FindCustomerByIdQuery
@@ -6,6 +6,7 @@ import ch.fitnesslab.customers.infrastructure.CustomerEntity
 import ch.fitnesslab.domain.value.CustomerId
 import ch.fitnesslab.domain.value.InvoiceId
 import ch.fitnesslab.domain.value.ProductId
+import ch.fitnesslab.plugins.bexio.infrastructure.BexioClient
 import ch.fitnesslab.product.application.FindProductByIdQuery
 import ch.fitnesslab.product.infrastructure.ProductVariantEntity
 import org.axonframework.queryhandling.QueryGateway
@@ -16,11 +17,11 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 @Service
-class BexioInvoiceService(
+class BexioInvoiceAdapter(
     private val bexioClient: BexioClient,
     private val queryGateway: QueryGateway,
 ) {
-    private val logger = LoggerFactory.getLogger(BexioInvoiceService::class.java)
+    private val logger = LoggerFactory.getLogger(BexioInvoiceAdapter::class.java)
 
     fun createInvoiceInBexio(
         invoiceId: InvoiceId,
