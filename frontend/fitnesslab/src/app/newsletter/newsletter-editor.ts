@@ -31,6 +31,7 @@ import { TableRow } from '@tiptap/extension-table-row';
 import { TableCell } from '@tiptap/extension-table-cell';
 import { TableHeader } from '@tiptap/extension-table-header';
 import { NewsletterService } from './newsletter.service';
+import hljs from 'highlight.js';
 
 @Component({
   selector: 'gym-newsletter-editor',
@@ -96,6 +97,62 @@ import { NewsletterService } from './newsletter.service';
 
     input[type="file"] {
       display: none;
+    }
+
+    .html-editor-container {
+      position: relative;
+      border: 1px solid rgb(71, 85, 105);
+      border-radius: 0 0 0.5rem 0.5rem;
+      background: rgb(15, 23, 42);
+      overflow: hidden;
+    }
+
+    .html-editor-textarea {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      padding: 1rem;
+      margin: 0;
+      border: none;
+      background: transparent;
+      color: transparent;
+      caret-color: rgb(248, 250, 252);
+      font-family: 'Courier New', Consolas, Monaco, monospace;
+      font-size: 0.875rem;
+      line-height: 1.5;
+      resize: none;
+      outline: none;
+      white-space: pre;
+      overflow-wrap: normal;
+      overflow-x: auto;
+      overflow-y: auto;
+      tab-size: 2;
+      z-index: 1;
+    }
+
+    .html-editor-highlight {
+      position: relative;
+      width: 100%;
+      min-height: 600px;
+      padding: 1rem;
+      margin: 0;
+      font-family: 'Courier New', Consolas, Monaco, monospace;
+      font-size: 0.875rem;
+      line-height: 1.5;
+      white-space: pre;
+      overflow-wrap: normal;
+      overflow-x: auto;
+      overflow-y: auto;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .html-editor-highlight code {
+      display: block;
+      background: transparent !important;
+      padding: 0 !important;
     }
   `],
   template: `
@@ -309,12 +366,17 @@ import { NewsletterService } from './newsletter.service';
             } @else if (!showHtml()) {
               <div class="editor-content" #editorElement></div>
             } @else {
-              <textarea
-                [(ngModel)]="htmlContent"
-                (ngModelChange)="onHtmlChange($event)"
-                class="w-full min-h-[600px] p-4 border border-slate-600 rounded-b-lg bg-slate-900 text-slate-50 font-mono text-sm"
-                style="border-radius: 0 0 0.5rem 0.5rem;"
-              ></textarea>
+              <div class="html-editor-container">
+                <textarea
+                  #htmlTextarea
+                  [(ngModel)]="htmlContent"
+                  (input)="onHtmlInput()"
+                  (scroll)="onHtmlScroll($event)"
+                  class="html-editor-textarea"
+                  spellcheck="false"
+                ></textarea>
+                <pre class="html-editor-highlight" #htmlHighlight><code [innerHTML]="getHighlightedHtml()"></code></pre>
+              </div>
             }
           </div>
 
@@ -339,6 +401,8 @@ import { NewsletterService } from './newsletter.service';
 })
 export class NewsletterEditor implements OnInit, OnDestroy {
   @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
+  @ViewChild('htmlTextarea') htmlTextarea?: ElementRef<HTMLTextAreaElement>;
+  @ViewChild('htmlHighlight') htmlHighlight?: ElementRef<HTMLPreElement>;
 
   private route = inject(ActivatedRoute);
   private router = inject(Router);
@@ -348,6 +412,7 @@ export class NewsletterEditor implements OnInit, OnDestroy {
   editor: Editor | null = null;
   title = '';
   htmlContent = '';
+  highlightedHtml = '';
   showHtml = signal(false);
   showTemplates = signal(false);
   showPreview = signal(false);
@@ -400,6 +465,8 @@ export class NewsletterEditor implements OnInit, OnDestroy {
       if (newsletter) {
         this.title = newsletter.title;
         this.htmlContent = newsletter.content;
+        // Initialize highlighting for existing content
+        this.updateHighlighting();
       }
     }
 
@@ -520,11 +587,13 @@ export class NewsletterEditor implements OnInit, OnDestroy {
     if (!this.showHtml()) {
       // Switching to HTML view
       if (this.editor) {
-        this.htmlContent = this.editor.getHTML();
+        this.htmlContent = this.prettifyHtml(this.editor.getHTML());
         this.editor.destroy();
         this.editor = null;
       }
       this.showHtml.set(true);
+      // Update highlighting after switching to HTML mode
+      setTimeout(() => this.updateHighlighting(), 0);
     } else {
       // Switching back to visual view
       this.showHtml.set(false);
@@ -631,10 +700,6 @@ export class NewsletterEditor implements OnInit, OnDestroy {
         }
       }, 0);
     }
-  }
-
-  onHtmlChange(html: string): void {
-    this.htmlContent = html;
   }
 
   triggerImageUpload(): void {
@@ -798,6 +863,10 @@ export class NewsletterEditor implements OnInit, OnDestroy {
       if (this.editor) {
         this.editor.commands.setContent(template.html);
       }
+      // Update highlighting if in HTML mode
+      if (this.showHtml()) {
+        this.updateHighlighting();
+      }
       this.showTemplates.set(false);
     }
   }
@@ -838,5 +907,64 @@ export class NewsletterEditor implements OnInit, OnDestroy {
   getPreviewContent(): SafeHtml {
     const html = this.showHtml() ? this.htmlContent : (this.editor?.getHTML() || '');
     return this.sanitizer.bypassSecurityTrustHtml(html);
+  }
+
+  private prettifyHtml(html: string): string {
+    // Simple HTML prettifier
+    let formatted = '';
+    let indent = 0;
+    const tab = '  ';
+
+    // Remove existing whitespace between tags
+    html = html.replace(/>\s+</g, '><');
+
+    // Split by tags
+    const tokens = html.split(/(<[^>]+>)/g).filter(token => token.trim());
+
+    tokens.forEach(token => {
+      if (token.startsWith('</')) {
+        // Closing tag
+        indent--;
+        formatted += tab.repeat(Math.max(0, indent)) + token + '\n';
+      } else if (token.startsWith('<')) {
+        // Opening tag or self-closing
+        formatted += tab.repeat(indent) + token + '\n';
+        // Check if it's not self-closing and not a void element
+        if (!token.endsWith('/>') && !token.match(/<(br|img|input|hr|meta|link)[^>]*>/)) {
+          indent++;
+        }
+      } else {
+        // Text content
+        const trimmed = token.trim();
+        if (trimmed) {
+          formatted += tab.repeat(indent) + trimmed + '\n';
+        }
+      }
+    });
+
+    return formatted.trim();
+  }
+
+  onHtmlInput(): void {
+    // Update syntax highlighting when HTML content changes
+    this.updateHighlighting();
+  }
+
+  onHtmlScroll(event: Event): void {
+    // Sync scroll position between textarea and highlight layer
+    const textarea = event.target as HTMLTextAreaElement;
+    if (this.htmlHighlight?.nativeElement) {
+      this.htmlHighlight.nativeElement.scrollTop = textarea.scrollTop;
+      this.htmlHighlight.nativeElement.scrollLeft = textarea.scrollLeft;
+    }
+  }
+
+  private updateHighlighting(): void {
+    // Escape HTML and apply syntax highlighting
+    this.highlightedHtml = hljs.highlight(this.htmlContent, { language: 'xml' }).value;
+  }
+
+  getHighlightedHtml(): SafeHtml {
+    return this.sanitizer.bypassSecurityTrustHtml(this.highlightedHtml);
   }
 }
