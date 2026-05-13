@@ -27,7 +27,7 @@ export const routes: Routes = [
     loadComponent: () => import('./customers/customer-list').then(m => m.CustomerList),
     canActivate: [authGuard],
     data: {
-      roles: ['customers.read']
+      roles: ['read:customers']
     },
     resolve: {
       allCustomers: resolveAllCustomers
@@ -37,13 +37,13 @@ export const routes: Routes = [
     path: 'customers/new',
     loadComponent: () => import('./customers/customer-create').then(m => m.CustomerCreate),
     canActivate: [authGuard],
-    data: {roles: ['customers.write']}
+    data: {roles: ['write:customers']}
   },
   {
     path: 'customers/:id',
     loadComponent: () => import('./customers/customer-detail').then(m => m.CustomerDetail),
     canActivate: [authGuard],
-    data: {roles: ['customers.read']}
+    data: {roles: ['read:customers']}
   },
 
   // ----------------------
@@ -53,7 +53,7 @@ export const routes: Routes = [
     path: 'products',
     loadComponent: () => import('./products/product-list').then(m => m.ProductList),
     canActivate: [authGuard],
-    data: {roles: ['products.read']},
+    data: {roles: ['read:products']},
     resolve: {
       productsFromResolve: resolveAllProducts
     }
@@ -62,13 +62,13 @@ export const routes: Routes = [
     path: 'products/new',
     loadComponent: () => import('./products/product-create').then(m => m.ProductCreate),
     canActivate: [authGuard],
-    data: {roles: ['products.write']} // Admin only
+    data: {roles: ['write:products']} // Admin only
   },
   {
     path: 'products/:id',
     loadComponent: () => import('./products/product-detail').then(m => m.ProductDetail),
     canActivate: [authGuard],
-    data: {roles: ['products.read']} // detail view
+    data: {roles: ['read:products']} // detail view
   },
 
   // ----------------------
@@ -78,7 +78,7 @@ export const routes: Routes = [
     path: 'invoices',
     loadComponent: () => import('./invoices/invoice-list').then(m => m.InvoiceList),
     canActivate: [authGuard],
-    data: {roles: ['invoices.read']},
+    data: {roles: ['read:invoices']},
   },
 
   // ----------------------
@@ -88,13 +88,13 @@ export const routes: Routes = [
     path: 'newsletter',
     loadComponent: () => import('./newsletter/newsletter-list').then(m => m.NewsletterList),
     canActivate: [authGuard],
-    data: {roles: ['invoices.read']},
+    data: {roles: ['read:invoices']},
   },
   {
     path: 'newsletter/:id',
     loadComponent: () => import('./newsletter/newsletter-editor').then(m => m.NewsletterEditor),
     canActivate: [authGuard],
-    data: {roles: ['invoices.read']},
+    data: {roles: ['read:invoices']},
   },
 
   // ----------------------
@@ -110,7 +110,7 @@ export const routes: Routes = [
   {path: 'not-found', loadComponent: () => import('./not-found').then(m => m.NotFound)},
   {path: 'error', loadComponent: () => import('./error').then(m => m.Error)},
   {path: 'login', loadComponent: () => import('./auth/login').then(m => m.Login), data: {companyName: 'Fitness Management System'}},
-  {path: 'unauthorized', loadComponent: () => import('./auth/login').then(m => m.Login)},
+  {path: 'unauthorized', loadComponent: () => import('./unauthorized').then(m => m.Unauthorized)},
   {path: '', redirectTo: '/dashboard', pathMatch: 'full'},
   {path: '**', redirectTo: '/not-found'}
 

@@ -3,10 +3,11 @@ import {provideRouter, withComponentInputBinding} from '@angular/router';
 import {HttpClient, provideHttpClient, withInterceptors} from '@angular/common/http';
 import {TranslateLoader, TranslateModule} from '@ngx-translate/core';
 import {TranslateHttpLoader} from '@ngx-translate/http-loader';
-import {authHttpInterceptorFn, provideAuth0} from '@auth0/auth0-angular';
+import {provideAuth0} from '@auth0/auth0-angular';
 
 import {routes} from './app.routes';
 import {httpLoadingInterceptor} from './shared/http-loading.interceptor';
+import {authInterceptor} from './auth/auth.interceptor';
 import {Configuration} from './generated-api/configuration';
 import {environment} from '../environments/environment';
 
@@ -18,16 +19,15 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideRouter(routes, withComponentInputBinding()),
-    provideHttpClient(withInterceptors([authHttpInterceptorFn, httpLoadingInterceptor])),
+    provideHttpClient(withInterceptors([authInterceptor, httpLoadingInterceptor])),
     provideAuth0({
       domain: 'fitnesslab.eu.auth0.com',
       clientId: 'k0o6L1mxBtIkHC6as89XkbEK2VXnFEWk',
       authorizationParams: {
         redirect_uri: `${window.location.origin}/`,
+        audience: 'https://www.oliverzihler.ch',
       },
-      httpInterceptor: {
-        allowedList: [`${environment.apiUrl}/*`],
-      },
+      errorPath: '/login',
     }),
     {
       provide: Configuration,

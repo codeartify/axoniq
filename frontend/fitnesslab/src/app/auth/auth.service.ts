@@ -2,7 +2,7 @@ import {Injectable, inject} from '@angular/core';
 import {toSignal} from '@angular/core/rxjs-interop';
 import {AuthService as Auth0AuthService} from '@auth0/auth0-angular';
 import type {IdToken, User} from '@auth0/auth0-spa-js';
-import {Observable, combineLatest, map, shareReplay} from 'rxjs';
+import {Observable, catchError, combineLatest, map, of, shareReplay, switchMap} from 'rxjs';
 
 export interface UserProfile {
   username: string;
@@ -26,8 +26,20 @@ class AuthService {
   userProfile$: Observable<UserProfile | null> = combineLatest([
     this.auth0.user$,
     this.auth0.idTokenClaims$,
+    this.auth0.isAuthenticated$.pipe(
+      switchMap((isAuthenticated) =>
+        isAuthenticated
+          ? this.auth0.getAccessTokenSilently().pipe(
+              map((token) => this.decodeJwtPayload(token)),
+              catchError(() => of({}))
+            )
+          : of({})
+      )
+    ),
   ]).pipe(
-    map(([user, idTokenClaims]) => (user ? this.toUserProfile(user, idTokenClaims) : null)),
+    map(([user, idTokenClaims, accessTokenClaims]) =>
+      user ? this.toUserProfile(user, idTokenClaims, accessTokenClaims) : null
+    ),
     shareReplay({bufferSize: 1, refCount: true})
   );
 
@@ -69,10 +81,15 @@ class AuthService {
     return roles.some((role) => currentRoles.includes(role));
   }
 
-  private toUserProfile(user: User, idTokenClaims?: IdToken | null): UserProfile {
+  private toUserProfile(
+    user: User,
+    idTokenClaims?: IdToken | null,
+    accessTokenClaims: Record<string, unknown> = {}
+  ): UserProfile {
     const roles = this.extractRolesFromClaims(
       user as Record<string, unknown>,
-      (idTokenClaims ?? {}) as Record<string, unknown>
+      (idTokenClaims ?? {}) as Record<string, unknown>,
+      accessTokenClaims
     );
 
     return {
@@ -96,6 +113,21 @@ class AuthService {
 
     return [...new Set(roleClaims.flatMap((claim) => (Array.isArray(claim) ? claim : [])))]
       .filter((role): role is string => typeof role === 'string');
+  }
+
+  private decodeJwtPayload(token: string): Record<string, unknown> {
+    const payload = token.split('.')[1];
+    if (!payload) {
+      return {};
+    }
+
+    const normalizedPayload = payload.replace(/-/g, '+').replace(/_/g, '/');
+    const paddedPayload = normalizedPayload.padEnd(
+      normalizedPayload.length + (4 - normalizedPayload.length % 4) % 4,
+      '='
+    );
+
+    return JSON.parse(atob(paddedPayload)) as Record<string, unknown>;
   }
 }
 

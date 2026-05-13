@@ -7,8 +7,8 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: https://auth.oliverzihler.ch/realms/fitnesslab
-          jwk-set-uri: https://auth.oliverzihler.ch/realms/fitnesslab/protocol/openid-connect/certs
+          issuer-uri: https://fitnesslab.eu.auth0.com/
+          jwk-set-uri: https://fitnesslab.eu.auth0.com/.well-known/jwks.json
   axon:
   serializer:
     general: jackson

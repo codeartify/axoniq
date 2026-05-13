@@ -65,53 +65,55 @@ class SecurityConfig {
             .permitAll()
             .requestMatchers("/actuator/health", "/actuator/info")
             .permitAll()
+            .requestMatchers(GET, "/api/version")
+            .permitAll()
             // =======================
             //     PRODUCTS
             // =======================
-            // Only ADMIN (i.e. only users having products.write) can create products
+            // Only ADMIN (i.e. only users having write:products) can create products
             .requestMatchers(POST, "/api/products/**")
-            .hasAuthority("ROLE_products.write")
-            // Admin + Trainer (i.e. users having products.read) can read products
+            .hasAuthority("ROLE_write:products")
+            // Admin + Trainer (i.e. users having read:products) can read products
             .requestMatchers(GET, "/api/products/**")
-            .hasAuthority("ROLE_products.read")
-            // Admin + Trainer (i.e. users having products.write OR products.read) can update products
+            .hasAuthority("ROLE_read:products")
+            // Admin + Trainer (i.e. users having write:products OR read:products) can update products
             .requestMatchers(PUT, "/api/products/**")
-            .hasAuthority("ROLE_products.write")
+            .hasAuthority("ROLE_write:products")
             // =======================
             //     CUSTOMERS
             // =======================
-            // GET → customers.read
+            // GET → read:customers
             .requestMatchers(GET, "/api/customers/**")
-            .hasAuthority("ROLE_customers.read")
-            // POST / PUT → customers.write
+            .hasAuthority("ROLE_read:customers")
+            // POST / PUT → write:customers
             .requestMatchers(POST, "/api/customers/**")
-            .hasAuthority("ROLE_customers.write")
+            .hasAuthority("ROLE_write:customers")
             .requestMatchers(PUT, "/api/customers/**")
-            .hasAuthority("ROLE_customers.write")
+            .hasAuthority("ROLE_write:customers")
             // =======================
             //     INVOICES
             // =======================
-            // GET → invoices.read
+            // GET → read:invoices
             .requestMatchers(GET, "/api/invoices/**")
-            .hasAuthority("ROLE_invoices.read")
-            // POST → invoices.write
+            .hasAuthority("ROLE_read:invoices")
+            // POST → write:invoices
             .requestMatchers(POST, "/api/invoices/**")
-            .hasAuthority("ROLE_invoices.write")
+            .hasAuthority("ROLE_write:invoices")
             // =======================
             //     CONTRACTS
             // =======================
-            // GET → contracts.read
+            // GET → read:contracts
             .requestMatchers(GET, "/api/contracts/**")
-            .hasAuthority("ROLE_contracts.read")
-            // POST → contracts.write
+            .hasAuthority("ROLE_read:contracts")
+            // POST → write:contracts
             .requestMatchers(POST, "/api/contracts/**")
-            .hasAuthority("ROLE_contracts.write")
+            .hasAuthority("ROLE_write:contracts")
             // =======================
             //     MEMBERSHIPS
             // =======================
-            // sign-up → memberships.write
+            // sign-up → write:memberships
             .requestMatchers("/api/memberships/**")
-            .hasAuthority("ROLE_memberships.write")
+            .hasAuthority("ROLE_write:memberships")
             // =======================
             //     DEFAULT
             // =======================

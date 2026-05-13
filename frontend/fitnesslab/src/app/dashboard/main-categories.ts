@@ -43,9 +43,9 @@ export class MainCategories {
   private router = inject(Router);
   private authService = inject(AuthService);
 
-  canViewCustomers = computed(() => this.authService.hasRole('customers.read'));
-  canViewProducts = computed(() => this.authService.hasRole('products.read'));
-  canViewInvoices = computed(() => this.authService.hasRole('invoices.read'));
+  canViewCustomers = computed(() => this.authService.hasRole('read:customers'));
+  canViewProducts = computed(() => this.authService.hasRole('read:products'));
+  canViewInvoices = computed(() => this.authService.hasRole('read:invoices'));
 
   mainCategories = signal<MainCategory[]>([
     {

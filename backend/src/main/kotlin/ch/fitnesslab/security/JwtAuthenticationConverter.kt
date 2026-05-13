@@ -8,13 +8,16 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 fun jwtAuthenticationConverter(): JwtAuthenticationConverter {
     val jwtAuthenticationConverter = JwtAuthenticationConverter()
     jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter { jwt ->
-        val realmAccess = jwt.claims["realm_access"] as? Map<*, *>
-        val roles = realmAccess?.get("roles") as? List<*> ?: emptyList<String>()
+        val permissions = jwt.claims["permissions"] as? List<*> ?: emptyList<String>()
+        val scopes = (jwt.claims["scope"] as? String)
+            ?.split(" ")
+            .orEmpty()
 
-        roles
+        (permissions + scopes)
             .filterIsInstance<String>()
-            .map { role ->
-                SimpleGrantedAuthority("ROLE_$role")
+            .distinct()
+            .map { permission ->
+                SimpleGrantedAuthority("ROLE_$permission")
             }
     }
     return jwtAuthenticationConverter

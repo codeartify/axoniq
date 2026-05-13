@@ -56,7 +56,7 @@ export class ProductList {
   sortColumn = signal<SortColumn>('name');
   sortDirection = signal<'asc' | 'desc'>('asc');
 
-  canAddProducts = computed(() => this.authService.hasRole('products.write'));
+  canAddProducts = computed(() => this.authService.hasRole('write:products'));
 
   constructor() {
     effect(() => {

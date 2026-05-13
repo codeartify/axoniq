@@ -31,8 +31,8 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: ${OAUTH2_ISSUER_URI:https://auth.oliverzihler.ch/realms/fitnesslab}
-          jwk-set-uri: ${OAUTH2_JWK_SET_URI:https://auth.oliverzihler.ch/realms/fitnesslab/protocol/openid-connect/certs}
+          issuer-uri: ${OAUTH2_ISSUER_URI:https://fitnesslab.eu.auth0.com/}
+          jwk-set-uri: ${OAUTH2_JWK_SET_URI:https://fitnesslab.eu.auth0.com/.well-known/jwks.json}
 axon:
   serializer:
     events: jackson
