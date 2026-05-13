@@ -6,10 +6,10 @@ import ch.fitnesslab.product.domain.PricingVariantConfig
 import ch.fitnesslab.product.domain.ProductAudience
 import ch.fitnesslab.product.domain.ProductBehaviorConfig
 import ch.fitnesslab.product.domain.ProductVisibility
-import org.axonframework.serialization.Revision
+import org.axonframework.eventsourcing.annotation.EventTag
 
-@Revision("2.0")
 data class ProductCreatedEvent(
+    @field:EventTag(key = "Product")
     val productId: ProductId,
     val slug: String,
     val name: String,

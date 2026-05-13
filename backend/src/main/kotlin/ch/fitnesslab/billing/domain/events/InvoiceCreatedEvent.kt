@@ -6,11 +6,11 @@ import ch.fitnesslab.domain.value.CustomerId
 import ch.fitnesslab.domain.value.InvoiceId
 import ch.fitnesslab.domain.value.ProductId
 import ch.fitnesslab.membership.domain.DueDate
-import org.axonframework.serialization.Revision
+import org.axonframework.eventsourcing.annotation.EventTag
 import java.math.BigDecimal
 
-@Revision("1.0")
 data class InvoiceCreatedEvent(
+    @field:EventTag(key = "Invoice")
     val invoiceId: InvoiceId,
     val bookingId: BookingId,
     val customerId: CustomerId,

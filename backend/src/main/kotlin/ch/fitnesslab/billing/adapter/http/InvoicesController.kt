@@ -2,7 +2,6 @@ package ch.fitnesslab.billing.adapter.http
 
 import ch.fitnesslab.billing.application.FindAllInvoicesQuery
 import ch.fitnesslab.billing.application.InvoiceProjection
-import ch.fitnesslab.billing.application.InvoiceUpdated
 import ch.fitnesslab.billing.application.InvoiceView
 import ch.fitnesslab.billing.domain.InvoiceStatus
 import ch.fitnesslab.billing.domain.commands.CancelInvoiceCommand
@@ -13,9 +12,8 @@ import ch.fitnesslab.generated.api.InvoicesApi
 import ch.fitnesslab.generated.model.CancelInvoiceRequest
 import ch.fitnesslab.generated.model.InvoiceDto
 import ch.fitnesslab.utils.waitForUpdateOf
-import org.axonframework.commandhandling.gateway.CommandGateway
-import org.axonframework.messaging.responsetypes.ResponseTypes
-import org.axonframework.queryhandling.QueryGateway
+import org.axonframework.messaging.commandhandling.gateway.CommandGateway
+import org.axonframework.messaging.queryhandling.gateway.QueryGateway
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import java.time.Instant
@@ -69,12 +67,11 @@ class InvoicesController(
         val subscriptionQuery =
             queryGateway.subscriptionQuery(
                 FindAllInvoicesQuery(),
-                ResponseTypes.multipleInstancesOf(InvoiceView::class.java),
-                ResponseTypes.instanceOf(InvoiceUpdated::class.java),
+                Any::class.java,
             )
 
         try {
-            commandGateway.sendAndWait<Any>(
+            commandGateway.sendAndWait(
                 MarkInvoicePaidCommand(
                     invoiceId = InvoiceId.from(invoiceId),
                     paidAt = Instant.now(),
@@ -85,7 +82,6 @@ class InvoicesController(
 
             return ResponseEntity.ok().build()
         } finally {
-            subscriptionQuery.close()
         }
     }
 
@@ -96,12 +92,11 @@ class InvoicesController(
         val subscriptionQuery =
             queryGateway.subscriptionQuery(
                 FindAllInvoicesQuery(),
-                ResponseTypes.multipleInstancesOf(InvoiceView::class.java),
-                ResponseTypes.instanceOf(InvoiceUpdated::class.java),
+                Any::class.java,
             )
 
         try {
-            commandGateway.sendAndWait<Any>(
+            commandGateway.sendAndWait(
                 MarkInvoiceOverdueCommand(
                     invoiceId = InvoiceId.from(invoiceId),
                 ),
@@ -111,7 +106,6 @@ class InvoicesController(
 
             return ResponseEntity.ok().build()
         } finally {
-            subscriptionQuery.close()
         }
     }
 
@@ -123,12 +117,11 @@ class InvoicesController(
         val subscriptionQuery =
             queryGateway.subscriptionQuery(
                 FindAllInvoicesQuery(),
-                ResponseTypes.multipleInstancesOf(InvoiceView::class.java),
-                ResponseTypes.instanceOf(InvoiceUpdated::class.java),
+                Any::class.java,
             )
 
         try {
-            commandGateway.sendAndWait<Any>(
+            commandGateway.sendAndWait(
                 CancelInvoiceCommand(
                     invoiceId = InvoiceId.from(invoiceId),
                     reason = cancelInvoiceRequest.reason,
@@ -139,7 +132,6 @@ class InvoicesController(
 
             return ResponseEntity.ok().build()
         } finally {
-            subscriptionQuery.close()
         }
     }
 }

@@ -9,7 +9,7 @@ import ch.fitnesslab.domain.value.ProductId
 import ch.fitnesslab.plugins.bexio.infrastructure.BexioClient
 import ch.fitnesslab.product.application.FindProductByIdQuery
 import ch.fitnesslab.product.infrastructure.ProductVariantEntity
-import org.axonframework.queryhandling.QueryGateway
+import org.axonframework.messaging.queryhandling.gateway.QueryGateway
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.math.BigDecimal

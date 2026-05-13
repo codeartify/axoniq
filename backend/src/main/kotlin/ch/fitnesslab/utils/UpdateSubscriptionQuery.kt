@@ -1,11 +1,15 @@
 package ch.fitnesslab.utils
 
-import org.axonframework.queryhandling.SubscriptionQueryResult
+import org.reactivestreams.Publisher
+import reactor.core.publisher.Flux
 import java.time.Duration
 
-fun <V, U> waitForUpdateOf(
-    subscription: SubscriptionQueryResult<MutableList<V>, U>,
+fun waitForUpdateOf(
+    subscription: Publisher<*>,
     durationInSeconds: Long = 5,
 ) {
-    subscription.updates().blockFirst(Duration.ofSeconds(durationInSeconds))
+    Flux
+        .from(subscription)
+        .skip(1)
+        .blockFirst(Duration.ofSeconds(durationInSeconds))
 }

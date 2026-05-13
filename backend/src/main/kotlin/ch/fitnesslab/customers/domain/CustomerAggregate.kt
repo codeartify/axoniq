@@ -11,15 +11,14 @@ import ch.fitnesslab.domain.value.Address
 import ch.fitnesslab.domain.value.BexioContactId
 import ch.fitnesslab.domain.value.CustomerId
 import ch.fitnesslab.domain.value.Salutation
-import org.axonframework.commandhandling.CommandHandler
-import org.axonframework.eventsourcing.EventSourcingHandler
-import org.axonframework.modelling.command.AggregateIdentifier
-import org.axonframework.modelling.command.AggregateLifecycle
-import org.axonframework.spring.stereotype.Aggregate
+import org.axonframework.eventsourcing.annotation.EventSourcingHandler
+import org.axonframework.eventsourcing.annotation.reflection.EntityCreator
+import org.axonframework.extension.spring.stereotype.EventSourced
+import org.axonframework.messaging.commandhandling.annotation.CommandHandler
+import org.axonframework.messaging.eventhandling.gateway.EventAppender
 
-@Aggregate
-class CustomerAggregate() {
-    @AggregateIdentifier
+@EventSourced(idType = CustomerId::class, tagKey = "Customer")
+class CustomerAggregate {
     private lateinit var customerId: CustomerId
     private lateinit var salutation: Salutation
     private lateinit var firstName: FirstName
@@ -28,28 +27,39 @@ class CustomerAggregate() {
     private lateinit var address: Address
     private lateinit var email: EmailAddress
     private var phoneNumber: PhoneNumber? = null
-    private var bexioContactId: BexioContactId? = null // could be more generic to accomodate other IDs, e.g. as a Map<System, ID>
+    private var bexioContactId: BexioContactId? = null
 
-    @CommandHandler
-    constructor(command: RegisterCustomerCommand) : this() {
+    @EntityCreator
+    constructor()
 
-        AggregateLifecycle.apply(
-            CustomerRegisteredEvent(
-                customerId = command.customerId,
-                salutation = command.salutation,
-                firstName = command.firstName,
-                lastName = command.lastName,
-                dateOfBirth = command.dateOfBirth,
-                address = command.address,
-                email = command.email,
-                phoneNumber = command.phoneNumber,
-            ),
-        )
+    companion object {
+        @JvmStatic
+        @CommandHandler
+        fun handle(
+            command: RegisterCustomerCommand,
+            eventAppender: EventAppender,
+        ) {
+            eventAppender.append(
+                CustomerRegisteredEvent(
+                    customerId = command.customerId,
+                    salutation = command.salutation,
+                    firstName = command.firstName,
+                    lastName = command.lastName,
+                    dateOfBirth = command.dateOfBirth,
+                    address = command.address,
+                    email = command.email,
+                    phoneNumber = command.phoneNumber,
+                ),
+            )
+        }
     }
 
     @CommandHandler
-    fun handle(command: UpdateCustomerCommand) {
-        AggregateLifecycle.apply(
+    fun handle(
+        command: UpdateCustomerCommand,
+        eventAppender: EventAppender,
+    ) {
+        eventAppender.append(
             CustomerUpdatedEvent(
                 customerId = command.customerId,
                 salutation = command.salutation,
@@ -64,8 +74,11 @@ class CustomerAggregate() {
     }
 
     @CommandHandler
-    fun handle(command: LinkBexioContactCommand) {
-        AggregateLifecycle.apply(
+    fun handle(
+        command: LinkBexioContactCommand,
+        eventAppender: EventAppender,
+    ) {
+        eventAppender.append(
             BexioContactLinkedEvent(
                 customerId = command.customerId,
                 bexioContactId = command.bexioContactId,

@@ -7,20 +7,20 @@ import ch.fitnesslab.product.domain.events.ProductCreatedEvent
 import ch.fitnesslab.product.domain.events.ProductUpdatedEvent
 import ch.fitnesslab.product.infrastructure.ProductRepository
 import ch.fitnesslab.product.infrastructure.ProductVariantEntity
-import org.axonframework.config.ProcessingGroup
-import org.axonframework.eventhandling.EventHandler
-import org.axonframework.queryhandling.QueryHandler
-import org.axonframework.queryhandling.QueryUpdateEmitter
+import org.axonframework.messaging.eventhandling.annotation.EventHandler
+import org.axonframework.messaging.queryhandling.annotation.QueryHandler
+import org.axonframework.messaging.queryhandling.QueryUpdateEmitter
 import org.springframework.stereotype.Component
 
-@ProcessingGroup("products")
 @Component
 class ProductProjection(
     private val productRepository: ProductRepository,
-    private val queryUpdateEmitter: QueryUpdateEmitter,
 ) {
     @EventHandler
-    fun on(event: ProductCreatedEvent) {
+    fun on(
+        event: ProductCreatedEvent,
+        queryUpdateEmitter: QueryUpdateEmitter,
+    ) {
         val entity =
             ProductVariantEntity(
                 productId = event.productId.value,
@@ -60,7 +60,10 @@ class ProductProjection(
     }
 
     @EventHandler
-    fun on(event: ProductUpdatedEvent) {
+    fun on(
+        event: ProductUpdatedEvent,
+        queryUpdateEmitter: QueryUpdateEmitter,
+    ) {
         productRepository.findById(event.productId.value).ifPresent { existing ->
             val updatedLinkedPlatforms =
                 event.linkedPlatforms?.map { platform ->
@@ -121,7 +124,10 @@ class ProductProjection(
     }
 
     @EventHandler
-    fun on(event: LinkedPlatformAddedEvent) {
+    fun on(
+        event: LinkedPlatformAddedEvent,
+        queryUpdateEmitter: QueryUpdateEmitter,
+    ) {
         productRepository.findById(event.productId.value).ifPresent { existing ->
             existing.linkedPlatforms = event.linkedPlatforms
             productRepository.save(existing)

@@ -6,10 +6,10 @@ import ch.fitnesslab.product.domain.PricingVariantConfig
 import ch.fitnesslab.product.domain.ProductAudience
 import ch.fitnesslab.product.domain.ProductBehaviorConfig
 import ch.fitnesslab.product.domain.ProductVisibility
-import org.axonframework.modelling.command.TargetAggregateIdentifier
+import org.axonframework.modelling.annotation.TargetEntityId
 
 data class UpdateProductCommand(
-    @TargetAggregateIdentifier
+    @TargetEntityId
     val productId: ProductId,
     val slug: String,
     val name: String,

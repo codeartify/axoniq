@@ -2,10 +2,8 @@ package ch.fitnesslab.billing.infrastructure.bexio
 
 import ch.fitnesslab.billing.domain.events.InvoiceCreatedEvent
 import ch.fitnesslab.plugins.bexio.invoice.BexioInvoiceAdapter
-import org.axonframework.config.ProcessingGroup
-import org.axonframework.eventhandling.EventHandler
+import org.axonframework.messaging.eventhandling.annotation.EventHandler
 
-@ProcessingGroup("bexio-invoice")
 class BexioInvoiceProjection(
     private val bexioInvoiceAdapter: BexioInvoiceAdapter,
 ) {

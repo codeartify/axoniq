@@ -5,10 +5,10 @@ import ch.fitnesslab.domain.value.ContractId
 import ch.fitnesslab.domain.value.CustomerId
 import ch.fitnesslab.domain.value.DateRange
 import ch.fitnesslab.domain.value.ProductId
-import org.axonframework.serialization.Revision
+import org.axonframework.eventsourcing.annotation.EventTag
 
-@Revision("1.0")
 data class ContractSignedEvent(
+    @field:EventTag(key = "Contract")
     val contractId: ContractId,
     val customerId: CustomerId,
     val productId: ProductId,

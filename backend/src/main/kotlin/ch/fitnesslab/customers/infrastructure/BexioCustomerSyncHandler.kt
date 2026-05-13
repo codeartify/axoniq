@@ -9,14 +9,12 @@ import ch.fitnesslab.domain.value.Salutation
 import ch.fitnesslab.plugins.bexio.customer.BexioContactAdapter
 import ch.fitnesslab.plugins.bexio.customer.BexioCreateContactRequest
 import ch.fitnesslab.plugins.bexio.customer.BexioUpdateContactRequest
-import org.axonframework.commandhandling.gateway.CommandGateway
-import org.axonframework.config.ProcessingGroup
-import org.axonframework.eventhandling.EventHandler
+import org.axonframework.messaging.commandhandling.gateway.CommandGateway
+import org.axonframework.messaging.eventhandling.annotation.EventHandler
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
 @Component
-@ProcessingGroup("bexio-sync")
 class BexioCustomerSyncHandler(
     private val bexioContactAdapter: BexioContactAdapter,
     private val customerRepository: CustomerRepository,
@@ -49,7 +47,7 @@ class BexioCustomerSyncHandler(
             val bexioContact = bexioContactAdapter.createContact(request)
 
             // Link the Bexio contact ID to the customer aggregate
-            commandGateway.sendAndWait<Any>(
+            commandGateway.sendAndWait(
                 LinkBexioContactCommand(
                     customerId = event.customerId,
                     bexioContactId = BexioContactId.of(bexioContact.id),

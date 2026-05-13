@@ -7,17 +7,14 @@ import ch.fitnesslab.product.domain.commands.UpdateProductCommand
 import ch.fitnesslab.product.domain.events.LinkedPlatformAddedEvent
 import ch.fitnesslab.product.domain.events.ProductCreatedEvent
 import ch.fitnesslab.product.domain.events.ProductUpdatedEvent
-import org.axonframework.commandhandling.CommandHandler
-import org.axonframework.eventsourcing.EventSourcingHandler
-import org.axonframework.modelling.command.AggregateCreationPolicy
-import org.axonframework.modelling.command.AggregateIdentifier
-import org.axonframework.modelling.command.AggregateLifecycle.*
-import org.axonframework.modelling.command.CreationPolicy
-import org.axonframework.spring.stereotype.Aggregate
+import org.axonframework.eventsourcing.annotation.EventSourcingHandler
+import org.axonframework.eventsourcing.annotation.reflection.EntityCreator
+import org.axonframework.extension.spring.stereotype.EventSourced
+import org.axonframework.messaging.commandhandling.annotation.CommandHandler
+import org.axonframework.messaging.eventhandling.gateway.EventAppender
 
-@Aggregate
-class Product() {
-    @AggregateIdentifier
+@EventSourced(idType = ProductId::class, tagKey = "Product")
+class Product {
     private lateinit var productId: ProductId
     private lateinit var slug: String
     private lateinit var name: String
@@ -34,56 +31,86 @@ class Product() {
     private var perks: List<String>? = null
     private var linkedPlatforms: List<LinkedPlatformSync>? = null
 
-    @CommandHandler
-    constructor(command: CreateProductCommand) : this() {
-        apply(
-            ProductCreatedEvent(
-                productId = command.productId,
-                slug = command.slug,
-                name = command.name,
-                productType = command.productType,
-                audience = command.audience,
-                requiresMembership = command.requiresMembership,
-                pricingVariant = command.pricingVariant,
-                behavior = command.behavior,
-                description = command.description,
-                termsAndConditions = command.termsAndConditions,
-                visibility = command.visibility,
-                buyable = command.buyable,
-                buyerCanCancel = command.buyerCanCancel,
-                perks = command.perks,
-                linkedPlatforms = command.linkedPlatforms,
-            ),
-        )
+    @EntityCreator
+    constructor()
+
+    companion object {
+        @JvmStatic
+        @CommandHandler
+        fun handle(
+            command: CreateProductCommand,
+            eventAppender: EventAppender,
+        ) {
+            eventAppender.append(
+                ProductCreatedEvent(
+                    productId = command.productId,
+                    slug = command.slug,
+                    name = command.name,
+                    productType = command.productType,
+                    audience = command.audience,
+                    requiresMembership = command.requiresMembership,
+                    pricingVariant = command.pricingVariant,
+                    behavior = command.behavior,
+                    description = command.description,
+                    termsAndConditions = command.termsAndConditions,
+                    visibility = command.visibility,
+                    buyable = command.buyable,
+                    buyerCanCancel = command.buyerCanCancel,
+                    perks = command.perks,
+                    linkedPlatforms = command.linkedPlatforms,
+                ),
+            )
+        }
+
+        @JvmStatic
+        @CommandHandler
+        fun createFromUpdate(
+            command: UpdateProductCommand,
+            eventAppender: EventAppender,
+        ) {
+            appendProductUpdatedEvent(command, eventAppender)
+        }
+
+        private fun appendProductUpdatedEvent(
+            command: UpdateProductCommand,
+            eventAppender: EventAppender,
+        ) {
+            eventAppender.append(
+                ProductUpdatedEvent(
+                    productId = command.productId,
+                    slug = command.slug,
+                    name = command.name,
+                    productType = command.productType,
+                    audience = command.audience,
+                    requiresMembership = command.requiresMembership,
+                    pricingVariant = command.pricingVariant,
+                    behavior = command.behavior,
+                    description = command.description,
+                    termsAndConditions = command.termsAndConditions,
+                    visibility = command.visibility,
+                    buyable = command.buyable,
+                    buyerCanCancel = command.buyerCanCancel,
+                    perks = command.perks,
+                    linkedPlatforms = command.linkedPlatforms,
+                ),
+            )
+        }
     }
 
     @CommandHandler
-    @CreationPolicy(AggregateCreationPolicy.CREATE_IF_MISSING)
-    fun handle(command: UpdateProductCommand) {
-        apply(
-            ProductUpdatedEvent(
-                productId = command.productId,
-                slug = command.slug,
-                name = command.name,
-                productType = command.productType,
-                audience = command.audience,
-                requiresMembership = command.requiresMembership,
-                pricingVariant = command.pricingVariant,
-                behavior = command.behavior,
-                description = command.description,
-                termsAndConditions = command.termsAndConditions,
-                visibility = command.visibility,
-                buyable = command.buyable,
-                buyerCanCancel = command.buyerCanCancel,
-                perks = command.perks,
-                linkedPlatforms = command.linkedPlatforms,
-            ),
-        )
+    fun handle(
+        command: UpdateProductCommand,
+        eventAppender: EventAppender,
+    ) {
+        appendProductUpdatedEvent(command, eventAppender)
     }
 
     @CommandHandler
-    fun on(event: AddLinkedPlatformCommand) {
-        apply(
+    fun on(
+        event: AddLinkedPlatformCommand,
+        eventAppender: EventAppender,
+    ) {
+        eventAppender.append(
             LinkedPlatformAddedEvent(
                 productId = event.productId,
                 linkedPlatforms = event.linkedPlatforms,
@@ -112,6 +139,7 @@ class Product() {
 
     @EventSourcingHandler
     fun on(event: ProductUpdatedEvent) {
+        this.productId = event.productId
         this.slug = event.slug
         this.name = event.name
         this.productType = event.productType

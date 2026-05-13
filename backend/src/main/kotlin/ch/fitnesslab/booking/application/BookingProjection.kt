@@ -8,22 +8,22 @@ import ch.fitnesslab.booking.infrastructure.BookingRepository
 import ch.fitnesslab.domain.value.BookingId
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import org.axonframework.config.ProcessingGroup
-import org.axonframework.eventhandling.EventHandler
-import org.axonframework.queryhandling.QueryHandler
-import org.axonframework.queryhandling.QueryUpdateEmitter
+import org.axonframework.messaging.eventhandling.annotation.EventHandler
+import org.axonframework.messaging.queryhandling.annotation.QueryHandler
+import org.axonframework.messaging.queryhandling.QueryUpdateEmitter
 import org.springframework.stereotype.Component
 import java.util.*
 
-@ProcessingGroup("booking")
 @Component
 class BookingProjection(
     private val bookingRepository: BookingRepository,
     private val objectMapper: ObjectMapper,
-    private val queryUpdateEmitter: QueryUpdateEmitter,
 ) {
     @EventHandler
-    fun on(event: BookingPlacedEvent) {
+    fun on(
+        event: BookingPlacedEvent,
+        queryUpdateEmitter: QueryUpdateEmitter,
+    ) {
         val entity =
             BookingEntity(
                 bookingId = event.bookingId.value,

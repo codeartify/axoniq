@@ -8,10 +8,10 @@ import ch.fitnesslab.customers.domain.value.PhoneNumber
 import ch.fitnesslab.domain.value.Address
 import ch.fitnesslab.domain.value.CustomerId
 import ch.fitnesslab.domain.value.Salutation
-import org.axonframework.modelling.command.TargetAggregateIdentifier
+import org.axonframework.modelling.annotation.TargetEntityId
 
 data class RegisterCustomerCommand(
-    @TargetAggregateIdentifier
+    @TargetEntityId
     val customerId: CustomerId,
     val salutation: Salutation,
     val firstName: FirstName,

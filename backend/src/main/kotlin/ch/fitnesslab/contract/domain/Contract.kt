@@ -14,16 +14,15 @@ import ch.fitnesslab.domain.value.ContractId
 import ch.fitnesslab.domain.value.CustomerId
 import ch.fitnesslab.domain.value.DateRange
 import ch.fitnesslab.domain.value.ProductId
-import org.axonframework.commandhandling.CommandHandler
-import org.axonframework.eventsourcing.EventSourcingHandler
-import org.axonframework.modelling.command.AggregateIdentifier
-import org.axonframework.modelling.command.AggregateLifecycle
-import org.axonframework.spring.stereotype.Aggregate
+import org.axonframework.eventsourcing.annotation.EventSourcingHandler
+import org.axonframework.eventsourcing.annotation.reflection.EntityCreator
+import org.axonframework.extension.spring.stereotype.EventSourced
+import org.axonframework.messaging.commandhandling.annotation.CommandHandler
+import org.axonframework.messaging.eventhandling.gateway.EventAppender
 import java.time.temporal.ChronoUnit.DAYS
 
-@Aggregate
-class Contract() {
-    @AggregateIdentifier
+@EventSourced(idType = ContractId::class, tagKey = "Contract")
+class Contract {
     private lateinit var contractId: ContractId
     private lateinit var customerId: CustomerId
     private lateinit var productId: ProductId
@@ -34,22 +33,34 @@ class Contract() {
     private var sessionsUsed: Int = 0
     private val pauseHistory: MutableList<PauseEntry> = mutableListOf()
 
-    @CommandHandler
-    constructor(command: CreateContractCommand) : this() {
-        AggregateLifecycle.apply(
-            ContractSignedEvent(
-                contractId = command.contractId,
-                customerId = command.customerId,
-                productId = command.productId,
-                bookingId = command.bookingId,
-                validity = command.validity,
-                sessionsTotal = command.sessionsTotal,
-            ),
-        )
+    @EntityCreator
+    constructor()
+
+    companion object {
+        @JvmStatic
+        @CommandHandler
+        fun handle(
+            command: CreateContractCommand,
+            eventAppender: EventAppender,
+        ) {
+            eventAppender.append(
+                ContractSignedEvent(
+                    contractId = command.contractId,
+                    customerId = command.customerId,
+                    productId = command.productId,
+                    bookingId = command.bookingId,
+                    validity = command.validity,
+                    sessionsTotal = command.sessionsTotal,
+                ),
+            )
+        }
     }
 
     @CommandHandler
-    fun handle(command: PauseContractCommand) {
+    fun handle(
+        command: PauseContractCommand,
+        eventAppender: EventAppender,
+    ) {
         require(status == ACTIVE) {
             "Contract must be ACTIVE to be paused"
         }
@@ -60,7 +71,7 @@ class Contract() {
             "Pause duration must be between 3 and 8 weeks (21-56 days)"
         }
 
-        AggregateLifecycle.apply(
+        eventAppender.append(
             ContractPausedEvent(
                 contractId = command.contractId,
                 pauseRange = pauseRange,
@@ -72,14 +83,17 @@ class Contract() {
     private fun isValidPauseDuration(pauseDays: Long): Boolean = pauseDays in 21..56
 
     @CommandHandler
-    fun handle(command: ResumeContractCommand) {
+    fun handle(
+        command: ResumeContractCommand,
+        eventAppender: EventAppender,
+    ) {
         require(status == PAUSED) {
             "Contract must be PAUSED to be resumed"
         }
 
         val extendedValidity = extendValidityByPause()
 
-        AggregateLifecycle.apply(
+        eventAppender.append(
             ContractResumedEvent(
                 contractId = command.contractId,
                 extendedValidity = extendedValidity,

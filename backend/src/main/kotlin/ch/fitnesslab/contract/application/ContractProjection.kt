@@ -8,21 +8,21 @@ import ch.fitnesslab.contract.infrastructure.ContractRepository
 import ch.fitnesslab.domain.ContractStatus
 import ch.fitnesslab.domain.value.ContractId
 import ch.fitnesslab.domain.value.DateRange
-import org.axonframework.config.ProcessingGroup
-import org.axonframework.eventhandling.EventHandler
-import org.axonframework.queryhandling.QueryHandler
-import org.axonframework.queryhandling.QueryUpdateEmitter
+import org.axonframework.messaging.eventhandling.annotation.EventHandler
+import org.axonframework.messaging.queryhandling.annotation.QueryHandler
+import org.axonframework.messaging.queryhandling.QueryUpdateEmitter
 import org.springframework.stereotype.Component
 import java.util.*
 
-@ProcessingGroup("contracts")
 @Component
 class ContractProjection(
     private val contractRepository: ContractRepository,
-    private val queryUpdateEmitter: QueryUpdateEmitter,
 ) {
     @EventHandler
-    fun on(event: ContractSignedEvent) {
+    fun on(
+        event: ContractSignedEvent,
+        queryUpdateEmitter: QueryUpdateEmitter,
+    ) {
         val entity =
             ContractEntity(
                 contractId = event.contractId.value,
@@ -45,7 +45,10 @@ class ContractProjection(
     }
 
     @EventHandler
-    fun on(event: ContractPausedEvent) {
+    fun on(
+        event: ContractPausedEvent,
+        queryUpdateEmitter: QueryUpdateEmitter,
+    ) {
         contractRepository.findById(event.contractId.value).ifPresent { existing ->
             val updated =
                 ContractEntity(
@@ -76,7 +79,10 @@ class ContractProjection(
     }
 
     @EventHandler
-    fun on(event: ContractResumedEvent) {
+    fun on(
+        event: ContractResumedEvent,
+        queryUpdateEmitter: QueryUpdateEmitter,
+    ) {
         contractRepository.findById(event.contractId.value).ifPresent { existing ->
             val updated =
                 ContractEntity(

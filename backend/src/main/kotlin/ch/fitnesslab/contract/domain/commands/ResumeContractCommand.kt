@@ -1,9 +1,9 @@
 package ch.fitnesslab.contract.domain.commands
 
 import ch.fitnesslab.domain.value.ContractId
-import org.axonframework.modelling.command.TargetAggregateIdentifier
+import org.axonframework.modelling.annotation.TargetEntityId
 
 data class ResumeContractCommand(
-    @TargetAggregateIdentifier
+    @TargetEntityId
     val contractId: ContractId,
 )

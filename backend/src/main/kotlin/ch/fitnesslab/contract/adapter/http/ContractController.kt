@@ -1,7 +1,6 @@
 package ch.fitnesslab.contract.adapter.http
 
 import ch.fitnesslab.contract.application.ContractProjection
-import ch.fitnesslab.contract.application.ContractUpdatedUpdate
 import ch.fitnesslab.contract.application.ContractView
 import ch.fitnesslab.contract.application.FindAllContractsQuery
 import ch.fitnesslab.contract.domain.commands.PauseContractCommand
@@ -18,10 +17,9 @@ import ch.fitnesslab.generated.model.PauseContractRequest
 import ch.fitnesslab.generated.model.PauseHistoryEntryDto
 import ch.fitnesslab.product.application.ProductProjection
 import ch.fitnesslab.utils.waitForUpdateOf
-import org.axonframework.commandhandling.gateway.CommandGateway
-import org.axonframework.messaging.responsetypes.ResponseTypes
-import org.axonframework.queryhandling.QueryGateway
-import org.axonframework.queryhandling.SubscriptionQueryResult
+import org.axonframework.messaging.commandhandling.gateway.CommandGateway
+import org.axonframework.messaging.queryhandling.gateway.QueryGateway
+import org.reactivestreams.Publisher
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.RestController
 import java.time.LocalDate
@@ -60,13 +58,12 @@ class ContractController(
         try {
             val command = pauseCommandFrom(contractId, pauseContractRequest)
 
-            commandGateway.sendAndWait<Any>(command)
+            commandGateway.sendAndWait(command)
 
             waitForUpdateOf(subscriptionQuery)
 
             return ResponseEntity.ok().build()
         } finally {
-            subscriptionQuery.close()
         }
     }
 
@@ -78,13 +75,12 @@ class ContractController(
 
             val command = ResumeContractCommand(contractId)
 
-            commandGateway.sendAndWait<Any>(command)
+            commandGateway.sendAndWait(command)
 
             waitForUpdateOf(resumeSubscriptionQuery)
 
             return ResponseEntity.ok().build()
         } finally {
-            resumeSubscriptionQuery.close()
         }
     }
 
@@ -108,11 +104,10 @@ class ContractController(
         return command
     }
 
-    private fun createFindAllContractsQuery(): SubscriptionQueryResult<MutableList<ContractView>, ContractUpdatedUpdate> =
+    private fun createFindAllContractsQuery(): Publisher<Any> =
         queryGateway.subscriptionQuery(
             FindAllContractsQuery(),
-            ResponseTypes.multipleInstancesOf(ContractView::class.java),
-            ResponseTypes.instanceOf(ContractUpdatedUpdate::class.java),
+            Any::class.java,
         )
 
     private fun toPauseReason(pauseContractRequest: PauseContractRequest): PauseReason =
@@ -129,11 +124,10 @@ class ContractController(
             end = LocalDate.parse(endDate.toString()),
         )
 
-    private fun createResumeSubscriptionQuery(): SubscriptionQueryResult<MutableList<ContractView>, ContractUpdatedUpdate> =
+    private fun createResumeSubscriptionQuery(): Publisher<Any> =
         queryGateway.subscriptionQuery(
             FindAllContractsQuery(),
-            ResponseTypes.multipleInstancesOf(ContractView::class.java),
-            ResponseTypes.instanceOf(ContractUpdatedUpdate::class.java),
+            Any::class.java,
         )
 
     private fun toDto(contractView: ContractView): ContractDetailDto {

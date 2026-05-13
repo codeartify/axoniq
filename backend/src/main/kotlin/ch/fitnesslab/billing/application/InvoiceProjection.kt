@@ -11,10 +11,9 @@ import ch.fitnesslab.billing.infrastructure.InvoiceRepository
 import ch.fitnesslab.customers.application.CustomerProjection
 import ch.fitnesslab.domain.value.CustomerId
 import ch.fitnesslab.domain.value.InvoiceId
-import org.axonframework.config.ProcessingGroup
-import org.axonframework.eventhandling.EventHandler
-import org.axonframework.queryhandling.QueryHandler
-import org.axonframework.queryhandling.QueryUpdateEmitter
+import org.axonframework.messaging.eventhandling.annotation.EventHandler
+import org.axonframework.messaging.queryhandling.annotation.QueryHandler
+import org.axonframework.messaging.queryhandling.QueryUpdateEmitter
 import org.springframework.stereotype.Component
 import java.math.BigDecimal
 import java.time.Instant
@@ -22,15 +21,16 @@ import java.time.LocalDate
 import java.util.*
 
 @Component
-@ProcessingGroup("invoices")
 class InvoiceProjection(
     private val invoiceRepository: InvoiceRepository,
     private val invoiceEmailService: InvoiceEmailService,
     private val customerProjection: CustomerProjection,
-    private val queryUpdateEmitter: QueryUpdateEmitter,
 ) {
     @EventHandler
-    fun on(event: InvoiceCreatedEvent) {
+    fun on(
+        event: InvoiceCreatedEvent,
+        queryUpdateEmitter: QueryUpdateEmitter,
+    ) {
         val entity =
             InvoiceEntity(
                 invoiceId = event.invoiceId.value,
@@ -66,7 +66,10 @@ class InvoiceProjection(
     }
 
     @EventHandler
-    fun on(event: InvoicePaidEvent) {
+    fun on(
+        event: InvoicePaidEvent,
+        queryUpdateEmitter: QueryUpdateEmitter,
+    ) {
         invoiceRepository.findById(event.invoiceId.value).ifPresent { existing ->
             val updated =
                 InvoiceEntity(
@@ -92,7 +95,10 @@ class InvoiceProjection(
     }
 
     @EventHandler
-    fun on(event: InvoiceMarkedOverdueEvent) {
+    fun on(
+        event: InvoiceMarkedOverdueEvent,
+        queryUpdateEmitter: QueryUpdateEmitter,
+    ) {
         invoiceRepository.findById(event.invoiceId.value).ifPresent { existing ->
             val updated =
                 InvoiceEntity(
@@ -118,7 +124,10 @@ class InvoiceProjection(
     }
 
     @EventHandler
-    fun on(event: InvoiceCancelledEvent) {
+    fun on(
+        event: InvoiceCancelledEvent,
+        queryUpdateEmitter: QueryUpdateEmitter,
+    ) {
         invoiceRepository.findById(event.invoiceId.value).ifPresent { existing ->
             val updated =
                 InvoiceEntity(

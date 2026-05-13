@@ -13,17 +13,16 @@ import ch.fitnesslab.domain.value.CustomerId
 import ch.fitnesslab.domain.value.InvoiceId
 import ch.fitnesslab.domain.value.ProductId
 import ch.fitnesslab.membership.domain.DueDate
-import org.axonframework.commandhandling.CommandHandler
-import org.axonframework.eventsourcing.EventSourcingHandler
-import org.axonframework.modelling.command.AggregateIdentifier
-import org.axonframework.modelling.command.AggregateLifecycle
-import org.axonframework.spring.stereotype.Aggregate
+import org.axonframework.eventsourcing.annotation.EventSourcingHandler
+import org.axonframework.eventsourcing.annotation.reflection.EntityCreator
+import org.axonframework.extension.spring.stereotype.EventSourced
+import org.axonframework.messaging.commandhandling.annotation.CommandHandler
+import org.axonframework.messaging.eventhandling.gateway.EventAppender
 import java.math.BigDecimal
 import java.time.Instant
 
-@Aggregate
-class Invoice() {
-    @AggregateIdentifier
+@EventSourced(idType = InvoiceId::class, tagKey = "Invoice")
+class Invoice {
     private lateinit var invoiceId: InvoiceId
     private lateinit var bookingId: BookingId
     private lateinit var customerId: CustomerId
@@ -35,30 +34,42 @@ class Invoice() {
     private var installmentNumber: Int? = null
     private var paidAt: Instant? = null
 
-    @CommandHandler
-    constructor(command: CreateInvoiceCommand) : this() {
-        AggregateLifecycle.apply(
-            InvoiceCreatedEvent(
-                invoiceId = command.invoiceId,
-                bookingId = command.bookingId,
-                customerId = command.customerId,
-                productId = command.productId,
-                amount = command.amount,
-                dueDate = command.dueDate,
-                status = InvoiceStatus.OPEN,
-                isInstallment = command.isInstallment,
-                installmentNumber = command.installmentNumber,
-            ),
-        )
+    @EntityCreator
+    constructor()
+
+    companion object {
+        @JvmStatic
+        @CommandHandler
+        fun handle(
+            command: CreateInvoiceCommand,
+            eventAppender: EventAppender,
+        ) {
+            eventAppender.append(
+                InvoiceCreatedEvent(
+                    invoiceId = command.invoiceId,
+                    bookingId = command.bookingId,
+                    customerId = command.customerId,
+                    productId = command.productId,
+                    amount = command.amount,
+                    dueDate = command.dueDate,
+                    status = InvoiceStatus.OPEN,
+                    isInstallment = command.isInstallment,
+                    installmentNumber = command.installmentNumber,
+                ),
+            )
+        }
     }
 
     @CommandHandler
-    fun handle(command: MarkInvoicePaidCommand) {
+    fun handle(
+        command: MarkInvoicePaidCommand,
+        eventAppender: EventAppender,
+    ) {
         require(status == InvoiceStatus.OPEN || status == InvoiceStatus.OVERDUE) {
             "Invoice must be OPEN or OVERDUE to be marked as PAID"
         }
 
-        AggregateLifecycle.apply(
+        eventAppender.append(
             InvoicePaidEvent(
                 invoiceId = command.invoiceId,
                 paidAt = command.paidAt,
@@ -80,12 +91,15 @@ class Invoice() {
     }
 
     @CommandHandler
-    fun handle(command: MarkInvoiceOverdueCommand) {
+    fun handle(
+        command: MarkInvoiceOverdueCommand,
+        eventAppender: EventAppender,
+    ) {
         require(status == InvoiceStatus.OPEN) {
             "Invoice must be OPEN to be marked as OVERDUE"
         }
 
-        AggregateLifecycle.apply(
+        eventAppender.append(
             InvoiceMarkedOverdueEvent(
                 invoiceId = command.invoiceId,
             ),
@@ -93,12 +107,15 @@ class Invoice() {
     }
 
     @CommandHandler
-    fun handle(command: CancelInvoiceCommand) {
+    fun handle(
+        command: CancelInvoiceCommand,
+        eventAppender: EventAppender,
+    ) {
         require(status != InvoiceStatus.PAID) {
             "Cannot cancel a PAID invoice"
         }
 
-        AggregateLifecycle.apply(
+        eventAppender.append(
             InvoiceCancelledEvent(
                 invoiceId = command.invoiceId,
                 reason = command.reason,

@@ -4,10 +4,10 @@ import ch.fitnesslab.customers.domain.value.*
 import ch.fitnesslab.domain.value.Address
 import ch.fitnesslab.domain.value.CustomerId
 import ch.fitnesslab.domain.value.Salutation
-import org.axonframework.serialization.Revision
+import org.axonframework.eventsourcing.annotation.EventTag
 
-@Revision("1.0")
 data class CustomerUpdatedEvent(
+    @field:EventTag(key = "Customer")
     val customerId: CustomerId,
     val salutation: Salutation,
     val firstName: FirstName,

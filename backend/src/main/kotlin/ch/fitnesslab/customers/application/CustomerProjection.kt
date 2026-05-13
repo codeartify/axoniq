@@ -6,20 +6,20 @@ import ch.fitnesslab.customers.domain.events.CustomerUpdatedEvent
 import ch.fitnesslab.customers.infrastructure.CustomerEntity
 import ch.fitnesslab.customers.infrastructure.CustomerRepository
 import ch.fitnesslab.domain.value.CustomerId
-import org.axonframework.config.ProcessingGroup
-import org.axonframework.eventhandling.EventHandler
-import org.axonframework.queryhandling.QueryHandler
-import org.axonframework.queryhandling.QueryUpdateEmitter
+import org.axonframework.messaging.eventhandling.annotation.EventHandler
+import org.axonframework.messaging.queryhandling.annotation.QueryHandler
+import org.axonframework.messaging.queryhandling.QueryUpdateEmitter
 import org.springframework.stereotype.Component
 
 @Component
-@ProcessingGroup("customers")
 class CustomerProjection(
     private val customerRepository: CustomerRepository,
-    private val queryUpdateEmitter: QueryUpdateEmitter,
 ) {
     @EventHandler
-    fun on(event: CustomerRegisteredEvent) {
+    fun on(
+        event: CustomerRegisteredEvent,
+        queryUpdateEmitter: QueryUpdateEmitter,
+    ) {
         val entity =
             CustomerEntity(
                 customerId = event.customerId.value.toString(),
@@ -45,7 +45,10 @@ class CustomerProjection(
     }
 
     @EventHandler
-    fun on(event: CustomerUpdatedEvent) {
+    fun on(
+        event: CustomerUpdatedEvent,
+        queryUpdateEmitter: QueryUpdateEmitter,
+    ) {
         customerRepository.findById(event.customerId.value.toString()).ifPresent { existing ->
             existing.customerId = event.customerId.value.toString()
             existing.salutation = event.salutation.name
@@ -71,7 +74,10 @@ class CustomerProjection(
     }
 
     @EventHandler
-    fun on(event: BexioContactLinkedEvent) {
+    fun on(
+        event: BexioContactLinkedEvent,
+        queryUpdateEmitter: QueryUpdateEmitter,
+    ) {
         customerRepository.findById(event.customerId.value.toString()).ifPresent { existing ->
             existing.bexioContactId = event.bexioContactId.value
             customerRepository.save(existing)

@@ -1,16 +1,10 @@
 package ch.fitnesslab.membership.application
 
 import ch.fitnesslab.billing.application.FindAllInvoicesQuery
-import ch.fitnesslab.billing.application.InvoiceUpdated
-import ch.fitnesslab.billing.application.InvoiceView
 import ch.fitnesslab.billing.domain.commands.CreateInvoiceCommand
-import ch.fitnesslab.booking.application.BookingUpdatedUpdate
-import ch.fitnesslab.booking.application.BookingView
 import ch.fitnesslab.booking.application.FindAllBookingsQuery
 import ch.fitnesslab.booking.domain.PurchasedProduct
 import ch.fitnesslab.booking.domain.commands.PlaceBookingCommand
-import ch.fitnesslab.contract.application.ContractUpdatedUpdate
-import ch.fitnesslab.contract.application.ContractView
 import ch.fitnesslab.contract.application.FindAllContractsQuery
 import ch.fitnesslab.contract.domain.commands.CreateContractCommand
 import ch.fitnesslab.customers.application.FindCustomerByIdQuery
@@ -20,10 +14,9 @@ import ch.fitnesslab.membership.domain.DueDate
 import ch.fitnesslab.product.application.FindProductByIdQuery
 import ch.fitnesslab.product.infrastructure.ProductVariantEntity
 import ch.fitnesslab.utils.waitForUpdateOf
-import org.axonframework.commandhandling.gateway.CommandGateway
-import org.axonframework.messaging.responsetypes.ResponseTypes
-import org.axonframework.queryhandling.QueryGateway
-import org.axonframework.queryhandling.SubscriptionQueryResult
+import org.axonframework.messaging.commandhandling.gateway.CommandGateway
+import org.axonframework.messaging.queryhandling.gateway.QueryGateway
+import org.reactivestreams.Publisher
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 
@@ -49,7 +42,7 @@ class MembershipSignUpService(
         val invoiceId = InvoiceId.generate()
 
         try {
-            commandGateway.send<Any>(
+            commandGateway.send(
                 PlaceBookingCommand(
                     bookingId = bookingId,
                     payerCustomerId = customerId,
@@ -58,7 +51,7 @@ class MembershipSignUpService(
             )
 
             // 2. Create contract
-            commandGateway.send<Any>(
+            commandGateway.send(
                 CreateContractCommand(
                     contractId = contractId,
                     customerId = customerId,
@@ -70,7 +63,7 @@ class MembershipSignUpService(
             )
 
             val dueDate = DueDate.inDays(30)
-            commandGateway.send<Any>(
+            commandGateway.send(
                 CreateInvoiceCommand(
                     invoiceId = invoiceId,
                     bookingId = bookingId,
@@ -93,31 +86,25 @@ class MembershipSignUpService(
                 invoiceId = invoiceId,
             )
         } finally {
-            bookingSubscription.close()
-            contractSubscription.close()
-            invoiceSubscription.close()
         }
     }
 
-    private fun createInvoiceSubscription(): SubscriptionQueryResult<MutableList<InvoiceView>, InvoiceUpdated> =
+    private fun createInvoiceSubscription(): Publisher<Any> =
         queryGateway.subscriptionQuery(
             FindAllInvoicesQuery(),
-            ResponseTypes.multipleInstancesOf(InvoiceView::class.java),
-            ResponseTypes.instanceOf(InvoiceUpdated::class.java),
+            Any::class.java,
         )
 
-    private fun createContractSubscription(): SubscriptionQueryResult<MutableList<ContractView>, ContractUpdatedUpdate> =
+    private fun createContractSubscription(): Publisher<Any> =
         queryGateway.subscriptionQuery(
             FindAllContractsQuery(),
-            ResponseTypes.multipleInstancesOf(ContractView::class.java),
-            ResponseTypes.instanceOf(ContractUpdatedUpdate::class.java),
+            Any::class.java,
         )
 
-    private fun createBookingSubscriptionQuery(): SubscriptionQueryResult<MutableList<BookingView>, BookingUpdatedUpdate> =
+    private fun createBookingSubscriptionQuery(): Publisher<Any> =
         queryGateway.subscriptionQuery(
             FindAllBookingsQuery(),
-            ResponseTypes.multipleInstancesOf(BookingView::class.java),
-            ResponseTypes.instanceOf(BookingUpdatedUpdate::class.java),
+            Any::class.java,
         )
 
     private fun getProductVariant(productId: ProductId): ProductVariantEntity {

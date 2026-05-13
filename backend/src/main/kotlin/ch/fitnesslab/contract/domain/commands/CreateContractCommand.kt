@@ -5,10 +5,10 @@ import ch.fitnesslab.domain.value.ContractId
 import ch.fitnesslab.domain.value.CustomerId
 import ch.fitnesslab.domain.value.DateRange
 import ch.fitnesslab.domain.value.ProductId
-import org.axonframework.modelling.command.TargetAggregateIdentifier
+import org.axonframework.modelling.annotation.TargetEntityId
 
 data class CreateContractCommand(
-    @TargetAggregateIdentifier
+    @TargetEntityId
     val contractId: ContractId,
     val customerId: CustomerId,
     val productId: ProductId,

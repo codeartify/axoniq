@@ -5,11 +5,11 @@ import ch.fitnesslab.domain.value.CustomerId
 import ch.fitnesslab.domain.value.InvoiceId
 import ch.fitnesslab.domain.value.ProductId
 import ch.fitnesslab.membership.domain.DueDate
-import org.axonframework.modelling.command.TargetAggregateIdentifier
+import org.axonframework.modelling.annotation.TargetEntityId
 import java.math.BigDecimal
 
 data class CreateInvoiceCommand(
-    @TargetAggregateIdentifier
+    @TargetEntityId
     val invoiceId: InvoiceId,
     val bookingId: BookingId,
     val customerId: CustomerId,

@@ -8,15 +8,13 @@ import ch.fitnesslab.generated.model.ProductView
 import ch.fitnesslab.generated.model.UpdateProductRequest
 import ch.fitnesslab.product.application.FindAllProductsQuery
 import ch.fitnesslab.product.application.ProductProjection
-import ch.fitnesslab.product.application.ProductUpdatedUpdate
 import ch.fitnesslab.product.domain.*
 import ch.fitnesslab.product.domain.commands.CreateProductCommand
 import ch.fitnesslab.product.domain.commands.UpdateProductCommand
 import ch.fitnesslab.product.infrastructure.wix.WixSyncService
 import ch.fitnesslab.utils.waitForUpdateOf
-import org.axonframework.commandhandling.gateway.CommandGateway
-import org.axonframework.messaging.responsetypes.ResponseTypes
-import org.axonframework.queryhandling.QueryGateway
+import org.axonframework.messaging.commandhandling.gateway.CommandGateway
+import org.axonframework.messaging.queryhandling.gateway.QueryGateway
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.RestController
@@ -32,15 +30,14 @@ class ProductController(
         val subscriptionQuery =
             queryGateway.subscriptionQuery(
                 FindAllProductsQuery(),
-                ResponseTypes.multipleInstancesOf(ProductView::class.java),
-                ResponseTypes.instanceOf(ProductUpdatedUpdate::class.java),
+                Any::class.java,
             )
 
         try {
             val productId = ProductId.generate()
 
             val command = toCreateProductCommand(productId, createProductRequest)
-            commandGateway.sendAndWait<Any>(command)
+            commandGateway.sendAndWait(command)
 
             waitForUpdateOf(subscriptionQuery)
 
@@ -48,7 +45,6 @@ class ProductController(
                 .status(HttpStatus.CREATED)
                 .body(ProductCreationResponse(productId.toString()))
         } finally {
-            subscriptionQuery.close()
         }
     }
 
@@ -95,8 +91,7 @@ class ProductController(
         val subscriptionQuery =
             queryGateway.subscriptionQuery(
                 FindAllProductsQuery(),
-                ResponseTypes.multipleInstancesOf(ProductView::class.java),
-                ResponseTypes.instanceOf(ProductUpdatedUpdate::class.java),
+                Any::class.java,
             )
 
         try {
@@ -141,13 +136,12 @@ class ProductController(
                     linkedPlatforms = updatedLinkedPlatforms,
                 )
 
-            commandGateway.sendAndWait<Any>(command)
+            commandGateway.sendAndWait(command)
 
             waitForUpdateOf(subscriptionQuery)
 
             return ResponseEntity.ok().build()
         } finally {
-            subscriptionQuery.close()
         }
     }
 

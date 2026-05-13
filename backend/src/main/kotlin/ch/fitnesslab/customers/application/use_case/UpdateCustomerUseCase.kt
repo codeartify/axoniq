@@ -1,14 +1,11 @@
 package ch.fitnesslab.customers.application.use_case
 
-import ch.fitnesslab.customers.application.CustomerUpdatedUpdate
 import ch.fitnesslab.customers.application.FindAllCustomersQuery
 import ch.fitnesslab.customers.domain.commands.UpdateCustomerCommand
 import ch.fitnesslab.domain.value.CustomerId
-import ch.fitnesslab.generated.model.CustomerView
 import ch.fitnesslab.utils.waitForUpdateOf
-import org.axonframework.commandhandling.gateway.CommandGateway
-import org.axonframework.messaging.responsetypes.ResponseTypes
-import org.axonframework.queryhandling.QueryGateway
+import org.axonframework.messaging.commandhandling.gateway.CommandGateway
+import org.axonframework.messaging.queryhandling.gateway.QueryGateway
 import org.springframework.stereotype.Service
 
 @Service
@@ -20,16 +17,14 @@ class UpdateCustomerUseCase(
         val subscriptionQuery =
             queryGateway.subscriptionQuery(
                 FindAllCustomersQuery(),
-                ResponseTypes.multipleInstancesOf(CustomerView::class.java),
-                ResponseTypes.instanceOf(CustomerUpdatedUpdate::class.java),
+                Any::class.java,
             )
 
         try {
-            commandGateway.send<CustomerId>(command)
+            commandGateway.send(command)
 
             waitForUpdateOf(subscriptionQuery)
         } finally {
-            subscriptionQuery.close()
         }
     }
 }

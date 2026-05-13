@@ -4,10 +4,10 @@ import ch.fitnesslab.booking.domain.BookingStatus
 import ch.fitnesslab.booking.domain.PurchasedProduct
 import ch.fitnesslab.domain.value.BookingId
 import ch.fitnesslab.domain.value.CustomerId
-import org.axonframework.serialization.Revision
+import org.axonframework.eventsourcing.annotation.EventTag
 
-@Revision("1.0")
 data class BookingPlacedEvent(
+    @field:EventTag(key = "Booking")
     val bookingId: BookingId,
     val payerCustomerId: CustomerId,
     val purchasedProducts: List<PurchasedProduct>,
