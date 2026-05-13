@@ -23,6 +23,8 @@ export const appConfig: ApplicationConfig = {
     provideAuth0({
       domain: 'fitnesslab.eu.auth0.com',
       clientId: 'k0o6L1mxBtIkHC6as89XkbEK2VXnFEWk',
+      cacheLocation: 'localstorage',
+      useRefreshTokens: true,
       authorizationParams: {
         redirect_uri: `${window.location.origin}/`,
         audience: 'https://www.oliverzihler.ch',
