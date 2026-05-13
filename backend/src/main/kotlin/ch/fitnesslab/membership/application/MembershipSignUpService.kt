@@ -13,7 +13,7 @@ import ch.fitnesslab.domain.value.*
 import ch.fitnesslab.membership.domain.DueDate
 import ch.fitnesslab.product.application.FindProductByIdQuery
 import ch.fitnesslab.product.infrastructure.ProductVariantEntity
-import ch.fitnesslab.utils.waitForUpdateOf
+import ch.fitnesslab.utils.waitForUpdatesOf
 import org.axonframework.messaging.commandhandling.gateway.CommandGateway
 import org.axonframework.messaging.queryhandling.gateway.QueryGateway
 import org.reactivestreams.Publisher
@@ -42,43 +42,47 @@ class MembershipSignUpService(
         val invoiceId = InvoiceId.generate()
 
         try {
-            commandGateway.send(
-                PlaceBookingCommand(
-                    bookingId = bookingId,
-                    payerCustomerId = customerId,
-                    purchasedProducts = listOf(PurchasedProduct(productId = productId)),
+            waitForUpdatesOf(
+                listOf(
+                    bookingSubscription,
+                    contractSubscription,
+                    invoiceSubscription,
                 ),
-            )
+            ) {
+                commandGateway.sendAndWait(
+                    PlaceBookingCommand(
+                        bookingId = bookingId,
+                        payerCustomerId = customerId,
+                        purchasedProducts = listOf(PurchasedProduct(productId = productId)),
+                    ),
+                )
 
-            // 2. Create contract
-            commandGateway.send(
-                CreateContractCommand(
-                    contractId = contractId,
-                    customerId = customerId,
-                    productId = productId,
-                    bookingId = bookingId,
-                    validity = createValidity(request.startDate, (productVariantEntity.durationCount)),
-                    sessionsTotal = null,
-                ),
-            )
+                // 2. Create contract
+                commandGateway.sendAndWait(
+                    CreateContractCommand(
+                        contractId = contractId,
+                        customerId = customerId,
+                        productId = productId,
+                        bookingId = bookingId,
+                        validity = createValidity(request.startDate, (productVariantEntity.durationCount)),
+                        sessionsTotal = null,
+                    ),
+                )
 
-            val dueDate = DueDate.inDays(30)
-            commandGateway.send(
-                CreateInvoiceCommand(
-                    invoiceId = invoiceId,
-                    bookingId = bookingId,
-                    customerId = customerId,
-                    productId = productId,
-                    amount = productVariantEntity.flatRate,
-                    dueDate = dueDate,
-                    isInstallment = false,
-                    installmentNumber = null,
-                ),
-            )
-
-            waitForUpdateOf(bookingSubscription)
-            waitForUpdateOf(contractSubscription)
-            waitForUpdateOf(invoiceSubscription)
+                val dueDate = DueDate.inDays(30)
+                commandGateway.sendAndWait(
+                    CreateInvoiceCommand(
+                        invoiceId = invoiceId,
+                        bookingId = bookingId,
+                        customerId = customerId,
+                        productId = productId,
+                        amount = productVariantEntity.flatRate,
+                        dueDate = dueDate,
+                        isInstallment = false,
+                        installmentNumber = null,
+                    ),
+                )
+            }
 
             return MembershipSignUpResult(
                 contractId = contractId,

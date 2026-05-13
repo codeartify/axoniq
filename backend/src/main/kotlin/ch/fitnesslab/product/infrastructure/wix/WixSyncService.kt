@@ -12,14 +12,13 @@ import ch.fitnesslab.product.infrastructure.wix.v3.WixBillingTerms
 import ch.fitnesslab.product.infrastructure.wix.v3.WixPlan
 import ch.fitnesslab.product.infrastructure.wix.v3.WixPricingVariantV3
 import ch.fitnesslab.utils.waitForUpdateOf
+import ch.fitnesslab.utils.waitForUpdatesOf
 import org.axonframework.messaging.commandhandling.gateway.CommandGateway
 import org.axonframework.messaging.queryhandling.gateway.QueryGateway
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import reactor.core.publisher.Flux
 import java.math.BigDecimal
 import java.security.MessageDigest
-import java.time.Duration
 import java.time.Instant
 import java.util.*
 
@@ -75,10 +74,11 @@ class WixSyncService(
                         queryGateway.subscriptionQuery(
                             FindAllProductsQuery(),
                             Any::class.java,
-                        )
+                    )
 
-                    commandGateway.sendAndWait(updateCommand)
-                    waitForUpdateOf(subscriptionQuery)
+                    waitForUpdateOf(subscriptionQuery) {
+                        commandGateway.sendAndWait(updateCommand)
+                    }
                     logger.info("Successfully uploaded and linked product to Wix: ${wixResponse?.id}")
                 } catch (e: Exception) {
                     logger.error("Failed to upload product to Wix: ${e.message}", e)
@@ -150,10 +150,11 @@ class WixSyncService(
                         queryGateway.subscriptionQuery(
                             FindAllProductsQuery(),
                             Any::class.java,
-                        )
+                    )
 
-                    commandGateway.sendAndWait(updateCommand)
-                    waitForUpdateOf(subscriptionQuery)
+                    waitForUpdateOf(subscriptionQuery) {
+                        commandGateway.sendAndWait(updateCommand)
+                    }
                     logger.info("Successfully updated product on Wix: ${wixResponse?.id}")
                 } catch (e: Exception) {
                     logger.error("Failed to update product on Wix: ${e.message}", e)
@@ -281,16 +282,11 @@ class WixSyncService(
 
             logger.info("Expecting $updatesExpected updates from Wix check")
 
-            wixPlans.forEach { wixPlan ->
-                checkForUpdatesForPlanWithoutSubscription(wixPlan)
+            waitForUpdatesOf(subscriptionQuery, updatesExpected.toLong()) {
+                wixPlans.forEach { wixPlan ->
+                    checkForUpdatesForPlanWithoutSubscription(wixPlan)
+                }
             }
-
-            // Wait for all expected updates
-            Flux
-                .from(subscriptionQuery)
-                .skip(1)
-                .take(updatesExpected.toLong())
-                .blockLast(Duration.ofSeconds(5))
 
             logger.info("Wix check for updates completed successfully")
         } finally {
@@ -339,26 +335,16 @@ class WixSyncService(
                 return
             }
 
-            wixPlans.forEach { wixPlan ->
-                try {
-                    applyUpdatesForPlanWithoutSubscription(wixPlan)
-                } catch (e: Exception) {
-                    logger.error("Error applying update for plan ${wixPlan.id}: ${e.message}", e)
-                }
-            }
-
-            // Wait for all expected updates
-            logger.info("Waiting for $updatesExpected update notifications...")
             try {
-                Flux
-                    .from(subscriptionQuery)
-                    .skip(1)
-                    .take(updatesExpected.toLong())
-                    .index()
-                    .doOnNext { indexedUpdate ->
-                        logger.info("Received update notification ${indexedUpdate.t1 + 1} of $updatesExpected")
+                waitForUpdatesOf(subscriptionQuery, updatesExpected.toLong(), durationInSeconds = 10) {
+                    wixPlans.forEach { wixPlan ->
+                        try {
+                            applyUpdatesForPlanWithoutSubscription(wixPlan)
+                        } catch (e: Exception) {
+                            logger.error("Error applying update for plan ${wixPlan.id}: ${e.message}", e)
+                        }
                     }
-                    .blockLast(Duration.ofSeconds(10))
+                }
             } catch (e: Exception) {
                 logger.error("Error waiting for update notifications: ${e.message}", e)
             }
@@ -477,11 +463,12 @@ class WixSyncService(
             queryGateway.subscriptionQuery(
                 FindAllProductsQuery(),
                 Any::class.java,
-            )
+        )
 
         try {
-            markProductWithIncomingChangesWithoutSubscription(wixPlan, existingProduct, remoteHash)
-            waitForUpdateOf(subscriptionQuery)
+            waitForUpdateOf(subscriptionQuery) {
+                markProductWithIncomingChangesWithoutSubscription(wixPlan, existingProduct, remoteHash)
+            }
         } finally {
         }
     }
@@ -555,9 +542,9 @@ class WixSyncService(
         try {
             val command = mapWixPlanToUpdateCommand(wixPlan, existingProduct)
 
-            commandGateway.sendAndWait(command)
-
-            waitForUpdateOf(subscriptionQuery)
+            waitForUpdateOf(subscriptionQuery) {
+                commandGateway.sendAndWait(command)
+            }
 
             logger.info("Updated product from Wix plan: ${wixPlan.name} (${wixPlan.id})")
         } finally {
@@ -632,9 +619,9 @@ class WixSyncService(
         try {
             val command = mapWixPlanToCommand(wixPlan)
 
-            commandGateway.sendAndWait(command)
-
-            waitForUpdateOf(subscriptionQuery)
+            waitForUpdateOf(subscriptionQuery) {
+                commandGateway.sendAndWait(command)
+            }
 
             logger.info("Created product from Wix plan: ${wixPlan.name} (${wixPlan.id})")
         } finally {

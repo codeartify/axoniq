@@ -21,9 +21,9 @@ class UpdateCustomerUseCase(
             )
 
         try {
-            commandGateway.send(command)
-
-            waitForUpdateOf(subscriptionQuery)
+            waitForUpdateOf(subscriptionQuery) {
+                commandGateway.sendAndWait(command)
+            }
         } finally {
         }
     }

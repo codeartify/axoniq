@@ -58,9 +58,9 @@ class ContractController(
         try {
             val command = pauseCommandFrom(contractId, pauseContractRequest)
 
-            commandGateway.sendAndWait(command)
-
-            waitForUpdateOf(subscriptionQuery)
+            waitForUpdateOf(subscriptionQuery) {
+                commandGateway.sendAndWait(command)
+            }
 
             return ResponseEntity.ok().build()
         } finally {
@@ -75,9 +75,9 @@ class ContractController(
 
             val command = ResumeContractCommand(contractId)
 
-            commandGateway.sendAndWait(command)
-
-            waitForUpdateOf(resumeSubscriptionQuery)
+            waitForUpdateOf(resumeSubscriptionQuery) {
+                commandGateway.sendAndWait(command)
+            }
 
             return ResponseEntity.ok().build()
         } finally {

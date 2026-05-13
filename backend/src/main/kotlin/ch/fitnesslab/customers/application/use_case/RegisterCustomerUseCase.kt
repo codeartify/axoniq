@@ -21,9 +21,9 @@ class RegisterCustomerUseCase(
             )
 
         try {
-            commandGateway.send(command)
-
-            waitForUpdateOf(subscriptionQuery)
+            waitForUpdateOf(subscriptionQuery) {
+                commandGateway.sendAndWait(command)
+            }
 
             return command.customerId
         } finally {

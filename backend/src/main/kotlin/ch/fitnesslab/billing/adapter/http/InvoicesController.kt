@@ -71,14 +71,14 @@ class InvoicesController(
             )
 
         try {
-            commandGateway.sendAndWait(
-                MarkInvoicePaidCommand(
-                    invoiceId = InvoiceId.from(invoiceId),
-                    paidAt = Instant.now(),
-                ),
-            )
-
-            waitForUpdateOf(subscriptionQuery)
+            waitForUpdateOf(subscriptionQuery) {
+                commandGateway.sendAndWait(
+                    MarkInvoicePaidCommand(
+                        invoiceId = InvoiceId.from(invoiceId),
+                        paidAt = Instant.now(),
+                    ),
+                )
+            }
 
             return ResponseEntity.ok().build()
         } finally {
@@ -96,13 +96,13 @@ class InvoicesController(
             )
 
         try {
-            commandGateway.sendAndWait(
-                MarkInvoiceOverdueCommand(
-                    invoiceId = InvoiceId.from(invoiceId),
-                ),
-            )
-
-            waitForUpdateOf(subscriptionQuery)
+            waitForUpdateOf(subscriptionQuery) {
+                commandGateway.sendAndWait(
+                    MarkInvoiceOverdueCommand(
+                        invoiceId = InvoiceId.from(invoiceId),
+                    ),
+                )
+            }
 
             return ResponseEntity.ok().build()
         } finally {
@@ -121,14 +121,14 @@ class InvoicesController(
             )
 
         try {
-            commandGateway.sendAndWait(
-                CancelInvoiceCommand(
-                    invoiceId = InvoiceId.from(invoiceId),
-                    reason = cancelInvoiceRequest.reason,
-                ),
-            )
-
-            waitForUpdateOf(subscriptionQuery)
+            waitForUpdateOf(subscriptionQuery) {
+                commandGateway.sendAndWait(
+                    CancelInvoiceCommand(
+                        invoiceId = InvoiceId.from(invoiceId),
+                        reason = cancelInvoiceRequest.reason,
+                    ),
+                )
+            }
 
             return ResponseEntity.ok().build()
         } finally {

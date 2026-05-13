@@ -37,9 +37,9 @@ class ProductController(
             val productId = ProductId.generate()
 
             val command = toCreateProductCommand(productId, createProductRequest)
-            commandGateway.sendAndWait(command)
-
-            waitForUpdateOf(subscriptionQuery)
+            waitForUpdateOf(subscriptionQuery) {
+                commandGateway.sendAndWait(command)
+            }
 
             return ResponseEntity
                 .status(HttpStatus.CREATED)
@@ -134,11 +134,11 @@ class ProductController(
             val command =
                 toUpdateProductCommand(productId, updateProductRequest).copy(
                     linkedPlatforms = updatedLinkedPlatforms,
-                )
+            )
 
-            commandGateway.sendAndWait(command)
-
-            waitForUpdateOf(subscriptionQuery)
+            waitForUpdateOf(subscriptionQuery) {
+                commandGateway.sendAndWait(command)
+            }
 
             return ResponseEntity.ok().build()
         } finally {

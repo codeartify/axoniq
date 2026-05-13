@@ -36,6 +36,9 @@ spring:
 axon:
   serializer:
     events: jackson
+  axonserver:
+    enabled: false   # no Axon Server
+
 wix:
   token: ${WIX_TOKEN:default-token-here}
   site:
