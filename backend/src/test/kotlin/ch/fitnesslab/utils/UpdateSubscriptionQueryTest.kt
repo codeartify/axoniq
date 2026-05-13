@@ -22,7 +22,7 @@ class UpdateSubscriptionQueryTest {
         val result =
             waitForUpdateOf(publisher, durationInSeconds = 1) {
                 assertTrue(subscribed.get())
-                sink.tryEmitNext("update")
+                sink.tryEmitNext(TestUpdate)
                 "done"
             }
 
@@ -41,11 +41,26 @@ class UpdateSubscriptionQueryTest {
 
         val result =
             waitForUpdatesOf(publisher, updateCount = 2, durationInSeconds = 1) {
-                sink.tryEmitNext("first update")
-                sink.tryEmitNext("second update")
+                sink.tryEmitNext(TestUpdate)
+                sink.tryEmitNext(TestUpdate)
                 42
             }
 
         assertEquals(42, result)
     }
+
+    @Test
+    fun `waitForUpdateOf handles empty initial results`() {
+        val sink = Sinks.many().unicast().onBackpressureBuffer<Any>()
+
+        val result =
+            waitForUpdateOf(sink.asFlux(), durationInSeconds = 1) {
+                sink.tryEmitNext(TestUpdate)
+                "done"
+            }
+
+        assertEquals("done", result)
+    }
+
+    private data object TestUpdate
 }

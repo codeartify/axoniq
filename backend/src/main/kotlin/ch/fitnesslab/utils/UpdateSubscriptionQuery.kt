@@ -26,9 +26,6 @@ fun <T> waitForUpdatesOf(
     val activeSubscriptions = subscriptions.map { it.activateUpdateSubscription() }
 
     try {
-        // Axon 5 dispatches subscription queries lazily; wait for the initial result before commands emit updates.
-        activeSubscriptions.forEach { it.initialResult.block(timeout) }
-
         val result = action()
 
         activeSubscriptions.forEach { it.update.block(timeout) }
@@ -53,9 +50,6 @@ fun <T> waitForUpdatesOf(
     val activeSubscription = subscription.activateUpdateSubscription(updateCount)
 
     try {
-        // Axon 5 dispatches subscription queries lazily; wait for the initial result before commands emit updates.
-        activeSubscription.initialResult.block(timeout)
-
         val result = action()
 
         activeSubscription.update.block(timeout)
@@ -67,23 +61,21 @@ fun <T> waitForUpdatesOf(
 }
 
 private fun Publisher<*>.activateUpdateSubscription(updateCount: Long = 1): ActiveUpdateSubscription {
-    val sharedSubscription = Flux.from(this).publish().autoConnect(2)
     val update =
-        sharedSubscription
-            .skip(1)
+        Flux
+            .from(this)
+            .filter(::isSubscriptionUpdate)
             .take(updateCount)
             .then()
             .cache()
 
     return ActiveUpdateSubscription(
-        initialResult = sharedSubscription.next(),
         update = update,
         updateSubscription = update.subscribe(),
     )
 }
 
 private data class ActiveUpdateSubscription(
-    val initialResult: Mono<*>,
     val update: Mono<Void>,
     val updateSubscription: Disposable,
 ) {
@@ -91,3 +83,5 @@ private data class ActiveUpdateSubscription(
         updateSubscription.dispose()
     }
 }
+
+private fun isSubscriptionUpdate(value: Any): Boolean = value::class.simpleName?.contains("Update") == true

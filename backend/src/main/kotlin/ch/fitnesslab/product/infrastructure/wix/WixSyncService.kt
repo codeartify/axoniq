@@ -12,7 +12,6 @@ import ch.fitnesslab.product.infrastructure.wix.v3.WixBillingTerms
 import ch.fitnesslab.product.infrastructure.wix.v3.WixPlan
 import ch.fitnesslab.product.infrastructure.wix.v3.WixPricingVariantV3
 import ch.fitnesslab.utils.waitForUpdateOf
-import ch.fitnesslab.utils.waitForUpdatesOf
 import org.axonframework.messaging.commandhandling.gateway.CommandGateway
 import org.axonframework.messaging.queryhandling.gateway.QueryGateway
 import org.slf4j.LoggerFactory
@@ -257,35 +256,9 @@ class WixSyncService(
     }
 
     private fun checkForUpdatesFrom(wixPlans: List<WixPlan>) {
-        val subscriptionQuery =
-            queryGateway.subscriptionQuery(
-                FindAllProductsQuery(),
-                Any::class.java,
-            )
-
         try {
-            var updatesExpected = 0
             wixPlans.forEach { wixPlan ->
-                val wixPlanId = wixPlan.id
-                if (!wixPlanId.isNullOrBlank()) {
-                    val existingProduct = findProductByWixId(wixPlanId)
-                    if (existingProduct != null) {
-                        val remoteHash = computeWixPlanHash(wixPlan)
-                        val wixPlatform = existingProduct.linkedPlatforms?.find { it.platformName == "wix" }
-                        val storedRemoteHash = wixPlatform?.remoteHash
-                        if (remoteHash != storedRemoteHash) {
-                            updatesExpected++
-                        }
-                    }
-                }
-            }
-
-            logger.info("Expecting $updatesExpected updates from Wix check")
-
-            waitForUpdatesOf(subscriptionQuery, updatesExpected.toLong()) {
-                wixPlans.forEach { wixPlan ->
-                    checkForUpdatesForPlanWithoutSubscription(wixPlan)
-                }
+                checkForUpdatesForPlanWithoutSubscription(wixPlan)
             }
 
             logger.info("Wix check for updates completed successfully")
@@ -294,59 +267,13 @@ class WixSyncService(
     }
 
     private fun applyUpdatesFrom(wixPlans: List<WixPlan>) {
-        val subscriptionQuery =
-            queryGateway.subscriptionQuery(
-                FindAllProductsQuery(),
-                Any::class.java,
-            )
-
         try {
-            var updatesExpected = 0
             wixPlans.forEach { wixPlan ->
-                val wixPlanId = wixPlan.id
-                if (!wixPlanId.isNullOrBlank()) {
-                    val existingProduct = findProductByWixId(wixPlanId)
-                    if (existingProduct != null) {
-                        val wixPlatform = existingProduct.linkedPlatforms?.find { it.platformName == "wix" }
-                        // If there are incoming changes marked, we need to apply them
-                        if (wixPlatform?.hasIncomingChanges == true) {
-                            logger.debug("Product $wixPlanId has incoming changes marked, will apply")
-                            updatesExpected++
-                        } else {
-                            // Otherwise check hash difference
-                            val remoteHash = computeWixPlanHash(wixPlan)
-                            val storedRemoteHash = wixPlatform?.remoteHash
-                            if (remoteHash != storedRemoteHash) {
-                                logger.debug("Product $wixPlanId needs update - remote: $remoteHash, stored: $storedRemoteHash")
-                                updatesExpected++
-                            }
-                        }
-                    } else {
-                        logger.debug("Product $wixPlanId does not exist, will be created")
-                        updatesExpected++ // New product will be created
-                    }
+                try {
+                    applyUpdatesForPlanWithoutSubscription(wixPlan)
+                } catch (e: Exception) {
+                    logger.error("Error applying update for plan ${wixPlan.id}: ${e.message}", e)
                 }
-            }
-
-            logger.info("Expecting $updatesExpected updates from Wix apply")
-
-            if (updatesExpected == 0) {
-                logger.info("No updates needed, skipping")
-                return
-            }
-
-            try {
-                waitForUpdatesOf(subscriptionQuery, updatesExpected.toLong(), durationInSeconds = 10) {
-                    wixPlans.forEach { wixPlan ->
-                        try {
-                            applyUpdatesForPlanWithoutSubscription(wixPlan)
-                        } catch (e: Exception) {
-                            logger.error("Error applying update for plan ${wixPlan.id}: ${e.message}", e)
-                        }
-                    }
-                }
-            } catch (e: Exception) {
-                logger.error("Error waiting for update notifications: ${e.message}", e)
             }
 
             logger.info("Wix apply updates completed successfully")
@@ -373,7 +300,7 @@ class WixSyncService(
 
                 if (remoteHash != storedRemoteHash) {
                     logger.info("Detected changes from Wix for product $wixPlanId - marking as having incoming changes")
-                    markProductWithIncomingChangesWithoutSubscription(wixPlan, existingProduct, remoteHash)
+                    markProductWithIncomingChanges(wixPlan, existingProduct, remoteHash)
                 } else {
                     logger.debug("No changes detected for product $wixPlanId")
                 }
@@ -405,7 +332,9 @@ class WixSyncService(
                 if (wixPlatform?.hasIncomingChanges == true || remoteHash != wixPlatform?.remoteHash) {
                     logger.info("Applying changes from Wix for product $wixPlanId (hasIncomingChanges: ${wixPlatform?.hasIncomingChanges})")
                     val command = mapWixPlanToUpdateCommand(wixPlan, existingProduct, remoteHash)
-                    commandGateway.sendAndWait(command)
+                    waitForProductUpdate {
+                        commandGateway.sendAndWait(command)
+                    }
                     logger.info("Updated product from Wix plan: ${wixPlan.name} (${wixPlan.id})")
                 } else {
                     logger.debug("No changes to apply for product $wixPlanId")
@@ -413,7 +342,9 @@ class WixSyncService(
             } else {
                 logger.debug("Product with Wix ID $wixPlanId does not exist yet, creating")
                 val command = mapWixPlanToCommand(wixPlan)
-                commandGateway.sendAndWait(command)
+                waitForProductUpdate {
+                    commandGateway.sendAndWait(command)
+                }
                 logger.info("Created product from Wix plan: ${wixPlan.name} (${wixPlan.id})")
             }
         } catch (e: Exception) {
@@ -463,7 +394,7 @@ class WixSyncService(
             queryGateway.subscriptionQuery(
                 FindAllProductsQuery(),
                 Any::class.java,
-        )
+            )
 
         try {
             waitForUpdateOf(subscriptionQuery) {
@@ -497,7 +428,7 @@ class WixSyncService(
                         isSourceOfTruth = false,
                         lastSyncedAt = Instant.now(),
                         syncError = null,
-                        hasLocalChanges = wixPlatform?.hasLocalChanges ?: false,
+                        hasLocalChanges = wixPlatform?.hasLocalChanges == true,
                         hasIncomingChanges = true,
                         localHash = wixPlatform?.localHash,
                         remoteHash = remoteHash,
@@ -519,6 +450,16 @@ class WixSyncService(
         productRepository
             .findAll()
             .firstOrNull { product -> isWixProductWithWixId(product, wixId) }
+
+    private fun <T> waitForProductUpdate(action: () -> T): T {
+        val subscriptionQuery =
+            queryGateway.subscriptionQuery(
+                FindAllProductsQuery(),
+                Any::class.java,
+            )
+
+        return waitForUpdateOf(subscriptionQuery, action = action)
+    }
 
     private fun isWixProductWithWixId(
         product: ProductVariantEntity?,
