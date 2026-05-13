@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, computed, effect, inject, signal, TemplateRef, ViewChild} from '@angular/core';
+import {AfterViewInit, Component, computed, inject, OnInit, signal, TemplateRef, ViewChild} from '@angular/core';
 import {Invoices, InvoiceView} from './invoices';
 import {CommonModule} from '@angular/common';
 import {FormsModule} from '@angular/forms';
@@ -41,7 +41,8 @@ type SortColumn = 'invoiceId' | 'customerName' | 'amount' | 'dueDate' | 'status'
             class="mt-0 mb-4 text-xl font-semibold text-slate-200">{{ 'invoice.list.cancelModal.title' | translate }}</h2>
           <p class="mb-4">{{ 'invoice.list.cancelModal.reasonPrompt' | translate }}</p>
           <textarea
-            [(ngModel)]="cancelReason"
+            [ngModel]="cancelReason()"
+            (ngModelChange)="cancelReason.set($event)"
             class="w-full px-3 py-2 border border-slate-600 rounded text-sm resize-y mb-4 focus:outline-none focus:ring-2 focus:ring-blue-400"
             [placeholder]="'invoice.list.cancelModal.reasonPlaceholder' | translate"
             rows="4"
@@ -97,7 +98,7 @@ type SortColumn = 'invoiceId' | 'customerName' | 'amount' | 'dueDate' | 'status'
     </ng-template>
   `
 })
-export class InvoiceList implements AfterViewInit {
+export class InvoiceList implements OnInit, AfterViewInit {
   private invoiceService = inject(Invoices);
   private router = inject(Router);
 
@@ -115,7 +116,7 @@ export class InvoiceList implements AfterViewInit {
   showCancelModal = signal(false);
   selectedInvoiceId = signal<string | null>(null);
   cancelReason = signal('');
-  statusColor = (status: string) => computed(() => {
+  statusColor(status: string): string {
     switch (status) {
       case 'OPEN':
         return 'bg-blue-900 text-blue-300';
@@ -128,7 +129,7 @@ export class InvoiceList implements AfterViewInit {
       default:
         return '';
     }
-  });
+  }
 
   columns: ColumnDefinition<InvoiceView>[] = [];
 
@@ -235,10 +236,8 @@ export class InvoiceList implements AfterViewInit {
     return result;
   });
 
-  constructor() {
-    effect(() => {
-      this.loadInvoices();
-    }, { allowSignalWrites: true });
+  ngOnInit(): void {
+    this.loadInvoices();
   }
 
   loadInvoices(): void {
