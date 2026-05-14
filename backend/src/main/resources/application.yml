@@ -38,6 +38,10 @@ axon:
     events: jackson
   axonserver:
     enabled: false   # no Axon Server
+  eventhandling:
+    processors:
+      "..default":
+        mode: subscribing
 
 wix:
   token: ${WIX_TOKEN:default-token-here}
