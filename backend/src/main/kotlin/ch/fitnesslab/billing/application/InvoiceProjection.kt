@@ -40,7 +40,7 @@ class InvoiceProjection(
                 amount = event.amount,
                 dueDate = event.dueDate.value,
                 status = event.status,
-                isInstallment = event.isInstallment,
+                isInstallment = event.isInstallment == true,
                 installmentNumber = event.installmentNumber,
                 paidAt = null,
             )

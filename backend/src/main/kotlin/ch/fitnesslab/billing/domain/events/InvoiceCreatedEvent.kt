@@ -18,6 +18,6 @@ data class InvoiceCreatedEvent(
     val amount: BigDecimal,
     val dueDate: DueDate,
     val status: InvoiceStatus,
-    val isInstallment: Boolean,
+    val isInstallment: Boolean? = false,
     val installmentNumber: Int?,
 )

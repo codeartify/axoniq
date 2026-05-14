@@ -86,7 +86,7 @@ class Invoice {
         this.amount = event.amount
         this.dueDate = event.dueDate
         this.status = event.status
-        this.isInstallment = event.isInstallment
+        this.isInstallment = event.isInstallment == true
         this.installmentNumber = event.installmentNumber
     }
 
