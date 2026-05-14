@@ -1,7 +1,6 @@
 package ch.fitnesslab.product.infrastructure.wix
 
 import ch.fitnesslab.domain.value.ProductId
-import ch.fitnesslab.product.application.FindAllProductsQuery
 import ch.fitnesslab.product.domain.*
 import ch.fitnesslab.product.domain.commands.AddLinkedPlatformCommand
 import ch.fitnesslab.product.domain.commands.CreateProductCommand
@@ -11,9 +10,7 @@ import ch.fitnesslab.product.infrastructure.ProductVariantEntity
 import ch.fitnesslab.product.infrastructure.wix.v3.WixBillingTerms
 import ch.fitnesslab.product.infrastructure.wix.v3.WixPlan
 import ch.fitnesslab.product.infrastructure.wix.v3.WixPricingVariantV3
-import ch.fitnesslab.utils.waitForUpdateOf
 import org.axonframework.messaging.commandhandling.gateway.CommandGateway
-import org.axonframework.messaging.queryhandling.gateway.QueryGateway
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
@@ -25,7 +22,6 @@ import java.util.*
 class WixSyncService(
     private val wixClient: WixClient,
     private val commandGateway: CommandGateway,
-    private val queryGateway: QueryGateway,
     private val productRepository: ProductRepository,
 ) {
     private val logger = LoggerFactory.getLogger(WixSyncService::class.java)
@@ -69,15 +65,7 @@ class WixSyncService(
                             linkedPlatforms = linkedPlatforms,
                         )
 
-                    val subscriptionQuery =
-                        queryGateway.subscriptionQuery(
-                            FindAllProductsQuery(),
-                            Any::class.java,
-                    )
-
-                    waitForUpdateOf(subscriptionQuery) {
-                        commandGateway.sendAndWait(updateCommand)
-                    }
+                    commandGateway.sendAndWait(updateCommand)
                     logger.info("Successfully uploaded and linked product to Wix: ${wixResponse?.id}")
                 } catch (e: Exception) {
                     logger.error("Failed to upload product to Wix: ${e.message}", e)
@@ -145,15 +133,7 @@ class WixSyncService(
                             linkedPlatforms = linkedPlatforms,
                         )
 
-                    val subscriptionQuery =
-                        queryGateway.subscriptionQuery(
-                            FindAllProductsQuery(),
-                            Any::class.java,
-                    )
-
-                    waitForUpdateOf(subscriptionQuery) {
-                        commandGateway.sendAndWait(updateCommand)
-                    }
+                    commandGateway.sendAndWait(updateCommand)
                     logger.info("Successfully updated product on Wix: ${wixResponse?.id}")
                 } catch (e: Exception) {
                     logger.error("Failed to update product on Wix: ${e.message}", e)
@@ -332,9 +312,7 @@ class WixSyncService(
                 if (wixPlatform?.hasIncomingChanges == true || remoteHash != wixPlatform?.remoteHash) {
                     logger.info("Applying changes from Wix for product $wixPlanId (hasIncomingChanges: ${wixPlatform?.hasIncomingChanges})")
                     val command = mapWixPlanToUpdateCommand(wixPlan, existingProduct, remoteHash)
-                    waitForProductUpdate {
-                        commandGateway.sendAndWait(command)
-                    }
+                    commandGateway.sendAndWait(command)
                     logger.info("Updated product from Wix plan: ${wixPlan.name} (${wixPlan.id})")
                 } else {
                     logger.debug("No changes to apply for product $wixPlanId")
@@ -342,9 +320,7 @@ class WixSyncService(
             } else {
                 logger.debug("Product with Wix ID $wixPlanId does not exist yet, creating")
                 val command = mapWixPlanToCommand(wixPlan)
-                waitForProductUpdate {
-                    commandGateway.sendAndWait(command)
-                }
+                commandGateway.sendAndWait(command)
                 logger.info("Created product from Wix plan: ${wixPlan.name} (${wixPlan.id})")
             }
         } catch (e: Exception) {
@@ -390,18 +366,7 @@ class WixSyncService(
         existingProduct: ProductVariantEntity,
         remoteHash: String,
     ) {
-        val subscriptionQuery =
-            queryGateway.subscriptionQuery(
-                FindAllProductsQuery(),
-                Any::class.java,
-            )
-
-        try {
-            waitForUpdateOf(subscriptionQuery) {
-                markProductWithIncomingChangesWithoutSubscription(wixPlan, existingProduct, remoteHash)
-            }
-        } finally {
-        }
+        markProductWithIncomingChangesWithoutSubscription(wixPlan, existingProduct, remoteHash)
     }
 
     private fun markProductWithIncomingChangesWithoutSubscription(
@@ -451,16 +416,6 @@ class WixSyncService(
             .findAll()
             .firstOrNull { product -> isWixProductWithWixId(product, wixId) }
 
-    private fun <T> waitForProductUpdate(action: () -> T): T {
-        val subscriptionQuery =
-            queryGateway.subscriptionQuery(
-                FindAllProductsQuery(),
-                Any::class.java,
-            )
-
-        return waitForUpdateOf(subscriptionQuery, action = action)
-    }
-
     private fun isWixProductWithWixId(
         product: ProductVariantEntity?,
         id: String,
@@ -474,22 +429,11 @@ class WixSyncService(
         existingProduct: ProductVariantEntity,
         remoteHash: String? = null,
     ) {
-        val subscriptionQuery =
-            queryGateway.subscriptionQuery(
-                FindAllProductsQuery(),
-                Any::class.java,
-            )
+        val command = mapWixPlanToUpdateCommand(wixPlan, existingProduct, remoteHash)
 
-        try {
-            val command = mapWixPlanToUpdateCommand(wixPlan, existingProduct)
+        commandGateway.sendAndWait(command)
 
-            waitForUpdateOf(subscriptionQuery) {
-                commandGateway.sendAndWait(command)
-            }
-
-            logger.info("Updated product from Wix plan: ${wixPlan.name} (${wixPlan.id})")
-        } finally {
-        }
+        logger.info("Updated product from Wix plan: ${wixPlan.name} (${wixPlan.id})")
     }
 
     private fun mapWixPlanToUpdateCommand(
@@ -551,22 +495,11 @@ class WixSyncService(
     }
 
     private fun createProductFromWixPlan(wixPlan: WixPlan) {
-        val subscriptionQuery =
-            queryGateway.subscriptionQuery(
-                FindAllProductsQuery(),
-                Any::class.java,
-            )
+        val command = mapWixPlanToCommand(wixPlan)
 
-        try {
-            val command = mapWixPlanToCommand(wixPlan)
+        commandGateway.sendAndWait(command)
 
-            waitForUpdateOf(subscriptionQuery) {
-                commandGateway.sendAndWait(command)
-            }
-
-            logger.info("Created product from Wix plan: ${wixPlan.name} (${wixPlan.id})")
-        } finally {
-        }
+        logger.info("Created product from Wix plan: ${wixPlan.name} (${wixPlan.id})")
     }
 
     private fun mapWixPlanToCommand(wixPlan: WixPlan): CreateProductCommand {
